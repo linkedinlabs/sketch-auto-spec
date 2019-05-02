@@ -1,0 +1,18 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "hello-world",
+      "identifier": "sketch-auto-spec.hello-world-identifier",
+      "script": "./hello-world.js"
+    }
+  ],
+  "menu": {
+    "title": "Sketch Auto-Spec",
+    "items": [
+      "sketch-auto-spec.hello-world-identifier"
+    ]
+  }
+}
