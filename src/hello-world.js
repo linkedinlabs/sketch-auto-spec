@@ -1,6 +1,6 @@
-import sketch from 'sketch'
+import sketch from 'sketch';
 // documentation: https://developer.sketchapp.com/reference/api/
 
-export default function() {
-  sketch.UI.message("It's alive 🙌")
-}
+export default () => {
+  sketch.UI.message("It's alive 🙌");
+};
