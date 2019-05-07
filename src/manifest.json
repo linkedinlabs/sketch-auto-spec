@@ -1,18 +1,32 @@
 {
+  "name": "Sketch Auto-Spec",
+  "description": "Plugins to label symbols",
+  "author": "LinkedIn Labs",
+  "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
+  "version": "1.0-b",
+  "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "compatibleVersion": 3,
   "bundleVersion": 1,
-  "icon": "icon.png",
   "commands": [
     {
-      "name": "hello-world",
-      "identifier": "sketch-auto-spec.hello-world-identifier",
-      "script": "./hello-world.js"
+      "name": "Hello World",
+      "identifier": "hello-world",
+      "shortcut": "ctrl shift h",
+      "script": "./commands.js",
+      "handler": "helloWorld"
+    },
+    {
+      "name": "What Am I?",
+      "identifier": "what-am-i",
+      "script": "./commands.js",
+      "handler": "whatAmI"
     }
   ],
   "menu": {
-    "title": "Sketch Auto-Spec",
+    "title": "Auto-Spec",
     "items": [
-      "sketch-auto-spec.hello-world-identifier"
+      "hello-world",
+      "what-am-i"
     ]
   }
 }
