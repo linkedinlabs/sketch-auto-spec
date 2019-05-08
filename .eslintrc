@@ -2,7 +2,13 @@
 // Copy this file, and add rule overrides as needed.
 {
   "extends": "airbnb-base",
+  "globals": {
+    "log": "readonly"
+  },
   "settings": {
-    "import/core-modules": [ "sketch" ]
+    "import/core-modules": [
+      "sketch",
+      "sketch/dom"
+    ]
   }
 }
