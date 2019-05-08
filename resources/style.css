@@ -4,10 +4,10 @@ html {
   box-sizing: border-box;
   background: transparent;
 
-  /* Prevent the page to be scrollable */
+  /* prevent scrolling */
   overflow: hidden;
 
-  /* Force the default cursor, even on text */
+  /* force the default cursor, even on text */
   cursor: default;
 }
 
@@ -19,7 +19,7 @@ html {
   padding: 0;
   position: relative;
 
-  /* Prevent the content from being selectionable */
+  /* prever the content from being selectable */
   -webkit-user-select: none;
   user-select: none;
 }
@@ -28,4 +28,26 @@ input,
 textarea {
   -webkit-user-select: auto;
   user-select: auto;
+}
+
+textarea,
+select,
+input,
+button {
+  outline: none;
+}
+
+.icon-holder {
+  display: block;
+  width: 20px;
+}
+
+svg {
+  display: block;
+  width: 100%;
+}
+
+svg path,
+svg polygon {
+  fill: magenta;
 }
