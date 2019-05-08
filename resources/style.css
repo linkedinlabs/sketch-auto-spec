@@ -11,7 +11,9 @@ html {
   cursor: default;
 }
 
-*, *:before, *:after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
   margin: 0;
   padding: 0;
@@ -22,7 +24,8 @@ html {
   user-select: none;
 }
 
-input, textarea {
+input,
+textarea {
   -webkit-user-select: auto;
   user-select: auto;
 }

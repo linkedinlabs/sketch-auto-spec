@@ -12,11 +12,14 @@
     "postinstall": "npm run build && skpm-link",
     "lint": "npm run lint:js",
     "lint:eslint": "eslint './src/**/*.js' './resources/**/*.js'",
+    "lint:stylelint": "stylelint './resources/**/*.css'",
     "lint:js": "npm run lint:eslint",
+    "lint:css": "npm run lint:stylelint",
     "lint:staged": "lint-staged"
   },
   "lint-staged": {
-    "*.js": "eslint"
+    "*.js": "eslint",
+    "*.css": "stylelint"
   },
   "pre-commit": "lint:staged",
   "skpm": {
@@ -43,7 +46,9 @@
     "eslint-plugin-import": "^2.17.2",
     "html-loader": "^0.5.1",
     "lint-staged": "^8.1.5",
-    "pre-commit": "^1.2.2"
+    "pre-commit": "^1.2.2",
+    "stylelint": "^10.0.1",
+    "stylelint-config-standard": "^18.3.0"
   },
   "author": "Grant Blakeman <gblakeman@linkedin.com>"
 }
