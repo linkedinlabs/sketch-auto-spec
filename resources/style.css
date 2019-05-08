@@ -1,6 +1,7 @@
 /* some default styles to make the view more native like */
-
 html {
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
   background: transparent;
 
@@ -37,12 +38,73 @@ button {
   outline: none;
 }
 
-.icon-holder {
-  display: block;
-  width: 20px;
+/* layout base */
+body {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border: 1pt solid red;
 }
 
 svg {
+  display: block;
+  width: 100%;
+}
+
+.actions {
+  width: 100%;
+  height: 100%;
+  background: pink;
+}
+
+.actions ul {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  list-style-type: none;
+}
+
+.actions ul li.action {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.actions ul li.action-close {
+  border-right: 1pt solid red;
+}
+
+.actions li a {
+  display: block;
+  width: 16px;
+}
+
+.actions li.action-label a {
+  display: block;
+  width: 21px;
+}
+
+.actions li.action-measure a {
+  display: block;
+  width: 19px;
+}
+
+/* buttons */
+
+.actions ul li a .text {
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(100%);
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.actions a .icon {
   display: block;
   width: 100%;
 }

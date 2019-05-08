@@ -6,35 +6,56 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  Auto-Spec
-
-  <div class="icon-holder">
-    <svg viewBox="0 0 10 10" class="icons-close">
-      <polygon fill="red" points="10 1.32 6.31 5 10 8.69 8.69 10 5 6.31 1.31 10 0 8.69 3.69 5 0 1.31 1.31 0 5 3.69 8.68 0 10 1.32" fill-rule="evenodd"/>
-    </svg>
-  </div>
-
-  <div class="icon-holder">
-    <svg viewBox="0 0 21 18" class="icons-label">
-      <path d="M2,13H8.17l2.39,2.32L13.4,13H19V2H2ZM0,0H21V15H14.11l-3.66,3L7.36,15H0Z"/>
-    </svg>
-  </div>
-
-  <div class="icon-holder">
-    <svg viewBox="0 0 19 18" class="icons-measure">
-      <polygon points="12 18 10 18 10 9 0 9 0 7 12 7 12 18"/>
-      <polygon points="6 5 7 5 7 6 4 6 4 5 5 5 5 1 4 1 4 0 7 0 7 1 6 1 6 5"/>
-      <polygon points="14 13 14 14 13 14 13 11 14 11 14 12 18 12 18 11 19 11 19 14 18 14 18 13 14 13"/>
-    </svg>
-  </div>
-
+  <nav class="actions">
+    <ul>
+      <li class="action action-close">
+        <a href="#close" role="button">
+          <span class="text" aria-label="Close">
+            Close
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 10 10" class="icons-close">
+              <polygon points="10 1.32 6.31 5 10 8.69 8.69 10 5 6.31 1.31 10 0 8.69 3.69 5 0 1.31 1.31 0 5 3.69 8.68 0 10 1.32" fill-rule="evenodd"/>
+            </svg>
+          </span>
+        </a>
+      </li>
+      <li class="action action-label">
+        <a href="#label" role="button">
+          <span class="text" aria-label="Label">
+            Label
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 21 18" class="icons-label">
+              <path d="M2,13H8.17l2.39,2.32L13.4,13H19V2H2ZM0,0H21V15H14.11l-3.66,3L7.36,15H0Z"/>
+            </svg>
+          </span>
+        </a>
+      </li>
+      <li class="action action-measure">
+        <a href="#measure" role="button">
+          <span class="text" aria-label="Measure">
+            Measure
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 19 18" class="icons-measure">
+              <polygon points="12 18 10 18 10 9 0 9 0 7 12 7 12 18"/>
+              <polygon points="6 5 7 5 7 6 4 6 4 5 5 5 5 1 4 1 4 0 7 0 7 1 6 1 6 5"/>
+              <polygon points="14 13 14 14 13 14 13 11 14 11 14 12 18 12 18 11 19 11 19 14 18 14 18 13 14 13"/>
+            </svg>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<!--
   <div>
     <button id="button">
       Generate random number
     </button>
   </div>
   <div id="answer"></div>
-
+-->
 
   <!-- notice the "../" here. It's because webview.js will be compiled in a different folder -->
   <script src="../webview.js"></script>
