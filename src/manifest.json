@@ -6,13 +6,19 @@
     {
       "name": "hello-world",
       "identifier": "sketch-auto-spec.hello-world-identifier",
-      "script": "./hello-world.js"
+      "script": "./GUI.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
     }
   ],
   "menu": {
-    "title": "Sketch Auto-Spec",
+    "title": "Auto-Spec",
     "items": [
-      "sketch-auto-spec.hello-world-identifier"
+      "sketch-auto-spec.GUI-identifier"
     ]
   }
 }
