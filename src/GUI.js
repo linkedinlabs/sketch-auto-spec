@@ -9,9 +9,11 @@ const webviewIdentifier = 'my-plugin-name.webview';
 export default function () {
   const options = {
     identifier: webviewIdentifier,
-    width: 240,
-    height: 180,
-    show: false,
+    width: 147,
+    height: 54, // height includes title bar, if visible
+    transparent: true,
+    frame: false,
+    resizable: false,
   };
 
   const browserWindow = new BrowserWindow(options);
