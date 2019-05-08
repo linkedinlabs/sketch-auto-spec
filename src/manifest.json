@@ -5,7 +5,7 @@
   "commands": [
     {
       "name": "hello-world",
-      "identifier": "sketch-auto-spec.hello-world-identifier",
+      "identifier": "sketch-auto-spec.GUI-identifier",
       "script": "./GUI.js",
       "handlers": {
         "run": "onRun",
