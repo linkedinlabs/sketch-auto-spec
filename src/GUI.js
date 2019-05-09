@@ -10,7 +10,7 @@ export default function () {
   const options = {
     identifier: webviewIdentifier,
     width: 152,
-    height: 61, // height includes title bar, if visible
+    height: 64, // height includes title bar, if visible
     transparent: true,
     frame: false,
     resizable: false,
