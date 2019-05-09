@@ -15,6 +15,11 @@ export default function () {
     frame: false,
     resizable: false,
     hasShadow: false,
+    center: true,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    alwaysOnTop: true,
   };
 
   const browserWindow = new BrowserWindow(options);
