@@ -9,7 +9,7 @@
   <nav class="actions">
     <ul>
       <li class="action action-close">
-        <a href="#close" role="button">
+        <a href="#close" role="button" id="close" class="action-trigger">
           <span class="text" aria-label="Close">
             Close
           </span>
@@ -21,7 +21,7 @@
         </a>
       </li>
       <li class="action action-label">
-        <a href="#label" role="button">
+        <a href="#label" role="button" id="label" class="action-trigger">
           <span class="text" aria-label="Label">
             Label
           </span>
@@ -33,7 +33,7 @@
         </a>
       </li>
       <li class="action action-measure">
-        <a href="#measure" role="button">
+        <a href="#measure" role="button" id="measure" class="action-trigger">
           <span class="text" aria-label="Measure">
             Measure
           </span>
@@ -48,14 +48,6 @@
       </li>
     </ul>
   </nav>
-<!--
-  <div>
-    <button id="button">
-      Generate random number
-    </button>
-  </div>
-  <div id="answer"></div>
--->
 
   <!-- notice the "../" here. It's because webview.js will be compiled in a different folder -->
   <script src="../webview.js"></script>

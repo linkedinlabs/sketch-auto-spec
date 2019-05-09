@@ -44,6 +44,13 @@ export default function () {
       .catch(console.error);
   });
 
+  webContents.on('closeWindow', () => {
+    const existingWebview = getWebview(webviewIdentifier);
+    if (existingWebview) {
+      existingWebview.close();
+    }
+  });
+
   browserWindow.loadURL(theWebview);
 }
 
