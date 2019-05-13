@@ -36,14 +36,6 @@ export default function () {
     UI.message('UI loaded!');
   });
 
-  // add a handler for a call from web content's javascript
-  webContents.on('nativeLog', (s) => {
-    UI.message(s);
-    webContents
-      .executeJavaScript(`setRandomNumber(${Math.random()})`)
-      .catch(console.error);
-  });
-
   webContents.on('closeWindow', () => {
     const existingWebview = getWebview(webviewIdentifier);
     if (existingWebview) {
