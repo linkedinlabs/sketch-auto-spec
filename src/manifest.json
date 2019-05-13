@@ -41,13 +41,25 @@
           "OpenDocument": "onOpenDocument"
         }
       }
+    },
+    {
+      "name": "View GUI",
+      "identifier": "view-gui",
+      "script": "./GUI.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
     }
   ],
   "menu": {
     "title": "Auto-Spec",
     "items": [
       "hello-world",
-      "what-am-i"
+      "what-am-i",
+      "view-gui"
     ]
   }
 }
