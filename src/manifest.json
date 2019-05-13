@@ -12,20 +12,20 @@
       "name": "Hello World",
       "identifier": "hello-world",
       "shortcut": "ctrl shift h",
-      "script": "./Core.js",
+      "script": "./main.js",
       "handler": "helloWorld"
     },
     {
       "name": "What Am I?",
       "identifier": "what-am-i",
       "shortcut": "ctrl shift i",
-      "script": "./Core.js",
-      "handler": "whatAmI"
+      "script": "./main.js",
+      "handler": "labelLayer"
     },
     {
       "name" : "Selection Change Listener",
       "identifier": "selection-change-listener",
-      "script": "./Core.js",
+      "script": "./main.js",
       "handlers" : {
         "actions": {
           "SelectionChanged.finish": "onSelectionChange"
@@ -35,7 +35,7 @@
     {
       "name" : "Open Document Listener",
       "identifier": "open-document-listener",
-      "script": "./Core.js",
+      "script": "./main.js",
       "handlers" : {
         "actions": {
           "OpenDocument": "onOpenDocument"
