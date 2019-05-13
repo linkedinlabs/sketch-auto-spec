@@ -1,0 +1,9 @@
+# ignore files/directories that start with a period (.)
+.*
+
+# ignore specific directories
+assets/*
+sketch-*
+src/*
+
+# ignore specific files
