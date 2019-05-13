@@ -1,6 +1,6 @@
 {
   "name": "sketch-auto-spec",
-  "description": "",
+  "description": "A Sketch plugin for easily spec’ing design system components.",
   "version": "0.1.0",
   "repository": {
     "type": "git",
