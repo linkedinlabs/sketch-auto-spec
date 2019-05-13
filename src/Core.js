@@ -1,7 +1,7 @@
 import { fromNative } from 'sketch';
 
 import Crawler from './Crawler';
-import Drawing from './Drawing';
+import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
 
@@ -48,11 +48,11 @@ const coreTasks = (() => {
 
       const layers = new Crawler({ for: selection });
       const layerToId = new Identifier({ for: layers.first() });
-      const drawer = new Drawing({ for: layerToId.artboard() });
+      const painter = new Painter({ for: layerToId.artboard() });
 
       messenger.toast(`I will identify selected things 💅 “${layerToId.label()}”`);
       messenger.log(`Selected item: “${layerToId.label()}”`);
-      return drawer.add(`Label for ${layerToId.label()}`);
+      return painter.add(`Label for ${layerToId.label()}`);
     },
 
     // do a thing when the document opens

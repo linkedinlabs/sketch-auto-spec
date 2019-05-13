@@ -1,8 +1,8 @@
-// will handle the tasks of drawing labels, and other adjustments
+// will handle the tasks of painting/drawing labels, and other adjustments
 // in the actual Sketch file
 import { Rectangle, ShapePath } from 'sketch/dom';
 
-export default class Drawing {
+export default class Painter {
   constructor({ for: artboard }) {
     this.artboard = artboard;
   }
