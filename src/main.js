@@ -5,7 +5,13 @@ import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
 
-// shared -------------------------------------------------
+/**
+ * @description A shared helper function to set up in-UI messages and the logger.
+ *
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {Object} Contains an object with the current document, a messenger instance,
+ * and a selection array (if applicable).
+ */
 const assemble = (context) => {
   let contextDocument = null;
   if (context.actionContext && context.actionContext.document) {
@@ -24,17 +30,32 @@ const assemble = (context) => {
 };
 
 // invoked commands -------------------------------------------------
+
+/**
+ * @description Displays a “Hello World” Alert in the Sketch UI when invoked from the plugin menu.
+ *
+ * @kind function
+ * @name helloWorld
+ * @param {Object} context The current context (event) received from Sketch.
+ */
 const helloWorld = (context) => {
   if (context.document) {
     const { messenger } = assemble(context);
 
     messenger.alert('It’s alive 🙌', 'Hello');
-    return messenger.log('It’s alive 🙌');
+    messenger.log('It’s alive 🙌');
   }
   return null;
 };
 
-// identify and label a layer
+/**
+ * @description Identifies and labels a selected layer in a Sketch file.
+ *
+ * @kind function
+ * @name labelLayer
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected.
+ */
 const labelLayer = (context) => {
   const { messenger } = assemble(context);
   const { selection } = assemble(context);
@@ -49,11 +70,19 @@ const labelLayer = (context) => {
 
   messenger.toast(`I will identify selected things 💅 “${layerToId.label()}”`);
   messenger.log(`Selected item: “${layerToId.label()}”`);
-  return painter.add(`Label for ${layerToId.label()}`);
+  painter.add(`Label for ${layerToId.label()}`);
+  return null;
 };
 
 // listeners -------------------------------------------------
-// do a thing when the document opens
+
+/**
+ * @description Displays a Toast in the UI with the document ID on open.
+ *
+ * @kind function
+ * @name onOpenDocument
+ * @param {Object} context The current context (event) received from Sketch.
+ */
 const onOpenDocument = (context) => {
   if (context.actionContext.document) {
     const { document } = assemble(context);
@@ -70,7 +99,13 @@ const onOpenDocument = (context) => {
   }
 };
 
-// watch all selection changes
+/**
+ * @description Writes to the log whenever the selection changes and display a Toast indicator.
+ *
+ * @kind function
+ * @name onSelectionChange
+ * @param {Object} context The current context (event) received from Sketch.
+ */
 const onSelectionChange = (context) => {
   if (String(context.action) === 'SelectionChanged.finish') {
     const { document } = assemble(context);
