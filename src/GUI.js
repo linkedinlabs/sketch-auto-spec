@@ -13,7 +13,7 @@ import * as theWebview from '../resources/webview.html';
  * @name webviewIdentifier
  * @type {string}
  */
-const webviewIdentifier = 'my-plugin-name.webview';
+const webviewIdentifier = 'com.linkedinlabs.sketch.auto-spec-plugin.webview';
 
 /**
  * @description Called by the plugin manifest to open and operate the UI.
