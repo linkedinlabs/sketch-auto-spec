@@ -65,12 +65,12 @@ const labelLayer = (context) => {
   }
 
   const layers = new Crawler({ for: selection });
-  const layerToId = new Identifier({ for: layers.first() });
-  const painter = new Painter({ for: layerToId.artboard() });
+  const layerToLabel = new Identifier({ for: layers.first() });
+  const painter = new Painter({ for: layerToLabel.artboard() });
 
-  messenger.toast(`I will identify selected things 💅 “${layerToId.label()}”`);
-  messenger.log(`Selected item: “${layerToId.label()}”`);
-  painter.add(`Label for ${layerToId.label()}`);
+  messenger.toast(`I will identify selected things 💅 “${layerToLabel.label()}”`);
+  messenger.log(`Selected item: “${layerToLabel.label()}”`);
+  painter.addLabel(layerToLabel.label());
   return null;
 };
 

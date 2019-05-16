@@ -1,4 +1,4 @@
-import { Rectangle, ShapePath } from 'sketch/dom';
+import { Rectangle, ShapePath, Text } from 'sketch/dom';
 
 /**
 * @description A class to add elements to the Sketch file.
@@ -24,8 +24,22 @@ export default class Painter {
    * @param {Array} layerName The name we want for the new label.
    * @returns {Object} A Sketch ShapePath Rectangle object.
    */
-  add(layerName = 'New Label') {
-    return new ShapePath({
+  addLabel(layerLabel = 'New Label') {
+    const layerName = `Label for ${layerLabel}`;
+
+    const text = new Text({
+      name: layerName,
+      text: layerLabel,
+      alignment: Text.Alignment.center,
+      parent: this.artboard,
+      frame: {
+        x: 12,
+        y: 12,
+      },
+    });
+    text.adjustToFit();
+
+    const shape = new ShapePath({
       name: layerName,
       frame: new Rectangle(10, 10, 60, 60),
       parent: this.artboard,
@@ -33,5 +47,11 @@ export default class Painter {
         fills: ['#ffcc3399'],
       },
     });
+
+    shape.moveToFront();
+    text.index = shape.index + 1;
+    // log(text);
+
+    return null;
   }
 }
