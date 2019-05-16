@@ -1,11 +1,50 @@
 {
+  "name": "Sketch Auto-Spec",
+  "description": "Plugins to label symbols",
+  "author": "LinkedIn Labs",
+  "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
+  "version": "1.0-b",
+  "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "compatibleVersion": 3,
   "bundleVersion": 1,
-  "icon": "icon.png",
   "commands": [
     {
-      "name": "hello-world",
-      "identifier": "sketch-auto-spec.GUI-identifier",
+      "name": "Hello World",
+      "identifier": "hello-world",
+      "shortcut": "ctrl shift h",
+      "script": "./main.js",
+      "handler": "helloWorld"
+    },
+    {
+      "name": "What Am I?",
+      "identifier": "what-am-i",
+      "shortcut": "ctrl shift i",
+      "script": "./main.js",
+      "handler": "labelLayer"
+    },
+    {
+      "name" : "Selection Change Listener",
+      "identifier": "selection-change-listener",
+      "script": "./main.js",
+      "handlers" : {
+        "actions": {
+          "SelectionChanged.finish": "onSelectionChange"
+        }
+      }
+    },
+    {
+      "name" : "Open Document Listener",
+      "identifier": "open-document-listener",
+      "script": "./main.js",
+      "handlers" : {
+        "actions": {
+          "OpenDocument": "onOpenDocument"
+        }
+      }
+    },
+    {
+      "name": "View GUI",
+      "identifier": "view-gui",
       "script": "./GUI.js",
       "handlers": {
         "run": "onRun",
@@ -18,7 +57,9 @@
   "menu": {
     "title": "Auto-Spec",
     "items": [
-      "sketch-auto-spec.GUI-identifier"
+      "hello-world",
+      "what-am-i",
+      "view-gui"
     ]
   }
 }

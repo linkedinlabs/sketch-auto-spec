@@ -1,5 +1,12 @@
 /* eslint-disable indent */
 /* eslint-disable comma-dangle */
+/**
+ * @description Function that mutates original webpack config.
+ * Supports asynchronous changes when promise is returned.
+ *
+ * @kind function
+ * @param {object} config Original webpack config.
+ */
 module.exports = (config) => {
   config.module.rules.push({
     test: /\.(html)$/,
