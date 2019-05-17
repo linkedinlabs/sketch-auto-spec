@@ -19,11 +19,13 @@ const assemble = (context) => {
   } else {
     contextDocument = context.document;
   }
-  const document = fromNative(contextDocument); // move from obj-c object to js api object
+  const document = fromNative(contextDocument); // move from obj-c object to JSON object
+  const documentData = context.document.documentData(); // obj-c object
   const messenger = new Messenger({ for: context, in: document });
 
   return {
     document,
+    documentData,
     messenger,
     selection: context.selection || null,
   };
@@ -57,20 +59,24 @@ const helloWorld = (context) => {
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
 const labelLayer = (context) => {
-  const { messenger } = assemble(context);
-  const { selection } = assemble(context);
+  const {
+    documentData,
+    messenger,
+    selection,
+  } = assemble(context);
 
   if (selection === null || selection.count() === 0) {
     return messenger.toast('A layer must be selected');
   }
 
   const layers = new Crawler({ for: selection });
-  const layerToLabel = new Identifier({ for: layers.first() });
+  const layerToLabel = new Identifier({ for: layers.first(), documentData });
   const painter = new Painter({ for: layerToLabel.artboard() });
+  const kitLayerLabel = layerToLabel.label();
 
-  messenger.toast(`I will identify selected things 💅 “${layerToLabel.label()}”`);
-  messenger.log(`Selected item: “${layerToLabel.label()}”`);
-  painter.addLabel(layerToLabel.label());
+  messenger.toast(`I will identify selected things 💅 “${kitLayerLabel}”`);
+  messenger.log(`Component Name: “${kitLayerLabel}”`);
+  painter.addLabel(kitLayerLabel);
   return null;
 };
 
@@ -85,8 +91,7 @@ const labelLayer = (context) => {
  */
 const onOpenDocument = (context) => {
   if (context.actionContext.document) {
-    const { document } = assemble(context);
-    const { messenger } = assemble(context);
+    const { document, messenger } = assemble(context);
 
     if (document) {
       messenger.log(`Document “${document.id}” Opened 😻`);
@@ -108,8 +113,7 @@ const onOpenDocument = (context) => {
  */
 const onSelectionChange = (context) => {
   if (String(context.action) === 'SelectionChanged.finish') {
-    const { document } = assemble(context);
-    const { messenger } = assemble(context);
+    const { document, messenger } = assemble(context);
     // const newSelectionArray = setArray(context.actionContext.newSelection);
 
     messenger.log(`Selection Changed in Doc “${document.id}”`);

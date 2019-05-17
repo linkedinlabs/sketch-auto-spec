@@ -21,14 +21,13 @@ export default class Painter {
    *
    * @kind function
    * @name add
-   * @param {Array} layerName The name we want for the new label.
+   * @param {Array} layerLabel The name we want for the new label.
    * @returns {Object} A Sketch ShapePath Rectangle object.
    */
   addLabel(layerLabel = 'New Label') {
     const layerName = `Label for ${layerLabel}`;
 
     const text = new Text({
-      name: layerName,
       text: layerLabel,
       alignment: Text.Alignment.center,
       parent: this.artboard,
