@@ -15,4 +15,9 @@ Array.from(triggerElements).forEach((trigger) => {
     }
   });
 });
+
+// call the wevbiew from the plugin
+// window.setRandomNumber = (randomNumber) => {
+//   document.getElementById('answer').innerHTML = `Random number from the plugin: ${randomNumber}`;
+// };
 /* eslint-enable no-undef */
