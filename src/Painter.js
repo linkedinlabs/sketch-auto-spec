@@ -28,12 +28,20 @@ export default class Painter {
     const layerName = `Label for ${layerLabel}`;
 
     const text = new Text({
-      text: layerLabel,
-      alignment: Text.Alignment.center,
-      parent: this.artboard,
       frame: {
         x: 12,
         y: 12,
+      },
+      parent: this.artboard,
+      text: layerLabel,
+      style: {
+        alignment: Text.Alignment.left,
+        fontFamily: 'system',
+        fontSize: 18,
+        fontWeight: 6,
+        kerning: 0,
+        lineHeight: 22,
+        textColor: '#000000ff',
       },
     });
     text.adjustToFit();
