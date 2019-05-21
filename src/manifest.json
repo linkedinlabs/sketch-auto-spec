@@ -16,8 +16,8 @@
       "handler": "helloWorld"
     },
     {
-      "name": "What Am I?",
-      "identifier": "what-am-i",
+      "name": "Label Component Symbol",
+      "identifier": "label-component",
       "shortcut": "ctrl shift i",
       "script": "./main.js",
       "handler": "labelLayer"
@@ -58,7 +58,7 @@
     "title": "Auto-Spec",
     "items": [
       "hello-world",
-      "what-am-i",
+      "label-component",
       "view-gui"
     ]
   }
