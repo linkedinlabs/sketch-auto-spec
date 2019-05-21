@@ -31,7 +31,11 @@ export default class Messenger {
    */
   log(message, type = 'normal') {
     const logType = type === 'error' ? '🆘' : '🐞';
-    const eventType = this.event.action ? this.event.action : 'Invoked';
+
+    let eventType = 'GUI';
+    if (this.event) {
+      eventType = this.event.action ? this.event.action : 'Invoked';
+    }
 
     // log(this.event);
     log(`Auto-Spec ${logType} ${this.document.id} : ${eventType} : ${message}`);
