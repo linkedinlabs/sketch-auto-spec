@@ -20,12 +20,14 @@ export default class Identifier {
     this.documentData = documentData;
   }
 
-  /** WIP
-   * @description Returns the current name of the layer.
+  /**
+   * @description Returns Kit-verified master symbol name of a layer. Cross-references
+   * a symbol’s `symbolId` with the master symbol instance, and looks the name up
+   * from connected Lingo Kit symbols.
    *
    * @kind function
    * @name label
-   * @returns {string} The layer name.
+   * @returns {string} The Kit-verified symbol name.
    */
   label() {
     // convert to json to expose params and find the `symbolId`
@@ -40,9 +42,7 @@ export default class Identifier {
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
     const kitSymbol = kitSymbols[masterSymbolJSON.id];
 
-    // log(kitSymbols);
-    // log(this.documentData);
-
+    log(`simple name for layer: ${this.layer.name()}`);
     log(`masterSymbolJSON for ${symbolId} is ${masterSymbolJSON.id}`);
     log(`official name in Lingo Kit is “${kitSymbol.name}”`);
 

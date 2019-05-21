@@ -47,8 +47,8 @@ export default class Painter {
     text.adjustToFit();
 
     const shape = new ShapePath({
-      name: layerName,
       frame: new Rectangle(10, 10, 60, 60),
+      name: layerName,
       parent: this.artboard,
       style: {
         fills: ['#ffcc3399'],
