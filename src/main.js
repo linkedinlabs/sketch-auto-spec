@@ -6,28 +6,61 @@ import Identifier from './Identifier';
 import Messenger from './Messenger';
 
 /**
+ * @description Takes context (if available) and returns the document
+ * or derives the `currentDocument` from `NSDocumentController` (necessary
+ * when a command froms from the GUI)
+ *
+ * @kind function
+ * @name getDocument
+ * @param {Object} context The current context (event) received from Sketch (optional).
+ * @returns {Object} Contains an objective-c object with the current document.
+ */
+const getDocument = (context = null) => {
+  if (!context) {
+    /* eslint-disable no-undef */
+    return NSDocumentController.sharedDocumentController().currentDocument();
+    /* eslint-enable no-undef */
+  }
+
+  if (context.actionContext && context.actionContext.document) {
+    return context.actionContext.document;
+  }
+
+  return context.document;
+};
+
+/**
+ * @description Takes an objective-c object of the document and
+ * retrieves the currently-selected layers
+ *
+ * @kind function
+ * @name getSelection
+ * @param {Object} objcDocument The current objective-c document object.
+ * @returns {Object} Contains an objective-c object with the current document.
+ */
+const getSelection = objcDocument => objcDocument.selectedLayers().layers() || null;
+
+/**
  * @description A shared helper function to set up in-UI messages and the logger.
  *
+ * @kind function
+ * @name assemble
  * @param {Object} context The current context (event) received from Sketch.
- * @returns {Object} Contains an object with the current document, a messenger instance,
- * and a selection array (if applicable).
+ * @returns {Object} Contains an object with the current document as a javascript object,
+ * a JSON object with documentData, a messenger instance, and a selection array (if applicable).
  */
-const assemble = (context) => {
-  let contextDocument = null;
-  if (context.actionContext && context.actionContext.document) {
-    contextDocument = context.actionContext.document;
-  } else {
-    contextDocument = context.document;
-  }
-  const document = fromNative(contextDocument); // move from obj-c object to JSON object
-  const documentData = context.document.documentData(); // obj-c object
-  const messenger = new Messenger({ for: context, in: document });
+const assemble = (context = null) => {
+  const objcDocument = getDocument(context);
+  const jsDocument = fromNative(objcDocument); // move from obj-c object to JSON object
+  const documentData = objcDocument.documentData(); // obj-c object
+  const messenger = new Messenger({ for: context, in: jsDocument });
+  const selection = getSelection(objcDocument);
 
   return {
-    document,
+    document: jsDocument,
     documentData,
     messenger,
-    selection: context.selection || null,
+    selection,
   };
 };
 
@@ -58,7 +91,7 @@ const helloWorld = (context) => {
  * @param {Object} context The current context (event) received from Sketch.
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
-const labelLayer = (context) => {
+const labelLayer = (context = null) => {
   const {
     documentData,
     messenger,
@@ -74,8 +107,11 @@ const labelLayer = (context) => {
   const painter = new Painter({ for: layerToLabel.artboard() });
   const kitLayerLabel = layerToLabel.label();
 
-  messenger.toast(`I will identify selected things 💅 “${kitLayerLabel}”`);
-  messenger.log(`Component Name: “${kitLayerLabel}”`);
+  // some feedback
+  messenger.toast(`Component Identified: 💅 “${kitLayerLabel}”`);
+  messenger.log(`Component Identified: “${kitLayerLabel}”`);
+
+  // draw the label
   painter.addLabel(kitLayerLabel);
   return null;
 };
