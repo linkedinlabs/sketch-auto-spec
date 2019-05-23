@@ -36,27 +36,51 @@ export default class Painter {
       text: layerLabel,
       style: {
         alignment: Text.Alignment.left,
-        fontFamily: 'system',
-        fontSize: 18,
-        fontWeight: 6,
+        borders: [{
+          enabled: false,
+        }],
+        fontFamily: 'helevetica neue',
+        fontSize: 12,
+        fontWeight: 4,
         kerning: 0,
         lineHeight: 22,
-        textColor: '#000000ff',
+        textColor: '#ffffffff',
       },
     });
     text.adjustToFit();
 
-    const shape = new ShapePath({
-      frame: new Rectangle(10, 10, 60, 60),
+    const rectangle = new ShapePath({
+      frame: new Rectangle(10, 10, 200, 30),
       name: layerName,
       parent: this.artboard,
       style: {
-        fills: ['#ffcc3399'],
+        borders: [{
+          enabled: false,
+          thickness: 0,
+        }],
+        fills: ['#027affff'],
       },
     });
 
-    shape.moveToFront();
-    text.index = shape.index + 1;
+    const diamond = new ShapePath({
+      frame: new Rectangle(5, 5, 6, 6),
+      name: `${layerName} diamond`,
+      parent: this.artboard,
+      style: {
+        borders: [{
+          enabled: false,
+          thickness: 0,
+        }],
+        fills: ['#027affff'],
+      },
+      transform: {
+        rotation: 45,
+      },
+    });
+
+    rectangle.moveToFront();
+    text.index = rectangle.index + 1;
+    diamond.index = rectangle.index - 1;
     // log(text);
 
     return null;
