@@ -1,6 +1,6 @@
 /**
-* @description A set of functions to operate the plugin GUI.
-*/
+ * @description A set of functions to operate the plugin GUI.
+ */
 import UI from 'sketch/ui'; // eslint-disable-line import/no-unresolved
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';

@@ -16,12 +16,12 @@ const ready = (fn) => { // eslint-disable-line no-unused-vars
 };
 
 /**
-* @description A wrapper to contain all of the webview functionality.
-*
-* @kind function
-* @name AutoSpecWebview
-* @type {module}
-*/
+ * @description A wrapper to contain all of the webview functionality.
+ *
+ * @kind function
+ * @name AutoSpecWebview
+ * @type {module}
+ */
 const AutoSpecWebview = {
   /**
    * @description The initializer that is called once the DOM is loaded.
@@ -55,12 +55,12 @@ const AutoSpecWebview = {
    */
   watchTriggers: () => {
     /**
-    * @description Array containing the UI elements to watch for input.
-    *
-    * @kind constant
-    * @name triggerElements
-    * @type {array}
-    */
+     * @description Array containing the UI elements to watch for input.
+     *
+     * @kind constant
+     * @name triggerElements
+     * @type {array}
+     */
     const triggerElements = document.querySelectorAll('.action-trigger');
 
     /**

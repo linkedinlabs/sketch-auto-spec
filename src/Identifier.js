@@ -1,17 +1,17 @@
 import { fromNative } from 'sketch';
 
 /**
-* @description A class to handle identifying a Sketch layer as a valid part of the Design System.
-*
-* @class
-* @name Identifier
-*
-* @constructor
-*
-* @property layer The layer that needs identification.
-* @property document The Sketch document that contains the layer.
-* @property messenger An instance of the Messenger class.
-*/
+ * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
+ *
+ * @class
+ * @name Identifier
+ *
+ * @constructor
+ *
+ * @property layer The layer that needs identification.
+ * @property document The Sketch document that contains the layer.
+ * @property messenger An instance of the Messenger class.
+ */
 export default class Identifier {
   constructor({
     for: layer,

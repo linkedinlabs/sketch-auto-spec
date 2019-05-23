@@ -1,15 +1,15 @@
 import { Rectangle, ShapePath, Text } from 'sketch/dom';
 
 /**
-* @description A class to add elements to the Sketch file.
-*
-* @class
-* @name Painter
-*
-* @constructor
-*
-* @property artboard The artboard in the Sketch file that we want to modify.
-*/
+ * @description A class to add elements to the Sketch file.
+ *
+ * @class
+ * @name Painter
+ *
+ * @constructor
+ *
+ * @property artboard The artboard in the Sketch file that we want to modify.
+ */
 export default class Painter {
   constructor({ for: artboard }) {
     this.artboard = artboard;
