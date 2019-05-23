@@ -33,6 +33,17 @@ export default class Identifier {
    * @returns {string} The Kit-verified symbol name.
    */
   label() {
+    // check for Lingo data - not much else we can do at the moment if it does not exist
+    if (
+      !this.documentData.userInfo()['com.lingoapp.lingo']
+      || !this.documentData.userInfo()['com.lingoapp.lingo'].storage
+    ) {
+      this.messenger.log('No data from Lingo in the file', 'error');
+      this.messenger.toast('🆘 Lingo does not seem to be connected to this file.');
+      return null;
+    }
+    const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
+
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
     const { id, symbolId, type } = layerJSON;
@@ -42,6 +53,7 @@ export default class Identifier {
     // return if we do not actually have a Symbol selected
     if (!symbolId) {
       this.messenger.log(`${id} is not a SymbolInstance; it is a ${type}`, 'error');
+      this.messenger.toast('🆘 This layer is not a Symbol.');
       return null;
     }
 
@@ -51,7 +63,6 @@ export default class Identifier {
     const masterSymbolId = masterSymbolJSON.id;
 
     // parse the connected Lingo Kit data and find the corresponding Kit Symbol
-    const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
     const kitSymbol = kitSymbols[masterSymbolId];
 
     if (!kitSymbol) {
