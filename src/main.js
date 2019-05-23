@@ -33,19 +33,17 @@ const assemble = (context = null) => {
 // invoked commands -------------------------------------------------
 
 /**
- * @description Displays a “Hello World” Alert in the Sketch UI when invoked from the plugin menu.
+ * @description Temporary dev function to quickly draw an instance of a Component label.
  *
  * @kind function
- * @name helloWorld
+ * @name drawLabel
  * @param {Object} context The current context (event) received from Sketch.
  */
-const helloWorld = (context) => {
-  if (context.document) {
-    const { messenger } = assemble(context);
+const drawLabel = (context) => {
+  const { selection } = assemble(context);
 
-    messenger.alert('It’s alive 🙌', 'Hello');
-    messenger.log('It’s alive 🙌');
-  }
+  const painter = new Painter({ for: selection[0].parentArtboard() });
+  painter.addLabel('Hello, I am Component');
   return null;
 };
 
@@ -133,7 +131,7 @@ const onSelectionChange = (context) => {
 
 // export each used in manifest
 export {
-  helloWorld,
+  drawLabel,
   labelLayer,
   onOpenDocument,
   onSelectionChange,
