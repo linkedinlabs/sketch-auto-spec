@@ -4,41 +4,7 @@ import Crawler from './Crawler';
 import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
-
-/**
- * @description Takes context (if available) and returns the document
- * or derives the `currentDocument` from `NSDocumentController` (necessary
- * when a command froms from the GUI)
- *
- * @kind function
- * @name getDocument
- * @param {Object} context The current context (event) received from Sketch (optional).
- * @returns {Object} Contains an objective-c object with the current document.
- */
-const getDocument = (context = null) => {
-  if (!context) {
-    /* eslint-disable no-undef */
-    return NSDocumentController.sharedDocumentController().currentDocument();
-    /* eslint-enable no-undef */
-  }
-
-  if (context.actionContext && context.actionContext.document) {
-    return context.actionContext.document;
-  }
-
-  return context.document;
-};
-
-/**
- * @description Takes an objective-c object of the document and
- * retrieves the currently-selected layers
- *
- * @kind function
- * @name getSelection
- * @param {Object} objcDocument The current objective-c document object.
- * @returns {Object} Contains an objective-c object with the current document.
- */
-const getSelection = objcDocument => objcDocument.selectedLayers().layers() || null;
+import { getDocument, getSelection } from './Tools';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
