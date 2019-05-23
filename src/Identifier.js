@@ -46,23 +46,13 @@ export default class Identifier {
     }
 
     // use the API to find the MasterSymbol instance based on the `symbolId`
-    let masterSymbol = this.documentData.symbolWithID(symbolId);
-    if (!masterSymbol) {
-      masterSymbol = this.documentData.layerWithID(symbolId);
-    }
+    const masterSymbol = this.documentData.symbolWithID(symbolId);
     const masterSymbolJSON = fromNative(masterSymbol);
     const masterSymbolId = masterSymbolJSON.id;
-    const masterSymbolType = masterSymbolJSON.type;
-
-    // return if we cannot find a master symbol
-    if (masterSymbolType !== 'SymbolMaster') {
-      this.messenger.log(`${masterSymbolId} is not a SymbolMaster; it is a ${masterSymbolType}`, 'error');
-      return null;
-    }
 
     // parse the connected Lingo Kit data and find the corresponding Kit Symbol
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
-    const kitSymbol = kitSymbols[masterSymbolJSON.id];
+    const kitSymbol = kitSymbols[masterSymbolId];
 
     if (!kitSymbol) {
       this.messenger.log(`${masterSymbolId} was not found in a connected Lingo Kit`, 'error');
