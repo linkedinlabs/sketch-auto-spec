@@ -103,16 +103,18 @@ const labelLayer = (context = null) => {
   }
 
   const layers = new Crawler({ for: selection });
-  const layerToLabel = new Identifier({ for: layers.first(), documentData });
+  const layerToLabel = new Identifier({
+    for: layers.first(),
+    documentData,
+    messenger,
+  });
   const painter = new Painter({ for: layerToLabel.artboard() });
   const kitLayerLabel = layerToLabel.label();
 
-  // some feedback
-  messenger.toast(`Component Identified: 💅 “${kitLayerLabel}”`);
-  messenger.log(`Component Identified: “${kitLayerLabel}”`);
-
   // draw the label
-  painter.addLabel(kitLayerLabel);
+  if (kitLayerLabel) {
+    painter.addLabel(kitLayerLabel);
+  }
   return null;
 };
 

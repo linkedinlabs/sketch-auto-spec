@@ -10,14 +10,17 @@ import { fromNative } from 'sketch';
 *
 * @property layer The layer that needs identification.
 * @property document The Sketch document that contains the layer.
+* @property messenger An instance of the Messenger class.
 */
 export default class Identifier {
   constructor({
     for: layer,
     documentData,
+    messenger,
   }) {
     this.layer = layer;
     this.documentData = documentData;
+    this.messenger = messenger;
   }
 
   /**
@@ -32,20 +35,42 @@ export default class Identifier {
   label() {
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
-    const { symbolId } = layerJSON;
+    const { id, symbolId, type } = layerJSON;
+
+    this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
+
+    // return if we do not actually have a Symbol selected
+    if (!symbolId) {
+      this.messenger.log(`${id} is not a SymbolInstance; it is a ${type}`, 'error');
+      return null;
+    }
 
     // use the API to find the MasterSymbol instance based on the `symbolId`
-    const masterSymbol = this.documentData.symbolWithID(symbolId);
+    let masterSymbol = this.documentData.symbolWithID(symbolId);
+    if (!masterSymbol) {
+      masterSymbol = this.documentData.layerWithID(symbolId);
+    }
     const masterSymbolJSON = fromNative(masterSymbol);
+    const masterSymbolId = masterSymbolJSON.id;
+    const masterSymbolType = masterSymbolJSON.type;
+
+    // return if we cannot find a master symbol
+    if (masterSymbolType !== 'SymbolMaster') {
+      this.messenger.log(`${masterSymbolId} is not a SymbolMaster; it is a ${masterSymbolType}`, 'error');
+      return null;
+    }
 
     // parse the connected Lingo Kit data and find the corresponding Kit Symbol
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
     const kitSymbol = kitSymbols[masterSymbolJSON.id];
 
-    log(`simple name for layer: ${this.layer.name()}`);
-    log(`masterSymbolJSON for ${symbolId} is ${masterSymbolJSON.id}`);
-    log(`official name in Lingo Kit is “${kitSymbol.name}”`);
+    if (!kitSymbol) {
+      this.messenger.log(`${masterSymbolId} was not found in a connected Lingo Kit`, 'error');
+      this.messenger.toast('😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.');
+      return null;
+    }
 
+    this.messenger.log(`Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbol.name}”`);
     return kitSymbol.name;
   }
 
