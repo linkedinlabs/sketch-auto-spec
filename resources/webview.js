@@ -28,17 +28,16 @@ const triggerElements = document.querySelectorAll('.action-trigger');
 Array.from(triggerElements).forEach((trigger) => {
   document.getElementById(trigger.id).addEventListener('click', () => {
     switch (trigger.id) {
-      case 'label':
-        window.postMessage('labelLayer');
-        break;
       case 'close':
         window.postMessage('closeWindow');
         break;
+      case 'label':
+        window.postMessage('labelLayer');
+        break;
       default:
-        return null;
+        window.postMessage('nativeLog', `Called #${trigger.id} from the webview`);
     }
-
-    return window.postMessage('nativeLog', `Called #${trigger.id} from the webview`);
+    return null;
   });
 });
 
