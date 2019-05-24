@@ -27,10 +27,17 @@ export default class Painter {
   addLabel(layerLabel = 'New Label') {
     const layerName = `Label for ${layerLabel}`;
 
+    // x, y placement of the label on the artboard
+    const placement = {
+      x: 20,
+      y: 20,
+    };
+
+    // build the text box
     const text = new Text({
       frame: {
-        x: 12,
-        y: 12,
+        x: placement.x + 16,
+        y: placement.y + 3,
       },
       parent: this.artboard,
       text: layerLabel,
@@ -49,8 +56,9 @@ export default class Painter {
     });
     text.adjustToFit();
 
+    // build the rounded rectangle
     const rectangle = new ShapePath({
-      frame: new Rectangle(10, 10, 200, 30),
+      frame: new Rectangle(placement.x, placement.y, 200, 30),
       name: layerName,
       parent: this.artboard,
       style: {
@@ -62,8 +70,16 @@ export default class Painter {
       },
     });
 
+    // set rounded corners of the rectangle
+    const { points } = rectangle;
+    points.forEach((point) => {
+      point.cornerRadius = 2; // eslint-disable-line no-param-reassign
+      return null;
+    });
+
+    // build the dangling diamond
     const diamond = new ShapePath({
-      frame: new Rectangle(5, 5, 6, 6),
+      frame: new Rectangle(placement.x, placement.y + 27, 6, 6),
       name: `${layerName} diamond`,
       parent: this.artboard,
       style: {
@@ -78,10 +94,19 @@ export default class Painter {
       },
     });
 
+    // set rectangle width based on text width
+    const textWidth = text.frame.width;
+    const rectangleWidth = textWidth + 32;
+    rectangle.frame.width = rectangleWidth;
+
+    // move the diamond to the mid-point of the rectangle
+    const diamondMidX = ((rectangleWidth - 8) / 2);
+    diamond.frame.x = diamondMidX + placement.x;
+
+    // set z-axis placement of all elements
     rectangle.moveToFront();
     text.index = rectangle.index + 1;
     diamond.index = rectangle.index - 1;
-    // log(text);
 
     return null;
   }
