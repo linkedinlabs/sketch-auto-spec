@@ -136,17 +136,17 @@ export default class Painter {
 
     // correct for left bleed
     if (placementX < 0) {
-      placementX = 0;
+      placementX = 5;
     }
 
     // correct for right bleed
     if ((placementX + group.frame.width) > artboardWidth) {
-      placementX = artboardWidth - group.frame.width;
+      placementX = artboardWidth - group.frame.width - 5;
     }
 
     // correct for top bleed
     if (placementY < 0) {
-      placementY = 0;
+      placementY = 5;
     }
 
     // set placement
