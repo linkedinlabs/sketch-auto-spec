@@ -121,27 +121,33 @@ export default class Painter {
     diamond.parent = group;
     text.parent = group;
 
-    // move the group
-    // initial placement based on layer to label
+    // position the group
     const artboardWidth = this.artboard.frame().width();
+    const layerWidth = this.layer.frame().width();
+    const originalLayerIndex = fromNative(this.layer).index;
+    let diamondAdjustment = null;
+
+    // move group to index right above layer to label
+    group.index = originalLayerIndex + 1;
+
+    // initial placement based on layer to label
     let placementX = (
       this.layer.frame().x() + (
-        (this.layer.frame().width() - group.frame.width) / 2
+        (layerWidth - group.frame.width) / 2
       )
     );
     let placementY = this.layer.frame().y() - 38;
 
-    const originalLayerIndex = fromNative(this.layer).index;
-    group.index = originalLayerIndex + 1;
-
     // correct for left bleed
     if (placementX < 0) {
       placementX = 5;
+      diamondAdjustment = 'left';
     }
 
     // correct for right bleed
     if ((placementX + group.frame.width) > artboardWidth) {
       placementX = artboardWidth - group.frame.width - 5;
+      diamondAdjustment = 'right';
     }
 
     // correct for top bleed
@@ -149,9 +155,26 @@ export default class Painter {
       placementY = 5;
     }
 
-    // set placement
+    // set label group placement
     group.frame.x = placementX;
     group.frame.y = placementY;
+
+    // adjust diamond, if necessary
+    if (diamondAdjustment) {
+      // move the diamond to the mid-point of the layer to label
+      let diamondLayerMidX = null;
+      switch (diamondAdjustment) {
+        case 'left':
+          diamondLayerMidX = ((this.layer.frame().x() + layerWidth - 8) / 2);
+          break;
+        case 'right':
+          diamondLayerMidX = ((this.layer.frame().x() - group.frame.x) + ((layerWidth - 8) / 2));
+          break;
+        default:
+          diamondLayerMidX = 0;
+      }
+      diamond.frame.x = diamondLayerMidX;
+    }
 
     return null;
   }
