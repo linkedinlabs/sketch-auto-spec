@@ -1,4 +1,9 @@
-import { Rectangle, ShapePath, Text } from 'sketch/dom';
+import {
+  Group,
+  Rectangle,
+  ShapePath,
+  Text,
+} from 'sketch/dom';
 
 /**
  * @description A class to add elements to the Sketch file.
@@ -29,15 +34,15 @@ export default class Painter {
 
     // x, y placement of the label on the artboard
     const placement = {
-      x: 20,
-      y: 20,
+      x: 30,
+      y: 30,
     };
 
     // build the text box
     const text = new Text({
       frame: {
-        x: placement.x + 16,
-        y: placement.y + 3,
+        x: 16,
+        y: 3,
       },
       parent: this.artboard,
       text: layerLabel,
@@ -58,8 +63,7 @@ export default class Painter {
 
     // build the rounded rectangle
     const rectangle = new ShapePath({
-      frame: new Rectangle(placement.x, placement.y, 200, 30),
-      name: layerName,
+      frame: new Rectangle(0, 0, 200, 30),
       parent: this.artboard,
       style: {
         borders: [{
@@ -79,8 +83,8 @@ export default class Painter {
 
     // build the dangling diamond
     const diamond = new ShapePath({
-      frame: new Rectangle(placement.x, placement.y + 27, 6, 6),
-      name: `${layerName} diamond`,
+      frame: new Rectangle(0, 27, 6, 6),
+      name: 'Diamond',
       parent: this.artboard,
       style: {
         borders: [{
@@ -101,12 +105,32 @@ export default class Painter {
 
     // move the diamond to the mid-point of the rectangle
     const diamondMidX = ((rectangleWidth - 8) / 2);
-    diamond.frame.x = diamondMidX + placement.x;
+    diamond.frame.x = diamondMidX;
 
     // set z-axis placement of all elements
     rectangle.moveToFront();
     text.index = rectangle.index + 1;
     diamond.index = rectangle.index - 1;
+
+    const group = new Group({
+      frame: {
+        x: placement.x,
+        y: placement.y,
+      },
+      name: layerName,
+      parent: this.artboard,
+    });
+
+    group.frame.width = rectangle.frame.width;
+    group.frame.height = rectangle.frame.height + 4;
+
+    rectangle.parent = group;
+    diamond.parent = group;
+    text.parent = group;
+
+    // move the group
+    group.frame.x = placement.x;
+    group.frame.y = placement.y;
 
     return null;
   }
