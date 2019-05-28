@@ -35,12 +35,6 @@ export default class Painter {
     const layerName = this.layer.name();
     const groupName = `Label for ${layerName}`;
 
-    // x, y placement of the label on the artboard
-    const placement = {
-      x: 30,
-      y: 30,
-    };
-
     // build the text box
     const text = new Text({
       frame: {
@@ -116,10 +110,6 @@ export default class Painter {
     diamond.index = rectangle.index - 1;
 
     const group = new Group({
-      frame: {
-        x: placement.x,
-        y: placement.y,
-      },
       name: groupName,
       parent: this.artboard,
     });
@@ -132,10 +122,18 @@ export default class Painter {
     text.parent = group;
 
     // move the group
+    // x, y placement of the label on the artboard
+    const placementX = (
+      this.layer.frame().x() + (
+        (this.layer.frame().width() - group.frame.width) / 2
+      )
+    );
+    const placementY = this.layer.frame().y() - 38;
+
     const originalLayerIndex = fromNative(this.layer).index;
     group.index = originalLayerIndex + 1;
-    group.frame.x = placement.x;
-    group.frame.y = placement.y;
+    group.frame.x = placementX;
+    group.frame.y = placementY;
 
     return null;
   }
