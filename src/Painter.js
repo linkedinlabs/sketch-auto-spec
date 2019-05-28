@@ -122,16 +122,34 @@ export default class Painter {
     text.parent = group;
 
     // move the group
-    // x, y placement of the label on the artboard
-    const placementX = (
+    // initial placement based on layer to label
+    const artboardWidth = this.artboard.frame().width();
+    let placementX = (
       this.layer.frame().x() + (
         (this.layer.frame().width() - group.frame.width) / 2
       )
     );
-    const placementY = this.layer.frame().y() - 38;
+    let placementY = this.layer.frame().y() - 38;
 
     const originalLayerIndex = fromNative(this.layer).index;
     group.index = originalLayerIndex + 1;
+
+    // correct for left bleed
+    if (placementX < 0) {
+      placementX = 0;
+    }
+
+    // correct for right bleed
+    if ((placementX + group.frame.width) > artboardWidth) {
+      placementX = artboardWidth - group.frame.width;
+    }
+
+    // correct for top bleed
+    if (placementY < 0) {
+      placementY = 0;
+    }
+
+    // set placement
     group.frame.x = placementX;
     group.frame.y = placementY;
 
