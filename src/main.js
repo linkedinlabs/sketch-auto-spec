@@ -42,7 +42,7 @@ const assemble = (context = null) => {
 const drawLabel = (context) => {
   const { selection } = assemble(context);
 
-  const painter = new Painter({ for: selection[0].parentArtboard() });
+  const painter = new Painter({ for: selection[0] });
   painter.addLabel('Hello, I am Component');
   return null;
 };
@@ -72,7 +72,7 @@ const labelLayer = (context = null) => {
     documentData,
     messenger,
   });
-  const painter = new Painter({ for: layerToLabel.artboard() });
+  const painter = new Painter({ for: layers.first() });
   const kitLayerLabel = layerToLabel.label();
 
   // draw the label

@@ -1,3 +1,4 @@
+import { fromNative } from 'sketch';
 import {
   Group,
   Rectangle,
@@ -13,11 +14,12 @@ import {
  *
  * @constructor
  *
- * @property artboard The artboard in the Sketch file that we want to modify.
+ * @property layer The layer in the Sketch file that we want to label or modify.
  */
 export default class Painter {
-  constructor({ for: artboard }) {
-    this.artboard = artboard;
+  constructor({ for: layer }) {
+    this.layer = layer;
+    this.artboard = this.layer.parentArtboard();
   }
 
   /**
@@ -30,7 +32,8 @@ export default class Painter {
    * @returns {Object} A Sketch ShapePath Rectangle object.
    */
   addLabel(layerLabel = 'New Label') {
-    const layerName = `Label for ${layerLabel}`;
+    const layerName = this.layer.name();
+    const groupName = `Label for ${layerName}`;
 
     // x, y placement of the label on the artboard
     const placement = {
@@ -117,7 +120,7 @@ export default class Painter {
         x: placement.x,
         y: placement.y,
       },
-      name: layerName,
+      name: groupName,
       parent: this.artboard,
     });
 
@@ -129,6 +132,8 @@ export default class Painter {
     text.parent = group;
 
     // move the group
+    const originalLayerIndex = fromNative(this.layer).index;
+    group.index = originalLayerIndex + 1;
     group.frame.x = placement.x;
     group.frame.y = placement.y;
 
