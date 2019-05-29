@@ -1,6 +1,6 @@
 {
-  "name": "Sketch Auto-Spec",
-  "description": "Plugins to label symbols",
+  "name": "Sketch Spec’ing",
+  "description": "Plugin to label symbols",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
   "version": "1.0-b",
@@ -62,7 +62,7 @@
     }
   ],
   "menu": {
-    "title": "Auto-Spec",
+    "title": "Spec’ing",
     "items": [
       "label-component",
       "view-gui",

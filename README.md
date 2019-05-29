@@ -1,10 +1,10 @@
-# sketch-auto-spec
+# sketch-speccing
 
 ## Installation
 
-- [Download](../../releases/latest/download/sketch-auto-spec.sketchplugin.zip) the latest release of the plugin
+- [Download](../../releases/latest/download/sketch-speccing.sketchplugin.zip) the latest release of the plugin
 - Un-zip
-- Double-click on sketch-auto-spec.sketchplugin
+- Double-click on sketch-speccing.sketchplugin
 
 ## Development Guide
 
