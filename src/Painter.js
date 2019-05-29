@@ -9,6 +9,7 @@ import { PLUGIN_IDENTIFIER } from './Tools';
 
 const initialSettingsState = {
   containerGroups: [],
+  labeledLayers: [],
 };
 
 const updateSettings = (key, data, action = 'add') => {
@@ -19,13 +20,11 @@ const updateSettings = (key, data, action = 'add') => {
   }
 
   if (action === 'add') {
-    switch (key) {
-      case 'containerGroups':
-        settings.containerGroups.push(data);
-        break;
-      default:
-        return null;
+    if (!settings[key]) {
+      settings[key] = [];
     }
+
+    settings[key].push(data);
   }
 
   if (action === 'remove') {
@@ -42,7 +41,24 @@ const updateSettings = (key, data, action = 'add') => {
   }
 
   Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
+  // log(Settings.settingForKey(PLUGIN_IDENTIFIER));
   return settings;
+};
+
+const findLayerById = (layers, layerId) => {
+  if (!layers || !layerId) {
+    return null;
+  }
+
+  let foundLayer = null;
+  layers.forEach((layer) => {
+    const layerJSON = fromNative(layer);
+    if (layerJSON.id === layerId) {
+      foundLayer = layer;
+    }
+    return foundLayer;
+  });
+  return foundLayer;
 };
 
 /**
@@ -61,20 +77,14 @@ export default class Painter {
     this.artboard = this.layer.parentArtboard();
   }
 
-  findLayerById(layerId) {
-    let foundLayer = null;
-    this.artboard.layers().forEach((layer) => {
-      const layerJSON = fromNative(layer);
-      if (layerJSON.id === layerId) {
-        foundLayer = layer;
-      }
-      return foundLayer;
-    });
-    return foundLayer;
-  }
-
   createContainerGroup(artboardId) {
     const newContainerGroup = new Group({
+      frame: {
+        x: 0,
+        y: 0,
+        width: 1,
+        height: 1,
+      },
       name: '+++ Auto-Spec Labels +++',
       parent: this.artboard,
     });
@@ -102,7 +112,7 @@ export default class Painter {
         }
         return null;
       });
-      containerGroup = this.findLayerById(containerGroupId);
+      containerGroup = findLayerById(this.artboard.layers(), containerGroupId);
       // Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
     }
 
@@ -113,7 +123,6 @@ export default class Painter {
       containerGroup = this.createContainerGroup(artboardId);
     }
 
-    log(Settings.settingForKey(PLUGIN_IDENTIFIER));
     return containerGroup;
   }
 
@@ -128,8 +137,27 @@ export default class Painter {
    */
   addLabel(layerLabel = 'New Label') {
     const layerName = this.layer.name();
+    const layerId = fromNative(this.layer).id;
     const groupName = `Label for ${layerName}`;
-    const containerGroupId = this.setContainerGroup();
+    const containerGroup = this.setContainerGroup();
+
+    // check if we have already labeled this one and remove it
+    const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+    if (settings && settings.labeledLayers) {
+      const existingItem = settings.labeledLayers.find(
+        foundItem => (foundItem.originalId === layerId),
+      );
+      if (existingItem) {
+        updateSettings('labeledLayers', { id: existingItem.id }, 'remove');
+        const layerContainer = findLayerById(this.artboard.layers(), existingItem.containerGroupId);
+        if (layerContainer) {
+          const layerToDelete = findLayerById(layerContainer.layers(), existingItem.id);
+          if (layerToDelete) {
+            fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
+          }
+        }
+      }
+    }
 
     // build the text box
     const text = new Text({
@@ -207,7 +235,7 @@ export default class Painter {
 
     const group = new Group({
       name: groupName,
-      parent: containerGroupId,
+      parent: containerGroup,
     });
 
     group.frame.width = rectangle.frame.width;
@@ -271,6 +299,14 @@ export default class Painter {
       }
       diamond.frame.x = diamondLayerMidX;
     }
+
+    const newSettingsEntry = {
+      containerGroupId: fromNative(containerGroup).id,
+      id: group.id,
+      originalId: layerId,
+    };
+
+    updateSettings('labeledLayers', newSettingsEntry);
 
     return null;
   }

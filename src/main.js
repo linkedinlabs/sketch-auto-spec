@@ -1,10 +1,10 @@
-import { fromNative } from 'sketch';
+import { fromNative, Settings } from 'sketch';
 
 import Crawler from './Crawler';
 import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
-import { getDocument, getSelection } from './Tools';
+import { getDocument, getSelection, PLUGIN_IDENTIFIER } from './Tools';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -44,6 +44,17 @@ const drawLabel = (context) => {
 
   const painter = new Painter({ for: selection[0] });
   painter.addLabel('Hello, I am Component');
+  return null;
+};
+
+/**
+ * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
+ *
+ * @kind function
+ * @name resetData
+ */
+const resetData = () => {
+  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
   return null;
 };
 
@@ -135,4 +146,5 @@ export {
   labelLayer,
   onOpenDocument,
   onSelectionChange,
+  resetData,
 };
