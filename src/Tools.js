@@ -1,5 +1,7 @@
 import { toArray } from 'util';
 
+const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
+
 /**
  * @description Takes context (if made available) and returns the document
  * or derives the `currentDocument` from `NSDocumentController` (necessary
@@ -50,5 +52,6 @@ const setArray = nsArray => toArray(nsArray);
 export {
   getDocument,
   getSelection,
+  PLUGIN_IDENTIFIER,
   setArray,
 };

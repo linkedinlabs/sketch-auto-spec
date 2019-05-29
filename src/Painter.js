@@ -1,10 +1,49 @@
-import { fromNative } from 'sketch';
+import { fromNative, Settings } from 'sketch';
 import {
   Group,
   Rectangle,
   ShapePath,
   Text,
 } from 'sketch/dom';
+import { PLUGIN_IDENTIFIER } from './Tools';
+
+const initialSettingsState = {
+  containerGroups: [],
+};
+
+const updateSettings = (key, data, action = 'add') => {
+  let settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+
+  if (!settings) {
+    settings = initialSettingsState;
+  }
+
+  if (action === 'add') {
+    switch (key) {
+      case 'containerGroups':
+        settings.containerGroups.push(data);
+        break;
+      default:
+        return null;
+    }
+  }
+
+  if (action === 'remove') {
+    let updatedItems = null;
+    // find the items array index of the item to remove
+    const itemIndex = settings[key].findIndex(foundItem => (foundItem.id === data.id));
+
+    updatedItems = [
+      ...settings[key].slice(0, itemIndex),
+      ...settings[key].slice(itemIndex + 1),
+    ];
+
+    settings[key] = updatedItems;
+  }
+
+  Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
+  return settings;
+};
 
 /**
  * @description A class to add elements to the Sketch file.
@@ -22,6 +61,62 @@ export default class Painter {
     this.artboard = this.layer.parentArtboard();
   }
 
+  findLayerById(layerId) {
+    let foundLayer = null;
+    this.artboard.layers().forEach((layer) => {
+      const layerJSON = fromNative(layer);
+      if (layerJSON.id === layerId) {
+        foundLayer = layer;
+      }
+      return foundLayer;
+    });
+    return foundLayer;
+  }
+
+  createContainerGroup(artboardId) {
+    const newContainerGroup = new Group({
+      name: '+++ Auto-Spec Labels +++',
+      parent: this.artboard,
+    });
+
+    const newContainerGroupSetting = {
+      artboardId,
+      id: newContainerGroup.id,
+    };
+
+    updateSettings('containerGroups', newContainerGroupSetting);
+
+    return newContainerGroup;
+  }
+
+  setContainerGroup() {
+    const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+    const artboardId = fromNative(this.artboard).id;
+    let containerGroup = null;
+    let containerGroupId = null;
+
+    if (settings && settings.containerGroups) {
+      settings.containerGroups.forEach((containerGroupLookupPair) => {
+        if (containerGroupLookupPair.artboardId === artboardId) {
+          containerGroupId = containerGroupLookupPair.id;
+        }
+        return null;
+      });
+      containerGroup = this.findLayerById(containerGroupId);
+      // Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
+    }
+
+    if (!containerGroup) {
+      if (containerGroupId) {
+        updateSettings('containerGroups', { id: containerGroupId }, 'remove');
+      }
+      containerGroup = this.createContainerGroup(artboardId);
+    }
+
+    log(Settings.settingForKey(PLUGIN_IDENTIFIER));
+    return containerGroup;
+  }
+
   /**
    * @description Takes a layer name and returns a semi-transparent, small rectangle with that name.
    * Info {@link https://developer.sketch.com/reference/api/#shapepath}
@@ -34,6 +129,7 @@ export default class Painter {
   addLabel(layerLabel = 'New Label') {
     const layerName = this.layer.name();
     const groupName = `Label for ${layerName}`;
+    const containerGroupId = this.setContainerGroup();
 
     // build the text box
     const text = new Text({
@@ -111,7 +207,7 @@ export default class Painter {
 
     const group = new Group({
       name: groupName,
-      parent: this.artboard,
+      parent: containerGroupId,
     });
 
     group.frame.width = rectangle.frame.width;
