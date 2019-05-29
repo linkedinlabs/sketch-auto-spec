@@ -82,9 +82,10 @@ export default class Painter {
       frame: {
         x: 0,
         y: 0,
-        width: 1,
-        height: 1,
+        width: this.artboard.frame().width(),
+        height: this.artboard.frame().height(),
       },
+      locked: true,
       name: '+++ Auto-Spec Labels +++',
       parent: this.artboard,
     });
