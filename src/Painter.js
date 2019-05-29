@@ -90,6 +90,14 @@ export default class Painter {
       parent: this.artboard,
     });
 
+    // add placeholder rectangle to keep everything relative to 0, 0 on the artboard
+    new ShapePath({ // eslint-disable-line no-new
+      frame: new Rectangle(0, 0, 1, 1),
+      locked: true,
+      name: '--- placeholder',
+      parent: newContainerGroup,
+    });
+
     const newContainerGroupSetting = {
       artboardId,
       id: newContainerGroup.id,
