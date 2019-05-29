@@ -124,6 +124,9 @@ export default class Painter {
       containerGroup = this.createContainerGroup(artboardId);
     }
 
+    // move to the front
+    fromNative(containerGroup).moveToFront();
+
     return containerGroup;
   }
 
