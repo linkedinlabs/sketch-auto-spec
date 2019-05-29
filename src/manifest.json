@@ -50,7 +50,7 @@
       }
     },
     {
-      "name": "View GUI",
+      "name": "Show Toolbar",
       "identifier": "view-gui",
       "script": "./GUI.js",
       "handlers": {
