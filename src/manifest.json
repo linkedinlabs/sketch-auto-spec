@@ -10,14 +10,14 @@
   "commands": [
     {
       "name": "Dev: Draw Label",
-      "identifier": "draw-label",
+      "identifier": "dev-draw-label",
       "shortcut": "ctrl shift d",
       "script": "./main.js",
       "handler": "drawLabel"
     },
     {
       "name": "Dev: Reset Data",
-      "identifier": "reset-data",
+      "identifier": "dev-reset-data",
       "shortcut": "ctrl shift r",
       "script": "./main.js",
       "handler": "resetData"
@@ -66,8 +66,8 @@
     "items": [
       "label-component",
       "view-gui",
-      "draw-label",
-      "reset-data"
+      "dev-draw-label",
+      "dev-reset-data"
     ]
   }
 }
