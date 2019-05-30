@@ -65,12 +65,13 @@ const AutoSpecWebview = {
 
     /**
      * @description Takes a string message and logs it at one of 2 levels (normal or error).
-     *
+     * WIP
      * @kind function
      * @param {array} triggerElements Array containing the UI elements to watch for input.
      */
     Array.from(triggerElements).forEach((trigger) => {
       document.getElementById(trigger.id).addEventListener('click', () => {
+        window.postMessage('nativeLog', `Called #${trigger.id} from the GUI`);
         switch (trigger.id) {
           case 'close':
             window.postMessage('closeWindow');
@@ -79,7 +80,7 @@ const AutoSpecWebview = {
             window.postMessage('labelLayer');
             break;
           default:
-            window.postMessage('nativeLog', `Called #${trigger.id} from the webview`);
+            window.postMessage('nativeLog', `Missing ${trigger.id} action`);
         }
         return null;
       });

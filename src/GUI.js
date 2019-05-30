@@ -1,9 +1,9 @@
 /**
  * @description A set of functions to operate the plugin GUI.
  */
-import UI from 'sketch/ui'; // eslint-disable-line import/no-unresolved
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
+import Messenger from './Messenger';
 import * as theWebview from '../resources/webview.html';
 import { labelLayer } from './main';
 
@@ -15,6 +15,15 @@ import { labelLayer } from './main';
  * @type {string}
  */
 const webviewIdentifier = 'com.linkedinlabs.sketch.auto-spec-plugin.webview';
+
+/**
+ * @description Set up a new Messenger class instance.
+ * WIP
+ * @kind function
+ * @name messenger
+ * @param {Object}
+ */
+const messenger = new Messenger({ for: { action: 'GUI' } });
 
 /**
  * @description Called by the plugin manifest to open and operate the UI.
@@ -68,11 +77,14 @@ const watchGui = () => {
    */
   const { webContents } = browserWindow;
 
-  // print a message when the page loads
-  webContents.on('did-finish-load', () => UI.message('UI loaded!'));
+  // log a message when the view loads
+  webContents.on('did-finish-load', () => messenger.log('GUI loaded!'));
 
   // add a handler for a call from web content's javascript
-  webContents.on('nativeLog', message => UI.message(message));
+  webContents.on('nativeLog', (message) => {
+    messenger.log(message);
+  });
+
 
   // call the labelLayer function in main.js
   webContents.on('labelLayer', () => labelLayer());
@@ -82,6 +94,7 @@ const watchGui = () => {
     const existingWebview = getWebview(webviewIdentifier);
     if (existingWebview) {
       existingWebview.close();
+      messenger.log('GUI closed.');
     }
   });
 
@@ -100,5 +113,6 @@ export const onShutdown = () => {
   const existingWebview = getWebview(webviewIdentifier);
   if (existingWebview) {
     existingWebview.close();
+    messenger.log('GUI closed.');
   }
 };
