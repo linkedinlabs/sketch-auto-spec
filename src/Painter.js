@@ -94,7 +94,7 @@ export default class Painter {
     new ShapePath({ // eslint-disable-line no-new
       frame: new Rectangle(0, 0, 1, 1),
       locked: true,
-      name: '--- placeholder',
+      name: '--- keystone - please DO NOT delete me 🤗',
       parent: newContainerGroup,
     });
 
