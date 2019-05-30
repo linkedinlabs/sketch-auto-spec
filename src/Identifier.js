@@ -71,8 +71,13 @@ export default class Identifier {
       return null;
     }
 
-    this.messenger.log(`Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbol.name}”`);
-    return kitSymbol.name;
+    // take only the last segment of the name (after a “/”, if available)
+    let kitSymbolNameClean = kitSymbol.name.split('/').pop();
+    // otherwise, fall back to the kit symbol name
+    kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
+
+    this.messenger.log(`Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`);
+    return kitSymbolNameClean;
   }
 
   /**
