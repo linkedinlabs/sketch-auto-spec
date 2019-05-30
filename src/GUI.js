@@ -20,9 +20,10 @@ const webviewIdentifier = 'com.linkedinlabs.sketch.auto-spec-plugin.webview';
  * @description Called by the plugin manifest to open and operate the UI.
  *
  * @kind function
+ * @name watchGui
  * @returns {Object} An open webview in the Sketch UI.
  */
-export default () => {
+const watchGui = () => {
   /**
    * @description Options to set on BrowserWindow.
    *
@@ -87,7 +88,7 @@ export default () => {
   // load the webview window
   return browserWindow.loadURL(theWebview);
 };
-
+export default watchGui;
 /**
  * @description Closes the webview when the plugin is shutdown by Sketch
  * (for example, when the user disables the plugin)
