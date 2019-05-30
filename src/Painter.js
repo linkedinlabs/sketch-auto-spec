@@ -94,7 +94,7 @@ export default class Painter {
     new ShapePath({ // eslint-disable-line no-new
       frame: new Rectangle(0, 0, 1, 1),
       locked: true,
-      name: '--- placeholder',
+      name: '--- keystone - please DO NOT delete me 🤗',
       parent: newContainerGroup,
     });
 
@@ -148,6 +148,21 @@ export default class Painter {
    * @returns {Object} A Sketch ShapePath Rectangle object.
    */
   addLabel(layerLabel = 'New Label') {
+    const result = {
+      success: false,
+      error: false,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+
+    if (!this.artboard) {
+      result.error = true;
+      result.messages.log = 'Selection not on artboard';
+      result.messages.toast = 'Your selection needs to be on an artboard';
+      return result;
+    }
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
     const groupName = `Label for ${layerName}`;
@@ -320,6 +335,7 @@ export default class Painter {
 
     updateSettings('labeledLayers', newSettingsEntry);
 
-    return null;
+    result.success = true;
+    return result;
   }
 }

@@ -87,8 +87,16 @@ const labelLayer = (context = null) => {
   const kitLayerLabel = layerToLabel.label();
 
   // draw the label
+  let paintResult = null;
   if (kitLayerLabel) {
-    painter.addLabel(kitLayerLabel);
+    paintResult = painter.addLabel(kitLayerLabel);
+  }
+
+  if (paintResult && (paintResult.error || !paintResult.success)) {
+    const toastMessage = paintResult.error && paintResult.messages.toast ? paintResult.messages.toast : 'An error occured';
+    const logMessage = paintResult.error && paintResult.messages.log ? paintResult.messages.log : 'An error occured';
+    messenger.log(logMessage, 'error');
+    return messenger.toast(toastMessage);
   }
   return null;
 };
