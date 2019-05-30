@@ -1,10 +1,11 @@
 /**
-* @description A set of functions to operate the plugin GUI.
-*/
+ * @description A set of functions to operate the plugin GUI.
+ */
 import UI from 'sketch/ui'; // eslint-disable-line import/no-unresolved
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import * as theWebview from '../resources/webview.html';
+import { labelLayer } from './main';
 
 /**
  * @description The namespace constant used to identify the webview within Sketch.
@@ -19,8 +20,10 @@ const webviewIdentifier = 'com.linkedinlabs.sketch.auto-spec-plugin.webview';
  * @description Called by the plugin manifest to open and operate the UI.
  *
  * @kind function
+ * @name watchGui
+ * @returns {Object} An open webview in the Sketch UI.
  */
-export default () => {
+const watchGui = () => {
   /**
    * @description Options to set on BrowserWindow.
    *
@@ -66,10 +69,15 @@ export default () => {
   const { webContents } = browserWindow;
 
   // print a message when the page loads
-  webContents.on('did-finish-load', () => {
-    UI.message('UI loaded!');
-  });
+  webContents.on('did-finish-load', () => UI.message('UI loaded!'));
 
+  // add a handler for a call from web content's javascript
+  webContents.on('nativeLog', message => UI.message(message));
+
+  // call the labelLayer function in main.js
+  webContents.on('labelLayer', () => labelLayer());
+
+  // close the webview window
   webContents.on('closeWindow', () => {
     const existingWebview = getWebview(webviewIdentifier);
     if (existingWebview) {
@@ -77,9 +85,10 @@ export default () => {
     }
   });
 
-  browserWindow.loadURL(theWebview);
+  // load the webview window
+  return browserWindow.loadURL(theWebview);
 };
-
+export default watchGui;
 /**
  * @description Closes the webview when the plugin is shutdown by Sketch
  * (for example, when the user disables the plugin)

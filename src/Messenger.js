@@ -1,17 +1,17 @@
 import { UI } from 'sketch';
 
 /**
-* @description A class to handle UI alerts, messages, and logging.
-*
-* @class
-* @name Messenger
-*
-* @constructor
-*
-* @property event The encompassing event we are logging or applying a message/alert to.
-* @property document The Sketch file that will display messages/alerts
-* or that the log will reference.
-*/
+ * @description A class to handle UI alerts, messages, and logging.
+ *
+ * @class
+ * @name Messenger
+ *
+ * @constructor
+ *
+ * @property event The encompassing event we are logging or applying a message/alert to.
+ * @property document The Sketch file that will display messages/alerts
+ * or that the log will reference.
+ */
 export default class Messenger {
   constructor({
     for: event,
@@ -31,7 +31,11 @@ export default class Messenger {
    */
   log(message, type = 'normal') {
     const logType = type === 'error' ? '🆘' : '🐞';
-    const eventType = this.event.action ? this.event.action : 'Invoked';
+
+    let eventType = 'GUI';
+    if (this.event) {
+      eventType = this.event.action ? this.event.action : 'Invoked';
+    }
 
     // log(this.event);
     log(`Auto-Spec ${logType} ${this.document.id} : ${eventType} : ${message}`);

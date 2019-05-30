@@ -1,14 +1,14 @@
 /**
-* @description A class to handle traversing an array of selected items and return useful items
-* (parent layer, artboard, document, etc). It will also find items based on ID (or timestamp).
-*
-* @class
-* @name Crawler
-*
-* @constructor
-*
-* @property selectionArray The array of selected items.
-*/
+ * @description A class to handle traversing an array of selected items and return useful items
+ * (parent layer, artboard, document, etc). It will also find items based on ID (or timestamp).
+ *
+ * @class
+ * @name Crawler
+ *
+ * @constructor
+ *
+ * @property selectionArray The array of selected items.
+ */
 export default class Crawler {
   constructor({ for: selectionArray }) {
     this.array = selectionArray;
