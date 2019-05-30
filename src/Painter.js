@@ -57,7 +57,6 @@ export default class Painter {
 
     shape.moveToFront();
     text.index = shape.index + 1;
-    // log(text);
 
     return null;
   }
