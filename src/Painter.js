@@ -86,7 +86,7 @@ export default class Painter {
         height: this.artboard.frame().height(),
       },
       locked: true,
-      name: '+++ Auto-Spec Labels +++',
+      name: '+++ Spec’ing Labels +++',
       parent: this.artboard,
     });
 

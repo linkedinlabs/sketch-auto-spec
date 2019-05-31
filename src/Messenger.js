@@ -34,7 +34,7 @@ export default class Messenger {
     const documentIdString = this.document ? ` ${this.document.id} :` : '';
     const eventTypeString = this.event ? ` ${this.event.action} :` : 'Invoked';
 
-    log(`Auto-Spec ${logType}${documentIdString}${eventTypeString} ${message}`);
+    log(`Spec’ing ${logType}${documentIdString}${eventTypeString} ${message}`);
   }
 
   /**
