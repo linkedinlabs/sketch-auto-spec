@@ -65,6 +65,7 @@ export default class Identifier {
     // parse the connected Lingo Kit data and find the corresponding Kit Symbol
     const kitSymbol = kitSymbols[masterSymbolId];
 
+    // could not find a matching master symbole in the Lingo Kit
     if (!kitSymbol) {
       this.messenger.log(`${masterSymbolId} was not found in a connected Lingo Kit`, 'error');
       this.messenger.toast('😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.');
@@ -76,6 +77,7 @@ export default class Identifier {
     // otherwise, fall back to the kit symbol name
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
+    // return the official name and log it alongside the original layer name
     this.messenger.log(`Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`);
     return kitSymbolNameClean;
   }
