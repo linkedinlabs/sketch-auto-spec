@@ -1,5 +1,7 @@
 import { toArray } from 'util';
+import { fromNative } from 'sketch';
 
+// --- contants
 /**
  * @description A constant with unique string to identify the plugin within Sketch.
  * Changing this will potentially break data retrieval in Sketch files that used
@@ -11,6 +13,7 @@ import { toArray } from 'util';
  */
 const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
 
+// --- helper functions
 /**
  * @description Takes context (if made available) and returns the document
  * or derives the `currentDocument` from `NSDocumentController` (necessary
@@ -54,11 +57,36 @@ const getSelection = objcDocument => objcDocument.selectedLayers().layers() || n
  * @name setArray
  * @param {Array} nsArray The NSArray-formatted array.
  * @returns {Array} Javascript Array.
- * @private
  */
 const setArray = nsArray => toArray(nsArray);
 
+/**
+ * @description Find a layer by ID in an array of layers.
+ *
+ * @kind function
+ * @name findLayerById
+ * @param {Array} layers Array of layers to search through.
+ * @param {string} layerId The string ID of the layer to find.
+ * @returns {Object} foundLayer The layer that was found (or null).
+ */
+const findLayerById = (layers, layerId) => {
+  if (!layers || !layerId) {
+    return null;
+  }
+
+  let foundLayer = null;
+  layers.forEach((layer) => {
+    const layerJSON = fromNative(layer);
+    if (layerJSON.id === layerId) {
+      foundLayer = layer;
+    }
+    return foundLayer;
+  });
+  return foundLayer;
+};
+
 export {
+  findLayerById,
   getDocument,
   getSelection,
   PLUGIN_IDENTIFIER,

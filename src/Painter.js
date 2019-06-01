@@ -5,7 +5,7 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { PLUGIN_IDENTIFIER } from './Tools';
+import { findLayerById, PLUGIN_IDENTIFIER } from './Tools';
 
 // --- settings/state management
 // good candidate to move this to its own class once it gets re-used
@@ -55,25 +55,7 @@ const updateSettings = (key, data, action = 'add') => {
   return settings;
 };
 
-// --- find layer by ID in array of layers
-// should move this to Crawler
-const findLayerById = (layers, layerId) => {
-  if (!layers || !layerId) {
-    return null;
-  }
-
-  let foundLayer = null;
-  layers.forEach((layer) => {
-    const layerJSON = fromNative(layer);
-    if (layerJSON.id === layerId) {
-      foundLayer = layer;
-    }
-    return foundLayer;
-  });
-  return foundLayer;
-};
-
-// --- some private functions for drawing/positioning label elements in the Sketch file
+// --- private functions for drawing/positioning label elements in the Sketch file
 const buildLabelElements = (artboard, layerLabel) => {
   // build the text box
   const text = new Text({
