@@ -6,6 +6,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import Messenger from './Messenger';
 import * as theWebview from '../resources/webview.html';
 import { labelLayer } from './main';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description The namespace constant used to identify the webview within Sketch.
@@ -14,7 +15,7 @@ import { labelLayer } from './main';
  * @name webviewIdentifier
  * @type {string}
  */
-const webviewIdentifier = 'com.linkedinlabs.sketch.auto-spec-plugin.webview';
+const webviewIdentifier = `${PLUGIN_IDENTIFIER}.webview`;
 
 /**
  * @description Set up a new Messenger class instance.
