@@ -4,11 +4,8 @@ import Crawler from './Crawler';
 import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
-import {
-  getDocument,
-  getSelection,
-  PLUGIN_IDENTIFIER,
-} from './Tools';
+import { getDocument, getSelection } from './Tools';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.

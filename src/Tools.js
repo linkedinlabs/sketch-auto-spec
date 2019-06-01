@@ -1,18 +1,6 @@
 import { toArray } from 'util';
 import { fromNative } from 'sketch';
 
-// --- contants
-/**
- * @description A constant with unique string to identify the plugin within Sketch.
- * Changing this will potentially break data retrieval in Sketch files that used
- * earlier versions of the plugin with a different identifier.
- *
- * @kind constant
- * @name options
- * @type {string}
- */
-const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
-
 // --- helper functions
 /**
  * @description Takes context (if made available) and returns the document
@@ -67,7 +55,7 @@ const setArray = nsArray => toArray(nsArray);
  * @name findLayerById
  * @param {Array} layers Array of layers to search through.
  * @param {string} layerId The string ID of the layer to find.
- * @returns {Object} foundLayer The layer that was found (or null).
+ * @returns {Object} The layer that was found (or null).
  */
 const findLayerById = (layers, layerId) => {
   if (!layers || !layerId) {
@@ -89,6 +77,5 @@ export {
   findLayerById,
   getDocument,
   getSelection,
-  PLUGIN_IDENTIFIER,
   setArray,
 };

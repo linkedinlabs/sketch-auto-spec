@@ -5,7 +5,8 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { findLayerById, PLUGIN_IDENTIFIER } from './Tools';
+import { findLayerById } from './Tools';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 // --- settings/state management
 // good candidate to move this to its own class once it gets re-used
