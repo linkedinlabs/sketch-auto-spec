@@ -1,4 +1,5 @@
 import { UI } from 'sketch';
+import { PLUGIN_NAME } from './constants';
 
 /**
  * @description A class to handle UI alerts, messages, and logging.
@@ -34,7 +35,7 @@ export default class Messenger {
     const documentIdString = this.document ? ` ${this.document.id} :` : '';
     const eventTypeString = this.event ? ` ${this.event.action} :` : 'Invoked';
 
-    log(`Spec’ing ${logType}${documentIdString}${eventTypeString} ${message}`);
+    log(`${PLUGIN_NAME} ${logType}${documentIdString}${eventTypeString} ${message}`);
   }
 
   /**
