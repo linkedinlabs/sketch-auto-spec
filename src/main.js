@@ -4,7 +4,8 @@ import Crawler from './Crawler';
 import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
-import { getDocument, getSelection, PLUGIN_IDENTIFIER } from './Tools';
+import { getDocument, getSelection } from './Tools';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -73,10 +74,12 @@ const labelLayer = (context = null) => {
     selection,
   } = assemble(context);
 
+  // need a selected layer to label it
   if (selection === null || selection.count() === 0) {
     return messenger.toast('A layer must be selected');
   }
 
+  // grab the first layer in the selection and set up Identifier and Painter instances for it
   const layers = new Crawler({ for: selection });
   const layerToLabel = new Identifier({
     for: layers.first(),
@@ -84,14 +87,17 @@ const labelLayer = (context = null) => {
     messenger,
   });
   const painter = new Painter({ for: layers.first() });
+
+  // determine the label text
   const kitLayerLabel = layerToLabel.label();
 
-  // draw the label
+  // draw the label (if the text exists)
   let paintResult = null;
   if (kitLayerLabel) {
     paintResult = painter.addLabel(kitLayerLabel);
   }
 
+  // read the response from Painter; if it was unsuccessful, log and display the error
   if (paintResult && (paintResult.error || !paintResult.success)) {
     const toastMessage = paintResult.error && paintResult.messages.toast ? paintResult.messages.toast : 'An error occured';
     const logMessage = paintResult.error && paintResult.messages.log ? paintResult.messages.log : 'An error occured';
@@ -121,7 +127,7 @@ const onOpenDocument = (context) => {
 };
 
 /**
- * @description Writes to the log whenever the selection changes and display a Toast indicator.
+ * @description Writes to the log whenever the selection changes and displays a Toast indicator.
  *
  * @kind function
  * @name onSelectionChange
