@@ -9,12 +9,28 @@ import { findLayerById } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
 // --- settings/state management
-// good candidate to move this to its own class once it gets re-used
+// good candidate to move this all to its own class once it gets re-used
+
+/**
+ * @description Initial starting point for the data layer that connects labels with
+ * layers that have received labels.
+ *
+ * @kind constant
+ * @name initialSettingsState
+ * @type {Object}
+ */
 const initialSettingsState = {
   containerGroups: [],
   labeledLayers: [],
 };
 
+/**
+ * @description Initial starting point for tracking the result of an action.
+ *
+ * @kind constant
+ * @name initialResultState
+ * @type {Object}
+ */
 const initialResultState = {
   success: false,
   error: false,
@@ -24,6 +40,19 @@ const initialResultState = {
   },
 };
 
+/**
+ * @description Adds or removes data from the data set based on a key and
+ * an action (`add` or `remove`).
+ *
+ * @kind function
+ * @name updateSettings
+ * @param {string} key String representing the area of Settings to modify.
+ * @param {Object} data Object containing the bit of data to add or
+ * remove (must include an `id` string).
+ * @param {string} action Constant string representing the action to take (`add` or `remove`).
+ * @returns {Object} The modified data set.
+ * @private
+ */
 const updateSettings = (key, data, action = 'add') => {
   let settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
 
@@ -52,11 +81,21 @@ const updateSettings = (key, data, action = 'add') => {
     settings[key] = updatedItems;
   }
 
-  Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
+  settings = Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
   return settings;
 };
 
 // --- private functions for drawing/positioning label elements in the Sketch file
+/**
+ * @description Builds the initial label elements in Sketch (diamond, rectangle, text).
+ *
+ * @kind function
+ * @name buildLabelElements
+ * @param {Object} artboard The artboard to draw within.
+ * @param {Object} layerLabel The layer receiving the label.
+ * @returns {Object} Each label element (`diamond`, `rectangle`, `text`).
+ * @private
+ */
 const buildLabelElements = (artboard, layerLabel) => {
   // build the text box
   const text = new Text({
@@ -79,6 +118,7 @@ const buildLabelElements = (artboard, layerLabel) => {
       textColor: '#ffffffff',
     },
   });
+  // need to fire `adjustToFit` after creating the text for it to be effective
   text.adjustToFit();
 
   // build the rounded rectangle
@@ -132,6 +172,7 @@ const buildLabelElements = (artboard, layerLabel) => {
   text.index = rectangle.index + 1;
   diamond.index = rectangle.index - 1;
 
+  // return an object with each element
   return {
     diamond,
     rectangle,
@@ -139,6 +180,21 @@ const buildLabelElements = (artboard, layerLabel) => {
   };
 };
 
+/**
+ * @description Takes the individual label elements, the specs for the layer receiving the label,
+ * and adds the label to the container group in the proper position.
+ *
+ * @kind function
+ * @name positionLabelElements
+ * @param {Object} containerGroup The group layer that holds all labels.
+ * @param {string} groupName The name of the group that holds the label elements
+ * inside the `containerGroup`.
+ * @param {Object} labelElements Each label element (`diamond`, `rectangle`, `text`).
+ * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
+ * for the layer receiving the label + the artboard width (`artboardWidth`).
+ * @returns {Object} The final label as a layer group.
+ * @private
+ */
 const positionLabelElements = (containerGroup, groupName, labelElements, layerFrame) => {
   const {
     diamond,
@@ -222,6 +278,15 @@ const positionLabelElements = (containerGroup, groupName, labelElements, layerFr
   return group;
 };
 
+/**
+ * @description Builds the parent container group that holds all of the labels.
+ *
+ * @kind function
+ * @name createContainerGroup
+ * @param {Object} artboard The artboard to draw within.
+ * @returns {Object} The container group layer.
+ * @private
+ */
 const createContainerGroup = (artboard) => {
   const artboardId = fromNative(artboard).id;
   const newContainerGroup = new Group({
@@ -254,6 +319,15 @@ const createContainerGroup = (artboard) => {
   return newContainerGroup;
 };
 
+/**
+ * @description Sets (finds or builds) the parent container group.
+ *
+ * @kind function
+ * @name createContainerGroup
+ * @param {Object} artboard The artboard to draw within.
+ * @returns {Object} The container group layer.
+ * @private
+ */
 const setContainerGroup = (artboard) => {
   const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
@@ -300,10 +374,20 @@ export default class Painter {
     this.artboard = this.layer.parentArtboard();
   }
 
-  removeLabel(existingItem) {
-    const layerContainer = findLayerById(this.artboard.layers(), existingItem.containerGroupId);
+  /**
+   * @description Takes the data representing an existing label and removes that label
+   * (and cleans up the data).
+   *
+   * @kind function
+   * @name removeLabel
+   * @param {Object} existingItemData The data object containing a
+   * `containerGroupId`, `id` (representting the label) and `layerId` representing
+   * the original layer that received the label.
+   */
+  removeLabel(existingItemData) {
+    const layerContainer = findLayerById(this.artboard.layers(), existingItemData.containerGroupId);
     if (layerContainer) {
-      const layerToDelete = findLayerById(layerContainer.layers(), existingItem.id);
+      const layerToDelete = findLayerById(layerContainer.layers(), existingItemData.id);
       if (layerToDelete) {
         fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
       }
@@ -341,14 +425,14 @@ export default class Painter {
 
     // check if we have already labeled this element and remove the old label
     if (settings && settings.labeledLayers) {
-      const existingItem = settings.labeledLayers.find(
+      const existingItemData = settings.labeledLayers.find(
         foundItem => (foundItem.originalId === layerId),
       );
 
       // remove old label layer + remove from data
-      if (existingItem) {
-        updateSettings('labeledLayers', { id: existingItem.id }, 'remove');
-        this.removeLabel(existingItem);
+      if (existingItemData) {
+        updateSettings('labeledLayers', { id: existingItemData.id }, 'remove');
+        this.removeLabel(existingItemData);
       }
     }
 
