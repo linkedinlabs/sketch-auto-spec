@@ -64,8 +64,9 @@ const AutoSpecWebview = {
     const triggerElements = document.querySelectorAll('.action-trigger');
 
     /**
-     * @description Takes a string message and logs it at one of 2 levels (normal or error).
-     * WIP
+     * @description Adds a click event listener to each webview trigger (`.action-trigger`)
+     * and fires off the appropriate action(s) when clicked.
+     *
      * @kind function
      * @param {array} triggerElements Array containing the UI elements to watch for input.
      */

@@ -19,10 +19,9 @@ const webviewIdentifier = `${PLUGIN_IDENTIFIER}.webview`;
 
 /**
  * @description Set up a new Messenger class instance.
- * WIP
+ *
  * @kind function
  * @name messenger
- * @param {Object}
  */
 const messenger = new Messenger({ for: { action: 'GUI' } });
 
