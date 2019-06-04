@@ -27,6 +27,13 @@ export default class Crawler {
     return this.array[0];
   }
 
+  /**
+   * @description Uses `setArray` to ensure the selection array is a javascript array.
+   *
+   * @kind function
+   * @name all
+   * @returns {Object} All items in the array as a javascript array.
+   */
   all() {
     return setArray(this.array);
   }
