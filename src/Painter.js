@@ -82,7 +82,6 @@ const updateSettings = (key, data, action = 'add') => {
   }
 
   Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
-  log(settings);
   return settings;
 };
 
