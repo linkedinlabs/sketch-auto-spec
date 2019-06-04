@@ -22,5 +22,25 @@ const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
  */
 const PLUGIN_NAME = 'Spec’ing';
 
-export { PLUGIN_IDENTIFIER, PLUGIN_NAME };
+/**
+ * @description Initial starting point for tracking the result of an action.
+ *
+ * @kind constant
+ * @name initialResultState
+ * @type {Object}
+ */
+const INITIAL_RESULT_STATE = {
+  success: false,
+  error: false,
+  messages: {
+    toast: null,
+    log: null,
+  },
+};
+
+export {
+  INITIAL_RESULT_STATE,
+  PLUGIN_IDENTIFIER,
+  PLUGIN_NAME,
+};
 /* eslint-enable import/prefer-default-export */

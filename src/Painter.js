@@ -6,7 +6,11 @@ import {
   Text,
 } from 'sketch/dom';
 import { findLayerById } from './Tools';
-import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
+import {
+  INITIAL_RESULT_STATE,
+  PLUGIN_IDENTIFIER,
+  PLUGIN_NAME,
+} from './constants';
 
 // --- settings/state management
 // good candidate to move this all to its own class once it gets re-used
@@ -22,22 +26,6 @@ import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 const initialSettingsState = {
   containerGroups: [],
   labeledLayers: [],
-};
-
-/**
- * @description Initial starting point for tracking the result of an action.
- *
- * @kind constant
- * @name initialResultState
- * @type {Object}
- */
-const initialResultState = {
-  success: false,
-  error: false,
-  messages: {
-    toast: null,
-    log: null,
-  },
 };
 
 /**
@@ -404,7 +392,7 @@ export default class Painter {
    * @returns {Object} A Sketch ShapePath Rectangle object.
    */
   addLabel(layerLabel = 'New Label') {
-    const result = initialResultState;
+    const result = INITIAL_RESULT_STATE;
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
