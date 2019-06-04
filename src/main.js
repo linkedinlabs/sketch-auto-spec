@@ -102,10 +102,7 @@ const labelLayer = (context = null) => {
 
     // read the response from Painter; if it was unsuccessful, log and display the error
     if (paintResult && (paintResult.error || !paintResult.success)) {
-      const toastMessage = paintResult.error && paintResult.messages.toast ? paintResult.messages.toast : 'An error occured';
-      const logMessage = paintResult.error && paintResult.messages.log ? paintResult.messages.log : 'An error occured';
-      messenger.log(logMessage, 'error');
-      return messenger.toast(toastMessage);
+      return messenger.handleResult(paintResult);
     }
 
     return null;
