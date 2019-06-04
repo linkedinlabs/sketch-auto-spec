@@ -1,3 +1,5 @@
+import { setArray } from './Tools';
+
 /**
  * @description A class to handle traversing an array of selected items and return useful items
  * (parent layer, artboard, document, etc). It will also find items based on ID (or timestamp).
@@ -23,5 +25,9 @@ export default class Crawler {
    */
   first() {
     return this.array[0];
+  }
+
+  all() {
+    return setArray(this.array);
   }
 }
