@@ -33,7 +33,7 @@ export default class Messenger {
   log(message, type = 'normal') {
     const logType = type === 'error' ? '🆘' : '🐞';
     const documentIdString = this.document ? ` ${this.document.id} :` : '';
-    const eventTypeString = this.event ? ` ${this.event.action} :` : 'Invoked';
+    const eventTypeString = this.event ? ` ${this.event.action} :` : ' Invoked :';
 
     log(`${PLUGIN_NAME} ${logType}${documentIdString}${eventTypeString} ${message}`);
   }
