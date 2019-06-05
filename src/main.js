@@ -92,12 +92,15 @@ const labelLayer = (context = null) => {
     const painter = new Painter({ for: layer });
 
     // determine the label text
-    const kitLayerLabel = layerToLabel.label();
+    const labelTextResult = layerToLabel.label();
+    if (labelTextResult && (labelTextResult.error || !labelTextResult.success)) {
+      return messenger.handleResult(labelTextResult);
+    }
 
     // draw the label (if the text exists)
     let paintResult = null;
-    if (kitLayerLabel) {
-      paintResult = painter.addLabel(kitLayerLabel);
+    if (labelTextResult && labelTextResult.success && labelTextResult.data) {
+      paintResult = painter.addLabel(labelTextResult.data);
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error

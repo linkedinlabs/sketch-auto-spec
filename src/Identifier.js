@@ -1,4 +1,5 @@
 import { fromNative } from 'sketch';
+import { INITIAL_RESULT_STATE } from './constants';
 
 /**
  * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
@@ -30,17 +31,21 @@ export default class Identifier {
    *
    * @kind function
    * @name label
-   * @returns {string} The Kit-verified symbol name.
+   * @returns {Object} A result object containing the Kit-verified symbol name (`data`) along with
+   * success/error bool and log/toast messages.
    */
   label() {
+    const result = INITIAL_RESULT_STATE;
+
     // check for Lingo data - not much else we can do at the moment if it does not exist
     if (
       !this.documentData.userInfo()['com.lingoapp.lingo']
       || !this.documentData.userInfo()['com.lingoapp.lingo'].storage
     ) {
-      this.messenger.log('No data from Lingo in the file', 'error');
-      this.messenger.toast('🆘 Lingo does not seem to be connected to this file.');
-      return null;
+      result.error = true;
+      result.messages.log = 'No data from Lingo in the file';
+      result.messages.toast = '🆘 Lingo does not seem to be connected to this file.';
+      return result;
     }
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
 
@@ -52,9 +57,10 @@ export default class Identifier {
 
     // return if we do not actually have a Symbol selected
     if (!symbolId) {
-      this.messenger.log(`${id} is not a SymbolInstance; it is a ${type}`, 'error');
-      this.messenger.toast('🆘 This layer is not a Symbol.');
-      return null;
+      result.error = true;
+      result.messages.log = `${id} is not a SymbolInstance; it is a ${type}`;
+      result.messages.toast = '🆘 This layer is not a Symbol.';
+      return result;
     }
 
     // use the API to find the MasterSymbol instance based on the `symbolId`
@@ -67,9 +73,10 @@ export default class Identifier {
 
     // could not find a matching master symbole in the Lingo Kit
     if (!kitSymbol) {
-      this.messenger.log(`${masterSymbolId} was not found in a connected Lingo Kit`, 'error');
-      this.messenger.toast('😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.');
-      return null;
+      result.error = true;
+      result.messages.log = `${masterSymbolId} was not found in a connected Lingo Kit`;
+      result.messages.toast = '😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.';
+      return result;
     }
 
     // take only the last segment of the name (after a “/”, if available)
@@ -78,8 +85,10 @@ export default class Identifier {
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
     // return the official name and log it alongside the original layer name
-    this.messenger.log(`Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`);
-    return kitSymbolNameClean;
+    result.success = true;
+    result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
+    result.data = kitSymbolNameClean;
+    return result;
   }
 
   /**
