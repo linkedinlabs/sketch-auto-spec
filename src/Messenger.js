@@ -77,14 +77,21 @@ export default class Messenger {
    * @param {Object} result The success/error result and accompanying log/toast message(s).
    */
   handleResult(result) {
-    // set up toast and log messages
-    const toastMessage = result.error && result.messages.toast ? result.messages.toast : 'An error occured';
-    const logMessage = result.error && result.messages.log ? result.messages.log : 'An error occured';
+    if (result.messages) {
+      // set up toast and log messages
+      const toastMessage = result.messages.toast;
+      const logMessage = result.messages.log;
+      const isError = result.error;
 
-    // log a message or error
-    this.log(logMessage, 'error');
+      // log a message or error
+      if (logMessage) {
+        this.log(logMessage, isError ? 'error' : null);
+      }
 
-    // toast a message or error
-    this.toast(toastMessage);
+      // toast a message or error
+      if (toastMessage) {
+        this.toast(toastMessage);
+      }
+    }
   }
 }
