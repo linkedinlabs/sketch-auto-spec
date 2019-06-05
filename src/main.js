@@ -34,32 +34,6 @@ const assemble = (context = null) => {
 // invoked commands -------------------------------------------------
 
 /**
- * @description Temporary dev function to quickly draw an instance of a Component label.
- *
- * @kind function
- * @name drawAnnotation
- * @param {Object} context The current context (event) received from Sketch.
- */
-const drawAnnotation = (context) => {
-  const { selection } = assemble(context);
-
-  const painter = new Painter({ for: selection[0] });
-  painter.addLabel('Hello, I am Component');
-  return null;
-};
-
-/**
- * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
- *
- * @kind function
- * @name resetData
- */
-const resetData = () => {
-  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
-  return null;
-};
-
-/**
  * @description Identifies and labels a selected layer in a Sketch file.
  *
  * @kind function
@@ -111,6 +85,32 @@ const annotateLayer = (context = null) => {
     return null;
   });
 
+  return null;
+};
+
+/**
+ * @description Temporary dev function to quickly draw an instance of a Component label.
+ *
+ * @kind function
+ * @name drawAnnotation
+ * @param {Object} context The current context (event) received from Sketch.
+ */
+const drawAnnotation = (context) => {
+  const { selection } = assemble(context);
+
+  const painter = new Painter({ for: selection[0] });
+  painter.addLabel('Hello, I am Component');
+  return null;
+};
+
+/**
+ * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
+ *
+ * @kind function
+ * @name resetData
+ */
+const resetData = () => {
+  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
   return null;
 };
 
