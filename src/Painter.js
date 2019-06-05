@@ -16,8 +16,8 @@ import {
 // good candidate to move this all to its own class once it gets re-used
 
 /**
- * @description Initial starting point for the data layer that connects labels with
- * layers that have received labels.
+ * @description Initial starting point for the data layer that connects annotations with
+ * layers that have been annotated.
  *
  * @kind constant
  * @name initialSettingsState
@@ -73,18 +73,18 @@ const updateSettings = (key, data, action = 'add') => {
   return settings;
 };
 
-// --- private functions for drawing/positioning label elements in the Sketch file
+// --- private functions for drawing/positioning annotation elements in the Sketch file
 /**
- * @description Builds the initial label elements in Sketch (diamond, rectangle, text).
+ * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
- * @name buildLabelElements
+ * @name buildAnnotationElements
  * @param {Object} artboard The artboard to draw within.
- * @param {Object} layerLabel The layer receiving the label.
- * @returns {Object} Each label element (`diamond`, `rectangle`, `text`).
+ * @param {Object} annotationText The text for the annotation.
+ * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
  * @private
  */
-const buildLabelElements = (artboard, layerLabel) => {
+const buildAnnotationElements = (artboard, annotationText) => {
   // build the text box
   const text = new Text({
     frame: {
@@ -92,7 +92,7 @@ const buildLabelElements = (artboard, layerLabel) => {
       y: 3,
     },
     parent: artboard,
-    text: layerLabel,
+    text: annotationText,
     style: {
       alignment: Text.Alignment.left,
       borders: [{
@@ -169,26 +169,26 @@ const buildLabelElements = (artboard, layerLabel) => {
 };
 
 /**
- * @description Takes the individual label elements, the specs for the layer receiving the label,
- * and adds the label to the container group in the proper position.
+ * @description Takes the individual annotation elements, the specs for the layer receiving the
+ * annotation, and adds the annotation to the container group in the proper position.
  *
  * @kind function
- * @name positionLabelElements
- * @param {Object} containerGroup The group layer that holds all labels.
- * @param {string} groupName The name of the group that holds the label elements
+ * @name positionAnnotationElements
+ * @param {Object} containerGroup The group layer that holds all annotations.
+ * @param {string} groupName The name of the group that holds the annotation elements
  * inside the `containerGroup`.
- * @param {Object} labelElements Each label element (`diamond`, `rectangle`, `text`).
+ * @param {Object} annotationElements Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
- * for the layer receiving the label + the artboard width (`artboardWidth`).
- * @returns {Object} The final label as a layer group.
+ * for the layer receiving the annotation + the artboard width (`artboardWidth`).
+ * @returns {Object} The final annotation as a layer group.
  * @private
  */
-const positionLabelElements = (containerGroup, groupName, labelElements, layerFrame) => {
+const positionAnnotationElements = (containerGroup, groupName, annotationElements, layerFrame) => {
   const {
     diamond,
     rectangle,
     text,
-  } = labelElements;
+  } = annotationElements;
 
   const { artboardWidth } = layerFrame;
   const layerWidth = layerFrame.width;
@@ -196,13 +196,13 @@ const positionLabelElements = (containerGroup, groupName, labelElements, layerFr
   const layerY = layerFrame.y;
   const originalLayerIndex = layerFrame.index;
 
-  // create the label group
+  // create the annotation group
   const group = new Group({
     name: groupName,
     parent: containerGroup,
   });
 
-  // size the label group frame
+  // size the annotation group frame
   group.frame.width = rectangle.frame.width;
   group.frame.height = rectangle.frame.height + 4;
 
@@ -211,13 +211,13 @@ const positionLabelElements = (containerGroup, groupName, labelElements, layerFr
   diamond.parent = group;
   text.parent = group;
 
-  // position the group within the artboard, above the layer receiving the label
+  // position the group within the artboard, above the layer receiving the annotation
   let diamondAdjustment = null;
 
-  // move group to z-index right above layer to label
+  // move group to z-index right above layer to annotate
   group.index = originalLayerIndex + 1;
 
-  // initial placement based on layer to label
+  // initial placement based on layer to annotate
   let placementX = (
     layerX + (
       (layerWidth - group.frame.width) / 2
@@ -242,13 +242,13 @@ const positionLabelElements = (containerGroup, groupName, labelElements, layerFr
     placementY = 5;
   }
 
-  // set label group placement
+  // set annotation group placement
   group.frame.x = placementX;
   group.frame.y = placementY;
 
   // adjust diamond, if necessary
   if (diamondAdjustment) {
-    // move the diamond to the mid-point of the layer to label
+    // move the diamond to the mid-point of the layer to annotate
     let diamondLayerMidX = null;
     switch (diamondAdjustment) {
       case 'left':
@@ -267,7 +267,7 @@ const positionLabelElements = (containerGroup, groupName, labelElements, layerFr
 };
 
 /**
- * @description Builds the parent container group that holds all of the labels.
+ * @description Builds the parent container group that holds all of the annotations.
  *
  * @kind function
  * @name createContainerGroup
@@ -285,7 +285,7 @@ const createContainerGroup = (artboard) => {
       height: artboard.frame().height(),
     },
     locked: true,
-    name: `+++ ${PLUGIN_NAME} Labels +++`,
+    name: `+++ ${PLUGIN_NAME} Annotations +++`,
     parent: artboard,
   });
 
@@ -354,7 +354,7 @@ const setContainerGroup = (artboard) => {
  *
  * @constructor
  *
- * @property layer The layer in the Sketch file that we want to label or modify.
+ * @property layer The layer in the Sketch file that we want to annotate or modify.
  */
 export default class Painter {
   constructor({ for: layer }) {
@@ -363,16 +363,16 @@ export default class Painter {
   }
 
   /**
-   * @description Takes the data representing an existing label and removes that label
+   * @description Takes the data representing an existing annotation and removes that data
    * (and cleans up the data).
    *
    * @kind function
-   * @name removeLabel
+   * @name removeAnnotation
    * @param {Object} existingItemData The data object containing a
-   * `containerGroupId`, `id` (representting the label) and `layerId` representing
-   * the original layer that received the label.
+   * `containerGroupId`, `id` (representting the annotation) and `layerId` representing
+   * the original layer that received the annotation.
    */
-  removeLabel(existingItemData) {
+  removeAnnotation(existingItemData) {
     const layerContainer = findLayerById(this.artboard.layers(), existingItemData.containerGroupId);
     if (layerContainer) {
       const layerToDelete = findLayerById(layerContainer.layers(), existingItemData.id);
@@ -386,11 +386,11 @@ export default class Painter {
    * @description Takes a layer name and builds the visual annotation on the Sketch artboard.
    *
    * @kind function
-   * @name add
-   * @param {Array} layerLabel The name we want for the new label.
+   * @name addAnnotation
+   * @param {Array} annotationText The text for the annotation.
    * @returns {Object} A result object container success/error bool and log/toast messages.
    */
-  addLabel(layerLabel = 'New Label') {
+  addAnnotation(annotationText = 'New Annotation') {
     const result = INITIAL_RESULT_STATE;
 
     // return an error if the selection is not placed on an artboard
@@ -404,29 +404,29 @@ export default class Painter {
     // set up some information
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
-    const groupName = `Label for ${layerName}`;
+    const groupName = `Annotation for ${layerName}`;
     const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
 
     // create or locate the container group
     const containerGroup = setContainerGroup(this.artboard);
 
-    // check if we have already labeled this element and remove the old label
+    // check if we have already annotated this element and remove the old annotation
     if (settings && settings.labeledLayers) {
       const existingItemData = settings.labeledLayers.find(
         foundItem => (foundItem.originalId === layerId),
       );
 
-      // remove old label layer + remove from data
+      // remove old annotation layer + remove from data
       if (existingItemData) {
         updateSettings('labeledLayers', { id: existingItemData.id }, 'remove');
-        this.removeLabel(existingItemData);
+        this.removeAnnotation(existingItemData);
       }
     }
 
-    // construct the base label elements
-    const labelElements = buildLabelElements(this.artboard, layerLabel);
+    // construct the base annotation elements
+    const annotationElements = buildAnnotationElements(this.artboard, annotationText);
 
-    // group and position the base label elements
+    // group and position the base annotation elements
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
       width: this.layer.frame().width(),
@@ -435,9 +435,14 @@ export default class Painter {
       y: this.layer.frame().y(),
       index: fromNative(this.layer).index,
     };
-    const group = positionLabelElements(containerGroup, groupName, labelElements, layerFrame);
+    const group = positionAnnotationElements(
+      containerGroup,
+      groupName,
+      annotationElements,
+      layerFrame,
+    );
 
-    // update data (connect new label with layer receiving label)
+    // update data (connect new annotation with layer receiving annotation)
     const newSettingsEntry = {
       containerGroupId: fromNative(containerGroup).id,
       id: group.id,

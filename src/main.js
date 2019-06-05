@@ -74,7 +74,7 @@ const annotateLayer = (context = null) => {
     // draw the annotation (if the text exists)
     let paintResult = null;
     if (getNameResult && getNameResult.success && getNameResult.data) {
-      paintResult = painter.addLabel(getNameResult.data);
+      paintResult = painter.addAnnotation(getNameResult.data);
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error
@@ -99,7 +99,7 @@ const drawAnnotation = (context) => {
   const { selection } = assemble(context);
 
   const painter = new Painter({ for: selection[0] });
-  painter.addLabel('Hello, I am Component');
+  painter.addAnnotation('Hello, I am Component');
   return null;
 };
 
