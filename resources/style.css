@@ -91,7 +91,7 @@ svg {
   cursor: pointer;
 }
 
-.actions li.action-label a {
+.actions li.action-annotate a {
   display: block;
   width: 28px; /* 22px icon */
 }

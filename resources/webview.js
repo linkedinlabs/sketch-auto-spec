@@ -74,11 +74,11 @@ const AutoSpecWebview = {
       document.getElementById(trigger.id).addEventListener('click', () => {
         window.postMessage('nativeLog', `Called #${trigger.id} from the GUI`);
         switch (trigger.id) {
+          case 'annotate':
+            window.postMessage('annotateLayer');
+            break;
           case 'close':
             window.postMessage('closeWindow');
-            break;
-          case 'label':
-            window.postMessage('annotateLayer');
             break;
           default:
             window.postMessage('nativeLog', `Missing ${trigger.id} action`);
