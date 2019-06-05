@@ -78,7 +78,7 @@ const AutoSpecWebview = {
             window.postMessage('closeWindow');
             break;
           case 'label':
-            window.postMessage('labelLayer');
+            window.postMessage('annotateLayer');
             break;
           default:
             window.postMessage('nativeLog', `Missing ${trigger.id} action`);

@@ -21,11 +21,11 @@
       "handler": "resetData"
     },
     {
-      "name": "Label Component Symbol",
-      "identifier": "label-component",
-      "shortcut": "ctrl shift i",
+      "name": "Annotate Component",
+      "identifier": "annotate-layer",
+      "shortcut": "ctrl shift a",
       "script": "./main.js",
-      "handler": "labelLayer"
+      "handler": "annotateLayer"
     },
     {
       "name" : "Selection Change Listener",
@@ -62,7 +62,7 @@
   "menu": {
     "title": "Spec’ing",
     "items": [
-      "label-component",
+      "annotate-layer",
       "view-gui",
       "dev-draw-label",
       "dev-reset-data"

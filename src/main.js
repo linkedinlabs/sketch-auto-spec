@@ -63,11 +63,11 @@ const resetData = () => {
  * @description Identifies and labels a selected layer in a Sketch file.
  *
  * @kind function
- * @name labelLayer
+ * @name annotateLayer
  * @param {Object} context The current context (event) received from Sketch.
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
-const labelLayer = (context = null) => {
+const annotateLayer = (context = null) => {
   const {
     documentData,
     messenger,
@@ -151,8 +151,8 @@ const onSelectionChange = (context) => {
 
 // export each used in manifest
 export {
+  annotateLayer,
   drawLabel,
-  labelLayer,
   onOpenDocument,
   onSelectionChange,
   resetData,
