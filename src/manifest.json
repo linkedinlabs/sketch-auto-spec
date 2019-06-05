@@ -9,10 +9,10 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Dev: Draw Label",
-      "identifier": "dev-draw-label",
+      "name": "Dev: Draw Annotation",
+      "identifier": "dev-draw-annotation",
       "script": "./main.js",
-      "handler": "drawLabel"
+      "handler": "drawAnnotation"
     },
     {
       "name": "Dev: Reset Data",
@@ -64,7 +64,7 @@
     "items": [
       "annotate-layer",
       "view-gui",
-      "dev-draw-label",
+      "dev-draw-annotation",
       "dev-reset-data"
     ]
   }

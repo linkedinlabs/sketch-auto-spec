@@ -37,10 +37,10 @@ const assemble = (context = null) => {
  * @description Temporary dev function to quickly draw an instance of a Component label.
  *
  * @kind function
- * @name drawLabel
+ * @name drawAnnotation
  * @param {Object} context The current context (event) received from Sketch.
  */
-const drawLabel = (context) => {
+const drawAnnotation = (context) => {
   const { selection } = assemble(context);
 
   const painter = new Painter({ for: selection[0] });
@@ -152,7 +152,7 @@ const onSelectionChange = (context) => {
 // export each used in manifest
 export {
   annotateLayer,
-  drawLabel,
+  drawAnnotation,
   onOpenDocument,
   onSelectionChange,
   resetData,
