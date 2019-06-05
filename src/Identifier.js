@@ -30,11 +30,11 @@ export default class Identifier {
    * from connected Lingo Kit symbols.
    *
    * @kind function
-   * @name label
+   * @name getName
    * @returns {Object} A result object containing the Kit-verified symbol name (`data`) along with
    * success/error bool and log/toast messages.
    */
-  label() {
+  getName() {
     const result = INITIAL_RESULT_STATE;
 
     // check for Lingo data - not much else we can do at the moment if it does not exist

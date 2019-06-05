@@ -34,7 +34,7 @@ const assemble = (context = null) => {
 // invoked commands -------------------------------------------------
 
 /**
- * @description Identifies and labels a selected layer in a Sketch file.
+ * @description Identifies and annotates a selected layer in a Sketch file.
  *
  * @kind function
  * @name annotateLayer
@@ -48,7 +48,7 @@ const annotateLayer = (context = null) => {
     selection,
   } = assemble(context);
 
-  // need a selected layer to label it
+  // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
     return messenger.toast('A layer must be selected');
   }
@@ -57,7 +57,7 @@ const annotateLayer = (context = null) => {
   const layers = new Crawler({ for: selection });
   layers.all().forEach((layer) => {
     // set up Identifier instance for the layer
-    const layerToLabel = new Identifier({
+    const layerToAnnotate = new Identifier({
       for: layer,
       documentData,
       messenger,
@@ -65,16 +65,16 @@ const annotateLayer = (context = null) => {
     // set up Painter instance for the layer
     const painter = new Painter({ for: layer });
 
-    // determine the label text
-    const labelTextResult = layerToLabel.label();
-    if (labelTextResult && (labelTextResult.error || !labelTextResult.success)) {
-      return messenger.handleResult(labelTextResult);
+    // determine the annotation text
+    const getNameResult = layerToAnnotate.getName();
+    if (getNameResult && (getNameResult.error || !getNameResult.success)) {
+      return messenger.handleResult(getNameResult);
     }
 
-    // draw the label (if the text exists)
+    // draw the annotation (if the text exists)
     let paintResult = null;
-    if (labelTextResult && labelTextResult.success && labelTextResult.data) {
-      paintResult = painter.addLabel(labelTextResult.data);
+    if (getNameResult && getNameResult.success && getNameResult.data) {
+      paintResult = painter.addLabel(getNameResult.data);
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error
@@ -89,7 +89,7 @@ const annotateLayer = (context = null) => {
 };
 
 /**
- * @description Temporary dev function to quickly draw an instance of a Component label.
+ * @description Temporary dev function to quickly draw an instance of a Component annotation.
  *
  * @kind function
  * @name drawAnnotation
