@@ -383,13 +383,12 @@ export default class Painter {
   }
 
   /**
-   * @description Takes a layer name and returns a semi-transparent, small rectangle with that name.
-   * Info {@link https://developer.sketch.com/reference/api/#shapepath}
+   * @description Takes a layer name and builds the visual annotation on the Sketch artboard.
    *
    * @kind function
    * @name add
    * @param {Array} layerLabel The name we want for the new label.
-   * @returns {Object} A Sketch ShapePath Rectangle object.
+   * @returns {Object} A result object container success/error bool and log/toast messages.
    */
   addLabel(layerLabel = 'New Label') {
     const result = INITIAL_RESULT_STATE;
