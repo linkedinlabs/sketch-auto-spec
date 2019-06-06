@@ -97,9 +97,12 @@ const annotateLayer = (context = null) => {
  */
 const drawAnnotation = (context) => {
   const { selection } = assemble(context);
+  const layer = selection[0];
+  const settings = { annotationText: 'Hello, I am Component' };
+  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, settings);
 
   const painter = new Painter({ for: selection[0] });
-  painter.addAnnotation('Hello, I am Component');
+  painter.addAnnotation();
   return null;
 };
 
