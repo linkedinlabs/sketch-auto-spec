@@ -43,6 +43,7 @@ const assemble = (context = null) => {
  */
 const annotateLayer = (context = null) => {
   const {
+    document,
     documentData,
     messenger,
     selection,
@@ -63,7 +64,7 @@ const annotateLayer = (context = null) => {
       messenger,
     });
     // set up Painter instance for the layer
-    const painter = new Painter({ for: layer });
+    const painter = new Painter({ for: layer, in: document });
 
     // determine the annotation text
     const getNameResult = layerToAnnotate.getName();
@@ -96,12 +97,12 @@ const annotateLayer = (context = null) => {
  * @param {Object} context The current context (event) received from Sketch.
  */
 const drawAnnotation = (context) => {
-  const { selection } = assemble(context);
+  const { document, selection } = assemble(context);
   const layer = selection[0];
-  const settings = { annotationText: 'Hello, I am Component' };
-  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, settings);
+  const layerSettings = { annotationText: 'Hello, I am Component' };
+  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, layerSettings);
 
-  const painter = new Painter({ for: selection[0] });
+  const painter = new Painter({ for: selection[0], in: document });
   painter.addAnnotation();
   return null;
 };

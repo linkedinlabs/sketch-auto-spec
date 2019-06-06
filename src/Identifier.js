@@ -35,7 +35,7 @@ export default class Identifier {
    */
   getName() {
     const result = INITIAL_RESULT_STATE;
-    let settings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+    let layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for Lingo data - not much else we can do at the moment if it does not exist
     if (
@@ -85,14 +85,14 @@ export default class Identifier {
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
     // set `annotationText` on the layer settings as the kit symbol name
-    if (!settings) {
-      settings = {
+    if (!layerSettings) {
+      layerSettings = {
         annotationText: kitSymbolNameClean,
       };
     } else {
-      settings.annotationText = kitSymbolNameClean;
+      layerSettings.annotationText = kitSymbolNameClean;
     }
-    Settings.setLayerSettingForKey(this.layer, PLUGIN_IDENTIFIER, settings);
+    Settings.setLayerSettingForKey(this.layer, PLUGIN_IDENTIFIER, layerSettings);
 
     // log the official name alongside the original layer name and set as success
     result.success = true;

@@ -357,8 +357,9 @@ const setContainerGroup = (artboard) => {
  * @property layer The layer in the Sketch file that we want to annotate or modify.
  */
 export default class Painter {
-  constructor({ for: layer }) {
+  constructor({ for: layer, in: document }) {
     this.layer = layer;
+    this.document = document;
     this.artboard = this.layer.parentArtboard();
   }
 
@@ -392,15 +393,15 @@ export default class Painter {
    */
   addAnnotation() {
     const result = INITIAL_RESULT_STATE;
-    const settings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+    const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
-    if (!settings || (settings && !settings.annotationText)) {
+    if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
       result.error = true;
       result.messages.log = 'Layer missing annotationText';
       return result;
     }
 
-    const { annotationText } = settings;
+    const { annotationText } = layerSettings;
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
