@@ -390,8 +390,17 @@ export default class Painter {
    * @param {Array} annotationText The text for the annotation.
    * @returns {Object} A result object container success/error bool and log/toast messages.
    */
-  addAnnotation(annotationText = 'New Annotation') {
+  addAnnotation() {
     const result = INITIAL_RESULT_STATE;
+    const settings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+
+    if (!settings || (settings && !settings.annotationText)) {
+      result.error = true;
+      result.messages.log = 'Layer missing annotationText';
+      return result;
+    }
+
+    const { annotationText } = settings;
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
@@ -405,14 +414,14 @@ export default class Painter {
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
     const groupName = `Annotation for ${layerName}`;
-    const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+    const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
 
     // create or locate the container group
     const containerGroup = setContainerGroup(this.artboard);
 
     // check if we have already annotated this element and remove the old annotation
-    if (settings && settings.labeledLayers) {
-      const existingItemData = settings.labeledLayers.find(
+    if (pluginSettings && pluginSettings.labeledLayers) {
+      const existingItemData = pluginSettings.labeledLayers.find(
         foundItem => (foundItem.originalId === layerId),
       );
 

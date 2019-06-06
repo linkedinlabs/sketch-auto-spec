@@ -1,5 +1,5 @@
-import { fromNative } from 'sketch';
-import { INITIAL_RESULT_STATE } from './constants';
+import { fromNative, Settings } from 'sketch';
+import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
@@ -25,17 +25,17 @@ export default class Identifier {
   }
 
   /**
-   * @description Returns Kit-verified master symbol name of a layer. Cross-references
-   * a symbol’s `symbolId` with the master symbol instance, and looks the name up
-   * from connected Lingo Kit symbols.
+   * @description Identifies the Kit-verified master symbol name of a layer and adds it to the
+   * layer’s settings object: Cross-references a symbol’s `symbolId` with the master symbol
+   * instance, and looks the name up from connected Lingo Kit symbols.
    *
    * @kind function
    * @name getName
-   * @returns {Object} A result object containing the Kit-verified symbol name (`data`) along with
-   * success/error bool and log/toast messages.
+   * @returns {Object} A result object container success/error bool and log/toast messages.
    */
   getName() {
     const result = INITIAL_RESULT_STATE;
+    let settings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for Lingo data - not much else we can do at the moment if it does not exist
     if (
@@ -84,10 +84,19 @@ export default class Identifier {
     // otherwise, fall back to the kit symbol name
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
-    // return the official name and log it alongside the original layer name
+    // set `annotationText` on the layer settings as the kit symbol name
+    if (!settings) {
+      settings = {
+        annotationText: kitSymbolNameClean,
+      };
+    } else {
+      settings.annotationText = kitSymbolNameClean;
+    }
+    Settings.setLayerSettingForKey(this.layer, PLUGIN_IDENTIFIER, settings);
+
+    // log the official name alongside the original layer name and set as success
     result.success = true;
     result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
-    result.data = kitSymbolNameClean;
     return result;
   }
 
