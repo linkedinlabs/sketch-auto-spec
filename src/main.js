@@ -1,9 +1,10 @@
 import { fromNative, Settings } from 'sketch';
 
 import Crawler from './Crawler';
-import Painter from './Painter';
+import Housekeeper from './Housekeeper';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
+import Painter from './Painter';
 import { getDocument, getSelection } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
@@ -21,11 +22,13 @@ const assemble = (context = null) => {
   const jsDocument = fromNative(objcDocument); // move from obj-c object to JSON object
   const documentData = objcDocument.documentData(); // obj-c object
   const messenger = new Messenger({ for: context, in: jsDocument });
+  const housekeeper = new Housekeeper({ in: jsDocument, messenger });
   const selection = getSelection(objcDocument);
 
   return {
     document: jsDocument,
     documentData,
+    housekeeper,
     messenger,
     selection,
   };
@@ -129,10 +132,18 @@ const resetData = () => {
  */
 const onOpenDocument = (context) => {
   if (context.actionContext.document) {
-    const { document, messenger } = assemble(context);
+    const {
+      document,
+      housekeeper,
+      messenger,
+    } = assemble(context);
 
     if (document) {
       messenger.log(`Document “${document.id}” Opened 😻`);
+
+      setTimeout(() => {
+        housekeeper.runMigrations();
+      }, 500);
     }
   }
 };
