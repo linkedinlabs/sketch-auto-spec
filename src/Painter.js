@@ -5,7 +5,7 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { findLayerById, updateArray } from './Tools';
+import { updateArray } from './Tools';
 import {
   INITIAL_RESULT_STATE,
   PLUGIN_IDENTIFIER,
@@ -340,7 +340,7 @@ const setContainerGroup = (artboard, document) => {
       }
       return null;
     });
-    containerGroup = findLayerById(artboard.layers(), containerGroupId);
+    containerGroup = document.getLayerWithID(containerGroupId);
   }
 
   // create a new `containerGroup` if one does not exist (or it cannot be found)
@@ -405,12 +405,9 @@ export default class Painter {
    * the original layer that received the annotation.
    */
   removeAnnotation(existingItemData) {
-    const layerContainer = findLayerById(this.artboard.layers(), existingItemData.containerGroupId);
-    if (layerContainer) {
-      const layerToDelete = findLayerById(layerContainer.layers(), existingItemData.id);
-      if (layerToDelete) {
-        fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
-      }
+    const layerToDelete = this.document.getLayerWithID(existingItemData.id);
+    if (layerToDelete) {
+      fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
     }
   }
 
