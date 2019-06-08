@@ -5,7 +5,7 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { findLayerById } from './Tools';
+import { findLayerById, updateArray } from './Tools';
 import {
   INITIAL_RESULT_STATE,
   PLUGIN_IDENTIFIER,
@@ -266,7 +266,7 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
   return group;
 };
 
-/**
+/** WIP
  * @description Builds the parent container group that holds all of the annotations.
  *
  * @kind function
@@ -275,7 +275,7 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
  * @returns {Object} The container group layer.
  * @private
  */
-const createContainerGroup = (artboard) => {
+const createContainerGroup = (artboard, documentSettings) => {
   const artboardId = fromNative(artboard).id;
   const newContainerGroup = new Group({
     frame: {
@@ -297,17 +297,27 @@ const createContainerGroup = (artboard) => {
     parent: newContainerGroup,
   });
 
-  const newContainerGroupSetting = {
+  // new object with IDs to add to settings
+  const newContainerGroupSet = {
     artboardId,
     id: newContainerGroup.id,
   };
 
-  updateSettings('containerGroups', newContainerGroupSetting);
+  // update the `documentSettings` array
+  const newDocumentSettings = updateArray(
+    'containerGroups',
+    newContainerGroupSet,
+    documentSettings,
+    'add',
+  );
 
-  return newContainerGroup;
+  return {
+    newContainerGroup,
+    newDocumentSettings,
+  };
 };
 
-/**
+/** WIP
  * @description Sets (finds or builds) the parent container group.
  *
  * @kind function
@@ -316,14 +326,15 @@ const createContainerGroup = (artboard) => {
  * @returns {Object} The container group layer.
  * @private
  */
-const setContainerGroup = (artboard) => {
-  const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+const setContainerGroup = (artboard, document) => {
+  const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
   let containerGroup = null;
   let containerGroupId = null;
 
-  if (settings && settings.containerGroups) {
-    settings.containerGroups.forEach((containerGroupLookupPair) => {
+  // find the existing `containerGroup` (if it exists)
+  if (documentSettings && documentSettings.containerGroups) {
+    documentSettings.containerGroups.forEach((containerGroupLookupPair) => {
       if (containerGroupLookupPair.artboardId === artboardId) {
         containerGroupId = containerGroupLookupPair.id;
       }
@@ -332,14 +343,34 @@ const setContainerGroup = (artboard) => {
     containerGroup = findLayerById(artboard.layers(), containerGroupId);
   }
 
+  // create a new `containerGroup` if one does not exist (or it cannot be found)
   if (!containerGroup) {
+    let newDocumentSettings = documentSettings;
+
+    // remove the ID that cannot be found from the `newDocumentSettings` array
     if (containerGroupId) {
-      updateSettings('containerGroups', { id: containerGroupId }, 'remove');
+      newDocumentSettings = updateArray(
+        'containerGroups',
+        { id: containerGroupId },
+        newDocumentSettings,
+        'remove',
+      );
     }
-    containerGroup = createContainerGroup(artboard);
+
+    // create the new `containerGroup` layer (and update the settings array to include it)
+    const ccgResult = createContainerGroup(artboard, newDocumentSettings);
+    containerGroup = ccgResult.newContainerGroup;
+    newDocumentSettings = ccgResult.newDocumentSettings; // eslint-disable-line prefer-destructuring
+
+    // commit the `Settings` update
+    Settings.setDocumentSettingForKey(
+      document,
+      PLUGIN_IDENTIFIER,
+      newDocumentSettings,
+    );
   }
 
-  // move to the front
+  // move the group layer to the front
   fromNative(containerGroup).moveToFront();
 
   return containerGroup;
@@ -418,7 +449,7 @@ export default class Painter {
     const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
 
     // create or locate the container group
-    const containerGroup = setContainerGroup(this.artboard);
+    const containerGroup = setContainerGroup(this.artboard, this.document);
 
     // check if we have already annotated this element and remove the old annotation
     if (pluginSettings && pluginSettings.labeledLayers) {
