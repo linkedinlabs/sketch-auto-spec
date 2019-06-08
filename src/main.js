@@ -110,17 +110,6 @@ const drawAnnotation = (context) => {
   return null;
 };
 
-/**
- * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
- *
- * @kind function
- * @name resetData
- */
-const resetData = () => {
-  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
-  return null;
-};
-
 // listeners -------------------------------------------------
 
 /**
@@ -170,5 +159,4 @@ export {
   drawAnnotation,
   onOpenDocument,
   onSelectionChange,
-  resetData,
 };
