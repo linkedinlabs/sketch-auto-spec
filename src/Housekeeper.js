@@ -19,44 +19,47 @@ export default class Housekeeper {
     this.messenger = messenger;
   }
 
-  moveContainerGroupsToDocument(pluginSettings, documentSettings) {
+  fromPluginToDocument(pluginSettings, documentSettings, comparisonKeys) {
+    const { mainKey, secondaryKey } = comparisonKeys;
     let settingsChanged = false;
     let newDocumentSettings = documentSettings;
     let newPluginSettings = pluginSettings;
+
+    // set up `documentSettings` placeholder
     if (!newDocumentSettings) {
-      newDocumentSettings = {
-        containerGroups: [],
-      };
+      newDocumentSettings = {};
+      newDocumentSettings[mainKey] = [];
     }
 
-    if (!newDocumentSettings.containerGroups) {
-      newDocumentSettings.containerGroups = [];
+    // set up placeholder in `documentSettings` for the main key
+    if (!newDocumentSettings[mainKey]) {
+      newDocumentSettings[mainKey] = [];
     }
 
-    // iterate through each `containerGroup`
-    pluginSettings.containerGroups.forEach((containerGroupIdSet) => {
-      const { artboardId, id } = containerGroupIdSet;
+    // iterate through each `mainKey`
+    pluginSettings[mainKey].forEach((layerIdSet) => {
+      const { id } = layerIdSet;
+      const secondaryId = layerIdSet[secondaryKey];
 
-      // make sure the `artboard` layer actually exists
-      const artboard = this.document.getLayerWithID(artboardId);
+      // make sure the primary `id` layer actually exists
+      const primaryLayer = this.document.getLayerWithID(id);
 
-      // make sure the `containerGroup` layer actually exists
-      const containerGroup = this.document.getLayerWithID(id);
+      // make sure the `secondaryKey` paired layer actually exists
+      const pairedLayer = this.document.getLayerWithID(secondaryId);
 
-      if (artboard && containerGroup) {
-        // check if this `containerGroup` has already been migrated
-        const existingItemIndex = newDocumentSettings.containerGroups.findIndex(
+      if (primaryLayer && pairedLayer) {
+        // check if this `primaryLayer` has already been migrated
+        const existingItemIndex = newDocumentSettings[mainKey].findIndex(
           foundItem => (foundItem.id === id),
         );
         if (existingItemIndex < 0) {
-          newDocumentSettings.containerGroups.push({
-            artboardId,
-            id,
-          });
+          // add the `layerIdSet` to the document settings
+          newDocumentSettings[mainKey].push(layerIdSet);
 
+          // remove the `layerIdSet` from the plugin settings
           newPluginSettings = updateArray(
-            'containerGroups',
-            containerGroupIdSet,
+            mainKey,
+            layerIdSet,
             newPluginSettings,
             'remove',
           );
@@ -83,15 +86,42 @@ export default class Housekeeper {
   runMigrations() {
     const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
-    let settingsToUpdate = { changed: false };
+    let settingsToUpdate = {
+      pluginSettings,
+      documentSettings,
+      changed: false,
+    };
 
     if (!pluginSettings) {
       return null;
     }
 
+    // migrate the `containerGroups` into local document settings
     if (pluginSettings.containerGroups && pluginSettings.containerGroups.length > 0) {
-      this.messenger.log('Run settings migration…');
-      settingsToUpdate = this.moveContainerGroupsToDocument(pluginSettings, documentSettings);
+      const comparisonKeys = {
+        mainKey: 'containerGroups',
+        secondaryKey: 'artboardId',
+      };
+      this.messenger.log('Run “containerGroups” settings migration…');
+      settingsToUpdate = this.fromPluginToDocument(
+        settingsToUpdate.pluginSettings,
+        settingsToUpdate.documentSettings,
+        comparisonKeys,
+      );
+    }
+
+    // migrate the `labeledLayers` into local document settings
+    if (pluginSettings.labeledLayers && pluginSettings.labeledLayers.length > 0) {
+      const comparisonKeys = {
+        mainKey: 'labeledLayers',
+        secondaryKey: 'originalId',
+      };
+      this.messenger.log('Run “labeledLayers” settings migration…');
+      settingsToUpdate = this.fromPluginToDocument(
+        settingsToUpdate.pluginSettings,
+        settingsToUpdate.documentSettings,
+        comparisonKeys,
+      );
     }
 
     if (settingsToUpdate.changed) {

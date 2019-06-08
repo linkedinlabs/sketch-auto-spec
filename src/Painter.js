@@ -24,7 +24,6 @@ import {
  * @type {Object}
  */
 const initialSettingsState = {
-  containerGroups: [],
   labeledLayers: [],
 };
 
