@@ -9,11 +9,18 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Hello World",
-      "identifier": "hello-world",
-      "shortcut": "ctrl shift h",
+      "name": "Dev: Draw Label",
+      "identifier": "draw-label",
+      "shortcut": "ctrl shift d",
       "script": "./main.js",
-      "handler": "helloWorld"
+      "handler": "drawLabel"
+    },
+    {
+      "name": "Dev: Reset Data",
+      "identifier": "reset-data",
+      "shortcut": "ctrl shift r",
+      "script": "./main.js",
+      "handler": "resetData"
     },
     {
       "name": "Label Component Symbol",
@@ -57,9 +64,10 @@
   "menu": {
     "title": "Auto-Spec",
     "items": [
-      "hello-world",
       "label-component",
-      "view-gui"
+      "view-gui",
+      "draw-label",
+      "reset-data"
     ]
   }
 }

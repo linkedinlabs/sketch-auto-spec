@@ -1,10 +1,11 @@
-import { fromNative } from 'sketch';
+import { fromNative, Settings } from 'sketch';
 
 import Crawler from './Crawler';
 import Painter from './Painter';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
 import { getDocument, getSelection } from './Tools';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -33,19 +34,28 @@ const assemble = (context = null) => {
 // invoked commands -------------------------------------------------
 
 /**
- * @description Displays a “Hello World” Alert in the Sketch UI when invoked from the plugin menu.
+ * @description Temporary dev function to quickly draw an instance of a Component label.
  *
  * @kind function
- * @name helloWorld
+ * @name drawLabel
  * @param {Object} context The current context (event) received from Sketch.
  */
-const helloWorld = (context) => {
-  if (context.document) {
-    const { messenger } = assemble(context);
+const drawLabel = (context) => {
+  const { selection } = assemble(context);
 
-    messenger.alert('It’s alive 🙌', 'Hello');
-    messenger.log('It’s alive 🙌');
-  }
+  const painter = new Painter({ for: selection[0] });
+  painter.addLabel('Hello, I am Component');
+  return null;
+};
+
+/**
+ * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
+ *
+ * @kind function
+ * @name resetData
+ */
+const resetData = () => {
+  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
   return null;
 };
 
@@ -64,22 +74,35 @@ const labelLayer = (context = null) => {
     selection,
   } = assemble(context);
 
+  // need a selected layer to label it
   if (selection === null || selection.count() === 0) {
     return messenger.toast('A layer must be selected');
   }
 
+  // grab the first layer in the selection and set up Identifier and Painter instances for it
   const layers = new Crawler({ for: selection });
   const layerToLabel = new Identifier({
     for: layers.first(),
     documentData,
     messenger,
   });
-  const painter = new Painter({ for: layerToLabel.artboard() });
+  const painter = new Painter({ for: layers.first() });
+
+  // determine the label text
   const kitLayerLabel = layerToLabel.label();
 
-  // draw the label
+  // draw the label (if the text exists)
+  let paintResult = null;
   if (kitLayerLabel) {
-    painter.addLabel(kitLayerLabel);
+    paintResult = painter.addLabel(kitLayerLabel);
+  }
+
+  // read the response from Painter; if it was unsuccessful, log and display the error
+  if (paintResult && (paintResult.error || !paintResult.success)) {
+    const toastMessage = paintResult.error && paintResult.messages.toast ? paintResult.messages.toast : 'An error occured';
+    const logMessage = paintResult.error && paintResult.messages.log ? paintResult.messages.log : 'An error occured';
+    messenger.log(logMessage, 'error');
+    return messenger.toast(toastMessage);
   }
   return null;
 };
@@ -109,7 +132,7 @@ const onOpenDocument = (context) => {
 };
 
 /**
- * @description Writes to the log whenever the selection changes and display a Toast indicator.
+ * @description Writes to the log whenever the selection changes and displays a Toast indicator.
  *
  * @kind function
  * @name onSelectionChange
@@ -133,8 +156,9 @@ const onSelectionChange = (context) => {
 
 // export each used in manifest
 export {
-  helloWorld,
+  drawLabel,
   labelLayer,
   onOpenDocument,
   onSelectionChange,
+  resetData,
 };
