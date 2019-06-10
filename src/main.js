@@ -93,18 +93,18 @@ const labelLayer = (context = null) => {
 
     // determine the label text
     const labelTextResult = layerToLabel.label();
-    if (labelTextResult && (labelTextResult.error || !labelTextResult.success)) {
+    if (labelTextResult.status === 'error') {
       return messenger.handleResult(labelTextResult);
     }
 
     // draw the label (if the text exists)
     let paintResult = null;
-    if (labelTextResult && labelTextResult.success && labelTextResult.data) {
+    if (labelTextResult.status === 'success') {
       paintResult = painter.addLabel(labelTextResult.data);
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error
-    if (paintResult && (paintResult.error || !paintResult.success)) {
+    if (paintResult.status === 'error') {
       return messenger.handleResult(paintResult);
     }
 

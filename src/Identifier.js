@@ -42,7 +42,7 @@ export default class Identifier {
       !this.documentData.userInfo()['com.lingoapp.lingo']
       || !this.documentData.userInfo()['com.lingoapp.lingo'].storage
     ) {
-      result.error = true;
+      result.status = 'error';
       result.messages.log = 'No data from Lingo in the file';
       result.messages.toast = '🆘 Lingo does not seem to be connected to this file.';
       return result;
@@ -57,7 +57,7 @@ export default class Identifier {
 
     // return if we do not actually have a Symbol selected
     if (!symbolId) {
-      result.error = true;
+      result.status = 'error';
       result.messages.log = `${id} is not a SymbolInstance; it is a ${type}`;
       result.messages.toast = '🆘 This layer is not a Symbol.';
       return result;
@@ -73,7 +73,7 @@ export default class Identifier {
 
     // could not find a matching master symbole in the Lingo Kit
     if (!kitSymbol) {
-      result.error = true;
+      result.status = 'error';
       result.messages.log = `${masterSymbolId} was not found in a connected Lingo Kit`;
       result.messages.toast = '😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.';
       return result;
@@ -85,7 +85,7 @@ export default class Identifier {
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
     // return the official name and log it alongside the original layer name
-    result.success = true;
+    result.status = 'success';
     result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
     result.data = kitSymbolNameClean;
     return result;
