@@ -6,7 +6,11 @@ import {
   Text,
 } from 'sketch/dom';
 import { findLayerById } from './Tools';
-import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
+import {
+  INITIAL_RESULT_STATE,
+  PLUGIN_IDENTIFIER,
+  PLUGIN_NAME,
+} from './constants';
 
 // --- settings/state management
 // good candidate to move this all to its own class once it gets re-used
@@ -22,22 +26,6 @@ import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 const initialSettingsState = {
   containerGroups: [],
   labeledLayers: [],
-};
-
-/**
- * @description Initial starting point for tracking the result of an action.
- *
- * @kind constant
- * @name initialResultState
- * @type {Object}
- */
-const initialResultState = {
-  success: false,
-  error: false,
-  messages: {
-    toast: null,
-    log: null,
-  },
 };
 
 /**
@@ -395,20 +383,19 @@ export default class Painter {
   }
 
   /**
-   * @description Takes a layer name and returns a semi-transparent, small rectangle with that name.
-   * Info {@link https://developer.sketch.com/reference/api/#shapepath}
+   * @description Takes a layer name and builds the visual annotation on the Sketch artboard.
    *
    * @kind function
    * @name add
    * @param {Array} layerLabel The name we want for the new label.
-   * @returns {Object} A Sketch ShapePath Rectangle object.
+   * @returns {Object} A result object container success/error bool and log/toast messages.
    */
   addLabel(layerLabel = 'New Label') {
-    const result = initialResultState;
+    const result = INITIAL_RESULT_STATE;
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
-      result.error = true;
+      result.status = 'error';
       result.messages.log = 'Selection not on artboard';
       result.messages.toast = 'Your selection needs to be on an artboard';
       return result;
@@ -459,7 +446,7 @@ export default class Painter {
     updateSettings('labeledLayers', newSettingsEntry);
 
     // return a successful result
-    result.success = true;
+    result.status = 'success';
     return result;
   }
 }

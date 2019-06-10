@@ -33,7 +33,7 @@ export default class Messenger {
   log(message, type = 'normal') {
     const logType = type === 'error' ? '🆘' : '🐞';
     const documentIdString = this.document ? ` ${this.document.id} :` : '';
-    const eventTypeString = this.event ? ` ${this.event.action} :` : 'Invoked';
+    const eventTypeString = this.event && this.event.action ? ` ${this.event.action} :` : ' Invoked :';
 
     log(`${PLUGIN_NAME} ${logType}${documentIdString}${eventTypeString} ${message}`);
   }
@@ -66,6 +66,32 @@ export default class Messenger {
       UI.alert(title, message);
     } else {
       this.sendLog(`Could not display: “${message}”`, 'error');
+    }
+  }
+
+  /**
+   * @description Handle the result messenging/logging.
+   *
+   * @kind function
+   * @name handleResult
+   * @param {Object} result The success/error result and accompanying log/toast message(s).
+   */
+  handleResult(result) {
+    if (result.messages) {
+      // set up toast and log messages
+      const toastMessage = result.messages.toast;
+      const logMessage = result.messages.log;
+      const isError = (result.status === 'error');
+
+      // log a message or error
+      if (logMessage) {
+        this.log(logMessage, isError ? 'error' : null);
+      }
+
+      // toast a message or error
+      if (toastMessage) {
+        this.toast(toastMessage);
+      }
     }
   }
 }
