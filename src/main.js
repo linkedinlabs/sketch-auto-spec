@@ -34,17 +34,72 @@ const assemble = (context = null) => {
 // invoked commands -------------------------------------------------
 
 /**
- * @description Temporary dev function to quickly draw an instance of a Component label.
+ * @description Identifies and annotates a selected layer in a Sketch file.
  *
  * @kind function
- * @name drawLabel
+ * @name annotateLayer
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected.
+ */
+const annotateLayer = (context = null) => {
+  const {
+    documentData,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() === 0) {
+    return messenger.toast('A layer must be selected');
+  }
+
+  // iterate through each layer in a selection
+  const layers = new Crawler({ for: selection });
+  layers.all().forEach((layer) => {
+    // set up Identifier instance for the layer
+    const layerToAnnotate = new Identifier({
+      for: layer,
+      documentData,
+      messenger,
+    });
+    // set up Painter instance for the layer
+    const painter = new Painter({ for: layer });
+
+    // determine the annotation text
+    const getNameResult = layerToAnnotate.getName();
+    if (getNameResult.status === 'error') {
+      return messenger.handleResult(getNameResult);
+    }
+
+    // draw the annotation (if the text exists)
+    let paintResult = null;
+    if (getNameResult.status === 'success') {
+      paintResult = painter.addAnnotation(getNameResult.data);
+    }
+
+    // read the response from Painter; if it was unsuccessful, log and display the error
+    if (paintResult.status === 'error') {
+      return messenger.handleResult(paintResult);
+    }
+
+    return null;
+  });
+
+  return null;
+};
+
+/**
+ * @description Temporary dev function to quickly draw an instance of a Component annotation.
+ *
+ * @kind function
+ * @name drawAnnotation
  * @param {Object} context The current context (event) received from Sketch.
  */
-const drawLabel = (context) => {
+const drawAnnotation = (context) => {
   const { selection } = assemble(context);
 
   const painter = new Painter({ for: selection[0] });
-  painter.addLabel('Hello, I am Component');
+  painter.addAnnotation('Hello, I am Component');
   return null;
 };
 
@@ -56,61 +111,6 @@ const drawLabel = (context) => {
  */
 const resetData = () => {
   Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
-  return null;
-};
-
-/**
- * @description Identifies and labels a selected layer in a Sketch file.
- *
- * @kind function
- * @name labelLayer
- * @param {Object} context The current context (event) received from Sketch.
- * @returns {null} Shows a Toast in the UI if nothing is selected.
- */
-const labelLayer = (context = null) => {
-  const {
-    documentData,
-    messenger,
-    selection,
-  } = assemble(context);
-
-  // need a selected layer to label it
-  if (selection === null || selection.count() === 0) {
-    return messenger.toast('A layer must be selected');
-  }
-
-  // iterate through each layer in a selection
-  const layers = new Crawler({ for: selection });
-  layers.all().forEach((layer) => {
-    // set up Identifier instance for the layer
-    const layerToLabel = new Identifier({
-      for: layer,
-      documentData,
-      messenger,
-    });
-    // set up Painter instance for the layer
-    const painter = new Painter({ for: layer });
-
-    // determine the label text
-    const labelTextResult = layerToLabel.label();
-    if (labelTextResult.status === 'error') {
-      return messenger.handleResult(labelTextResult);
-    }
-
-    // draw the label (if the text exists)
-    let paintResult = null;
-    if (labelTextResult.status === 'success') {
-      paintResult = painter.addLabel(labelTextResult.data);
-    }
-
-    // read the response from Painter; if it was unsuccessful, log and display the error
-    if (paintResult.status === 'error') {
-      return messenger.handleResult(paintResult);
-    }
-
-    return null;
-  });
-
   return null;
 };
 
@@ -151,8 +151,8 @@ const onSelectionChange = (context) => {
 
 // export each used in manifest
 export {
-  drawLabel,
-  labelLayer,
+  annotateLayer,
+  drawAnnotation,
   onOpenDocument,
   onSelectionChange,
   resetData,

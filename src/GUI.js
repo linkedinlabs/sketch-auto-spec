@@ -5,7 +5,7 @@ import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import Messenger from './Messenger';
 import * as theWebview from '../resources/webview.html';
-import { labelLayer } from './main';
+import { annotateLayer } from './main';
 import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
@@ -86,8 +86,8 @@ const watchGui = () => {
   });
 
 
-  // call the labelLayer function in main.js
-  webContents.on('labelLayer', () => labelLayer());
+  // call the annotateLayer function in main.js
+  webContents.on('annotateLayer', () => annotateLayer());
 
   // close the webview window
   webContents.on('closeWindow', () => {
