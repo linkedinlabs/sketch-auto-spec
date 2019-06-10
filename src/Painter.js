@@ -6,7 +6,7 @@ import {
   Text,
 } from 'sketch/dom';
 import { findLayerById } from './Tools';
-import { PLUGIN_IDENTIFIER } from './constants';
+import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 
 // --- settings/state management
 // good candidate to move this all to its own class once it gets re-used
@@ -81,7 +81,7 @@ const updateSettings = (key, data, action = 'add') => {
     settings[key] = updatedItems;
   }
 
-  settings = Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
+  Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
   return settings;
 };
 
@@ -297,7 +297,7 @@ const createContainerGroup = (artboard) => {
       height: artboard.frame().height(),
     },
     locked: true,
-    name: '+++ Auto-Spec Labels +++',
+    name: `+++ ${PLUGIN_NAME} Labels +++`,
     parent: artboard,
   });
 

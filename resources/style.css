@@ -100,6 +100,7 @@ svg {
   display: block;
   margin-right: 13px;
   width: 25px; /* 19px icon */
+  opacity: 0.5; /* temporarily disable measure */
 }
 
 /* buttons */
@@ -129,6 +130,15 @@ svg polygon {
   a:hover svg path,
   a:hover svg polygon {
     fill: rgba(0, 0, 0, 0.9);
+  }
+
+  /* temporarily disable measure */
+  .actions li.action-measure a:hover {
+    cursor: default;
+  }
+
+  .actions li.action-measure a:hover svg polygon {
+    fill: rgba(0, 0, 0, 0.6);
   }
 }
 

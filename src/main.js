@@ -122,11 +122,6 @@ const onOpenDocument = (context) => {
 
     if (document) {
       messenger.log(`Document “${document.id}” Opened 😻`);
-
-      // need to wait for the UI to be ready
-      setTimeout(() => {
-        messenger.toast(`Document “${document.id}” Opened 😻`);
-      }, 1500);
     }
   }
 };
@@ -141,15 +136,8 @@ const onOpenDocument = (context) => {
 const onSelectionChange = (context) => {
   if (String(context.action) === 'SelectionChanged.finish') {
     const { document, messenger } = assemble(context);
-    // const newSelectionArray = setArray(context.actionContext.newSelection);
 
     messenger.log(`Selection Changed in Doc “${document.id}”`);
-    messenger.toast('Selection Changed');
-
-    // if (newSelectionArray.length > 0) {
-    //   const firstSelectedItem = new Crawler({ for: newSelectionArray }).first();
-    //   messenger.log(firstSelectedItem);
-    // }
   }
   return null;
 };

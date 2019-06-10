@@ -1,5 +1,5 @@
 {
-  "name": "sketch-auto-spec",
+  "name": "sketch-speccing",
   "description": "A Sketch plugin for easily spec’ing design system components.",
   "version": "0.1.0",
   "repository": {
@@ -27,9 +27,9 @@
   },
   "pre-commit": "lint:staged",
   "skpm": {
-    "name": "sketch-auto-spec",
+    "name": "sketch-speccing",
     "manifest": "src/manifest.json",
-    "main": "sketch-auto-spec.sketchplugin",
+    "main": "sketch-speccing.sketchplugin",
     "assets": [
       "assets/**/*"
     ],

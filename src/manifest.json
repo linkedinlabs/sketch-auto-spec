@@ -1,24 +1,22 @@
 {
-  "name": "Sketch Auto-Spec",
-  "description": "Plugins to label symbols",
+  "name": "Spec’ing",
+  "description": "Plugin to label symbols",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
-  "version": "1.0-b",
+  "version": "1.0.0-beta.5",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "compatibleVersion": 3,
   "bundleVersion": 1,
   "commands": [
     {
       "name": "Dev: Draw Label",
-      "identifier": "draw-label",
-      "shortcut": "ctrl shift d",
+      "identifier": "dev-draw-label",
       "script": "./main.js",
       "handler": "drawLabel"
     },
     {
       "name": "Dev: Reset Data",
-      "identifier": "reset-data",
-      "shortcut": "ctrl shift r",
+      "identifier": "dev-reset-data",
       "script": "./main.js",
       "handler": "resetData"
     },
@@ -50,7 +48,7 @@
       }
     },
     {
-      "name": "View GUI",
+      "name": "Show Toolbar",
       "identifier": "view-gui",
       "script": "./GUI.js",
       "handlers": {
@@ -62,12 +60,12 @@
     }
   ],
   "menu": {
-    "title": "Auto-Spec",
+    "title": "Spec’ing",
     "items": [
       "label-component",
       "view-gui",
-      "draw-label",
-      "reset-data"
+      "dev-draw-label",
+      "dev-reset-data"
     ]
   }
 }
