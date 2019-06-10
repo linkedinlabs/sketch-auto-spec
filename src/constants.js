@@ -30,8 +30,7 @@ const PLUGIN_NAME = 'Spec’ing';
  * @type {Object}
  */
 const INITIAL_RESULT_STATE = {
-  success: false,
-  error: false,
+  status: null,
   messages: {
     toast: null,
     log: null,

@@ -67,18 +67,18 @@ const annotateLayer = (context = null) => {
 
     // determine the annotation text
     const getNameResult = layerToAnnotate.getName();
-    if (getNameResult && (getNameResult.error || !getNameResult.success)) {
+    if (getNameResult.status === 'error') {
       return messenger.handleResult(getNameResult);
     }
 
     // draw the annotation (if the text exists)
     let paintResult = null;
-    if (getNameResult && getNameResult.success && getNameResult.data) {
+    if (getNameResult.status === 'success') {
       paintResult = painter.addAnnotation(getNameResult.data);
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error
-    if (paintResult && (paintResult.error || !paintResult.success)) {
+    if (paintResult.status === 'error') {
       return messenger.handleResult(paintResult);
     }
 

@@ -395,7 +395,7 @@ export default class Painter {
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
-      result.error = true;
+      result.status = 'error';
       result.messages.log = 'Selection not on artboard';
       result.messages.toast = 'Your selection needs to be on an artboard';
       return result;
@@ -451,7 +451,7 @@ export default class Painter {
     updateSettings('labeledLayers', newSettingsEntry);
 
     // return a successful result
-    result.success = true;
+    result.status = 'success';
     return result;
   }
 }
