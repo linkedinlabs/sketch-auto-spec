@@ -399,15 +399,15 @@ export default class Painter {
     let newDocumentSettings = documentSettings;
 
     // check if we have already annotated this element and remove the old annotation
-    if (documentSettings && documentSettings.labeledLayers) {
+    if (documentSettings && documentSettings.annotatedLayers) {
       // remove the old ID pair(s) from the `newDocumentSettings` array
-      documentSettings.labeledLayers.forEach((layerSet) => {
+      documentSettings.annotatedLayers.forEach((layerSet) => {
         if (layerSet.originalId === layerId) {
           this.removeAnnotation(layerSet);
 
           // remove the ID that cannot be found from the `newDocumentSettings` array
           newDocumentSettings = updateArray(
-            'labeledLayers',
+            'annotatedLayers',
             { id: layerSet.id },
             newDocumentSettings,
             'remove',
@@ -436,7 +436,7 @@ export default class Painter {
     );
 
     // new object with IDs to add to settings
-    const newLabeledLayerSet = {
+    const newAnnotatedLayerSet = {
       containerGroupId: fromNative(containerGroup).id,
       id: group.id,
       originalId: layerId,
@@ -444,8 +444,8 @@ export default class Painter {
 
     // update the `newDocumentSettings` array
     newDocumentSettings = updateArray(
-      'labeledLayers',
-      newLabeledLayerSet,
+      'annotatedLayers',
+      newAnnotatedLayerSet,
       newDocumentSettings,
       'add',
     );

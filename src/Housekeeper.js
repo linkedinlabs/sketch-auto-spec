@@ -35,7 +35,8 @@ export default class Housekeeper {
    * `pluginSettings` objects, and a `changed` flag indicating updates.
    */
   fromPluginToDocument(pluginSettings, documentSettings, comparisonKeys) {
-    const { mainKey, secondaryKey } = comparisonKeys;
+    const { mainKey, secondaryKey, newMainKey } = comparisonKeys;
+    const mainKeyToUse = newMainKey || mainKey;
     let settingsChanged = false;
     let newDocumentSettings = documentSettings;
     let newPluginSettings = pluginSettings;
@@ -64,12 +65,12 @@ export default class Housekeeper {
 
       if (primaryLayer && pairedLayer) {
         // check if this `primaryLayer` has already been migrated
-        const existingItemIndex = newDocumentSettings[mainKey].findIndex(
+        const existingItemIndex = newDocumentSettings[mainKeyToUse].findIndex(
           foundItem => (foundItem.id === id),
         );
         if (existingItemIndex < 0) {
           // add the `layerIdSet` to the document settings
-          newDocumentSettings[mainKey].push(layerIdSet);
+          newDocumentSettings[mainKeyToUse].push(layerIdSet);
 
           // remove the `layerIdSet` from the plugin settings
           newPluginSettings = updateArray(
@@ -125,10 +126,11 @@ export default class Housekeeper {
       );
     }
 
-    // migrate the `labeledLayers` into local document settings
+    // migrate the `labeledLayers` into local document settings as `annotatedLayeres`
     if (pluginSettings.labeledLayers && pluginSettings.labeledLayers.length > 0) {
       const comparisonKeys = {
         mainKey: 'labeledLayers',
+        newMainKey: 'annotatedLayers',
         secondaryKey: 'originalId',
       };
       this.messenger.log('Run “labeledLayers” settings migration…');
