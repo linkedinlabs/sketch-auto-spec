@@ -70,18 +70,31 @@ const annotateLayer = (context = null) => {
     const painter = new Painter({ for: layer, in: document });
 
     // determine the annotation text
-    let setNameResult = null;
-    const getLingoNameResult = layerToAnnotate.getLingoName();
-    if (getLingoNameResult.status === 'error') {
-      messenger.handleResult(getLingoNameResult);
+    let hasName = false;
+    const hasNameResult = layerToAnnotate.hasName();
 
-      setNameResult = layerToAnnotate.setName();
-      messenger.handleResult(setNameResult);
+    if (hasNameResult.status === 'error') {
+      let setNameResult = null;
+      const getLingoNameResult = layerToAnnotate.getLingoName();
+      if (getLingoNameResult.status === 'error') {
+        messenger.handleResult(getLingoNameResult);
+
+        setNameResult = layerToAnnotate.setName();
+        messenger.handleResult(setNameResult);
+
+        if (setNameResult.status === 'success') {
+          hasName = true;
+        }
+      } else {
+        hasName = true;
+      }
+    } else {
+      hasName = true;
     }
 
     // draw the annotation (if the text exists)
     let paintResult = null;
-    if ((getLingoNameResult.status === 'success') || (setNameResult.status === 'success')) {
+    if (hasName) {
       paintResult = painter.addAnnotation();
     }
 

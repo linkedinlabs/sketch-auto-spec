@@ -122,6 +122,29 @@ export default class Identifier {
   }
 
   /**
+   * @description Checks the layer’s settings object for the existence of `annotationText`.
+   *
+   * @kind function
+   * @name hasName
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
+  hasName() {
+    const result = INITIAL_RESULT_STATE;
+    const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+
+    // check for existing `annotationText`
+    if (layerSettings.annotationText) {
+      result.status = 'success';
+      result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
+    } else {
+      result.status = 'error';
+      result.messages.log = `No name is set for “${this.layer.name()}”`;
+    }
+
+    return result;
+  }
+
+  /**
    * @description Uses Sketch’s `getInputFromUser` dialog box to allow the user to set custom
    * annotation text and adds the text to the layer’s settings object.
    *
