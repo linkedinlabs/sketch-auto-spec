@@ -372,7 +372,7 @@ export default class Painter {
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
-      result.error = true;
+      result.status = 'true';
       result.messages.log = 'Layer missing annotationText';
       return result;
     }
@@ -400,22 +400,20 @@ export default class Painter {
 
     // check if we have already annotated this element and remove the old annotation
     if (documentSettings && documentSettings.labeledLayers) {
-      const existingItemData = documentSettings.labeledLayers.find(
-        foundItem => (foundItem.originalId === layerId),
-      );
+      // remove the old ID pair(s) from the `newDocumentSettings` array
+      documentSettings.labeledLayers.forEach((layerSet) => {
+        if (layerSet.originalId === layerId) {
+          this.removeAnnotation(layerSet);
 
-      // remove the old ID pair from the `newDocumentSettings` array
-      if (existingItemData) {
-        this.removeAnnotation(existingItemData);
-
-        // remove the ID that cannot be found from the `newDocumentSettings` array
-        newDocumentSettings = updateArray(
-          'labeledLayers',
-          { id: existingItemData.id },
-          newDocumentSettings,
-          'remove',
-        );
-      }
+          // remove the ID that cannot be found from the `newDocumentSettings` array
+          newDocumentSettings = updateArray(
+            'labeledLayers',
+            { id: layerSet.id },
+            newDocumentSettings,
+            'remove',
+          );
+        }
+      });
     }
 
     // construct the base annotation elements
