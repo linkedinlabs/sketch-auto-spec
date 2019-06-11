@@ -108,13 +108,14 @@ const annotateLayer = (context = null) => {
   return null;
 };
 
-/** WIP
- * @description Identifies and annotates a selected layer in a Sketch file.
+/**
+ * @description Annotates a selected layer in a Sketch file with user input.
  *
  * @kind function
  * @name annotateLayerCustom
  * @param {Object} context The current context (event) received from Sketch.
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @returns {null} Shows a Toast in the UI if nothing is selected or
+ * if multiple layers are selected.
  */
 const annotateLayerCustom = (context = null) => {
   const {
@@ -134,35 +135,32 @@ const annotateLayerCustom = (context = null) => {
     return messenger.toast('Only one layer must be selected');
   }
 
-  // iterate through each layer in a selection
-  const layers = new Crawler({ for: selection });
-  layers.all().forEach((layer) => {
-    // set up Identifier instance for the layer
-    const layerToAnnotate = new Identifier({
-      for: layer,
-      documentData,
-      messenger,
-    });
-    // set up Painter instance for the layer
-    const painter = new Painter({ for: layer, in: document });
+  // grab the layer form the selection
+  const layer = new Crawler({ for: selection }).first();
 
-    // determine the annotation text
-    const setNameResult = layerToAnnotate.setName();
-    messenger.handleResult(setNameResult);
-
-    if (setNameResult.status === 'success') {
-      // draw the annotation (if the text exists)
-      let paintResult = null;
-      paintResult = painter.addAnnotation();
-
-      // read the response from Painter; if it was unsuccessful, log and display the error
-      if (paintResult && (paintResult.status === 'error')) {
-        return messenger.handleResult(paintResult);
-      }
-    }
-
-    return null;
+  // set up Identifier instance for the layer
+  const layerToAnnotate = new Identifier({
+    for: layer,
+    documentData,
+    messenger,
   });
+  // set up Painter instance for the layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // determine the annotation text
+  const setNameResult = layerToAnnotate.setName();
+  messenger.handleResult(setNameResult);
+
+  if (setNameResult.status === 'success') {
+    // draw the annotation (if the text exists)
+    let paintResult = null;
+    paintResult = painter.addAnnotation();
+
+    // read the response from Painter; if it was unsuccessful, log and display the error
+    if (paintResult && (paintResult.status === 'error')) {
+      return messenger.handleResult(paintResult);
+    }
+  }
 
   return null;
 };
