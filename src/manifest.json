@@ -16,6 +16,13 @@
       "handler": "annotateLayer"
     },
     {
+      "name": "Custom Annotation…",
+      "identifier": "annotate-layer-custom",
+      "shortcut": "ctrl shift option a",
+      "script": "./main.js",
+      "handler": "annotateLayerCustom"
+    },
+    {
       "name": "Show Toolbar",
       "identifier": "view-gui",
       "script": "./GUI.js",
@@ -51,6 +58,7 @@
     "title": "Spec’ing",
     "items": [
       "annotate-layer",
+      "annotate-layer-custom",
       "view-gui"
     ]
   }

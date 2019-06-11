@@ -108,6 +108,65 @@ const annotateLayer = (context = null) => {
   return null;
 };
 
+/** WIP
+ * @description Identifies and annotates a selected layer in a Sketch file.
+ *
+ * @kind function
+ * @name annotateLayerCustom
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected.
+ */
+const annotateLayerCustom = (context = null) => {
+  const {
+    document,
+    documentData,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() === 0) {
+    return messenger.toast('A layer must be selected');
+  }
+
+  // need a selected layer to annotate it
+  if (selection.count() > 1) {
+    return messenger.toast('Only one layer must be selected');
+  }
+
+  // iterate through each layer in a selection
+  const layers = new Crawler({ for: selection });
+  layers.all().forEach((layer) => {
+    // set up Identifier instance for the layer
+    const layerToAnnotate = new Identifier({
+      for: layer,
+      documentData,
+      messenger,
+    });
+    // set up Painter instance for the layer
+    const painter = new Painter({ for: layer, in: document });
+
+    // determine the annotation text
+    const setNameResult = layerToAnnotate.setName();
+    messenger.handleResult(setNameResult);
+
+    if (setNameResult.status === 'success') {
+      // draw the annotation (if the text exists)
+      let paintResult = null;
+      paintResult = painter.addAnnotation();
+
+      // read the response from Painter; if it was unsuccessful, log and display the error
+      if (paintResult && (paintResult.status === 'error')) {
+        return messenger.handleResult(paintResult);
+      }
+    }
+
+    return null;
+  });
+
+  return null;
+};
+
 // listeners -------------------------------------------------
 
 /**
@@ -154,6 +213,7 @@ const onSelectionChange = (context) => {
 // export each used in manifest
 export {
   annotateLayer,
+  annotateLayerCustom,
   onOpenDocument,
   onSelectionChange,
 };
