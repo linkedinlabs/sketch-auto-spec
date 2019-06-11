@@ -133,7 +133,7 @@ export default class Identifier {
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for existing `annotationText`
-    if (layerSettings.annotationText) {
+    if (layerSettings && layerSettings.annotationText) {
       result.status = 'success';
       result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
     } else {
@@ -154,11 +154,17 @@ export default class Identifier {
    */
   setName() {
     const result = INITIAL_RESULT_STATE;
+    const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+    let initialValue = this.layer.name();
+
+    if (layerSettings && layerSettings.annotationText) {
+      initialValue = layerSettings.annotationText;
+    }
 
     let customInput = null;
     getInputFromUser('Set the annotation’s text:', {
       type: INPUT_TYPE.string,
-      initialValue: this.layer.name(),
+      initialValue,
     }, (error, value) => {
       customInput = {
         error,
