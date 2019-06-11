@@ -1,6 +1,35 @@
 import { fromNative, Settings } from 'sketch';
+import { getInputFromUser, INPUT_TYPE } from 'sketch/ui';
 import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
 
+// --- private functions
+/**
+ * @description Sets the `annotationText` on a given layer’s settings object.
+ *
+ * @kind function
+ * @name setAnnotationTextSettings
+ * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {Object} layer The Sketch layer object receiving the settings update.
+ */
+const setAnnotationTextSettings = (annotationText, layer) => {
+  let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
+
+  // set `annotationText` on the layer settings
+  if (!layerSettings) {
+    layerSettings = {
+      annotationText,
+    };
+  } else {
+    layerSettings.annotationText = annotationText;
+  }
+
+  // commit the settings update
+  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, layerSettings);
+
+  return null;
+};
+
+// --- main Identifier class function
 /**
  * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
  *
@@ -30,12 +59,11 @@ export default class Identifier {
    * instance, and looks the name up from connected Lingo Kit symbols.
    *
    * @kind function
-   * @name getName
+   * @name getLingoName
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  getName() {
+  getLingoName() {
     const result = INITIAL_RESULT_STATE;
-    let layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for Lingo data - not much else we can do at the moment if it does not exist
     if (
@@ -85,14 +113,7 @@ export default class Identifier {
     kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
     // set `annotationText` on the layer settings as the kit symbol name
-    if (!layerSettings) {
-      layerSettings = {
-        annotationText: kitSymbolNameClean,
-      };
-    } else {
-      layerSettings.annotationText = kitSymbolNameClean;
-    }
-    Settings.setLayerSettingForKey(this.layer, PLUGIN_IDENTIFIER, layerSettings);
+    setAnnotationTextSettings(kitSymbolNameClean, this.layer);
 
     // log the official name alongside the original layer name and set as success
     result.status = 'success';
@@ -101,13 +122,41 @@ export default class Identifier {
   }
 
   /**
-   * @description Returns the artboard the layer exists on.
+   * @description Uses Sketch’s `getInputFromUser` dialog box to allow the user to set custom
+   * annotation text and adds the text to the layer’s settings object.
    *
    * @kind function
-   * @name artboard
-   * @returns {Object} The parent artboard.
+   * @name setName
+   * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  artboard() {
-    return this.layer.parentArtboard();
+  setName() {
+    const result = INITIAL_RESULT_STATE;
+
+    let customInput = null;
+    getInputFromUser('Set the annotation’s text:', {
+      type: INPUT_TYPE.string,
+      initialValue: this.layer.name(),
+    }, (error, value) => {
+      customInput = {
+        error,
+        value,
+      };
+    });
+
+    if (customInput.error) {
+      // most likely the user canceled the input
+      result.status = 'error';
+      result.messages.log = 'Set name was canceled by user';
+      return result;
+    }
+
+    const customName = customInput.value;
+    // set `annotationText` on the layer settings as the custom name
+    setAnnotationTextSettings(customName, this.layer);
+
+    // log the custom name alongside the original layer name and set as success
+    result.status = 'success';
+    result.messages.log = `Custom Name set for “${this.layer.name()}” is “${customName}”`;
+    return result;
   }
 }

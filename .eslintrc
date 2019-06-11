@@ -8,7 +8,8 @@
   "settings": {
     "import/core-modules": [
       "sketch",
-      "sketch/dom"
+      "sketch/dom",
+      "sketch/ui"
     ]
   },
   "plugins": [
