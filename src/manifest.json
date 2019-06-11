@@ -16,12 +16,13 @@
       "handler": "annotateLayer"
     },
     {
-      "name" : "Selection Change Listener",
-      "identifier": "selection-change-listener",
-      "script": "./main.js",
-      "handlers" : {
+      "name": "Show Toolbar",
+      "identifier": "view-gui",
+      "script": "./GUI.js",
+      "handlers": {
+        "run": "onRun",
         "actions": {
-          "SelectionChanged.finish": "onSelectionChange"
+          "Shutdown": "onShutdown"
         }
       }
     },
@@ -36,13 +37,12 @@
       }
     },
     {
-      "name": "Show Toolbar",
-      "identifier": "view-gui",
-      "script": "./GUI.js",
-      "handlers": {
-        "run": "onRun",
+      "name" : "Selection Change Listener",
+      "identifier": "selection-change-listener",
+      "script": "./main.js",
+      "handlers" : {
         "actions": {
-          "Shutdown": "onShutdown"
+          "SelectionChanged.finish": "onSelectionChange"
         }
       }
     }
@@ -51,7 +51,7 @@
     "title": "Spec’ing",
     "items": [
       "annotate-layer",
-      "view-gui",
+      "view-gui"
     ]
   }
 }
