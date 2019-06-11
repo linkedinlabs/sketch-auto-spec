@@ -404,7 +404,7 @@ export default class Painter {
         foundItem => (foundItem.originalId === layerId),
       );
 
-      // remove old annotation layer + remove from data
+      // remove the old ID pair from the `newDocumentSettings` array
       if (existingItemData) {
         this.removeAnnotation(existingItemData);
 
