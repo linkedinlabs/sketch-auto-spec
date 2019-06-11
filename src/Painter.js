@@ -205,13 +205,16 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
   return group;
 };
 
-/** WIP
- * @description Builds the parent container group that holds all of the annotations.
+/**
+ * @description Builds the parent container group that holds all of the annotations and makes
+ * updates to the accompanying document settings object.
  *
  * @kind function
  * @name createContainerGroup
  * @param {Object} artboard The artboard to draw within.
- * @returns {Object} The container group layer.
+ * @param {Object} documentSettings An instance of the document’s settings object.
+ * @returns {Object} The container group layer object and the accompanying
+ * updated document settings object.
  * @private
  */
 const createContainerGroup = (artboard, documentSettings) => {
@@ -256,12 +259,14 @@ const createContainerGroup = (artboard, documentSettings) => {
   };
 };
 
-/** WIP
- * @description Sets (finds or builds) the parent container group.
+/**
+ * @description Sets (finds or builds) the parent container group and
+ * updates the document settings (if a new container group has been created).
  *
  * @kind function
  * @name createContainerGroup
  * @param {Object} artboard The artboard to draw within.
+ * @param {Object} document The document to draw within.
  * @returns {Object} The container group layer.
  * @private
  */
@@ -342,6 +347,7 @@ export default class Painter {
    *
    * @kind function
    * @name removeAnnotation
+   *
    * @param {Object} existingItemData The data object containing a
    * `containerGroupId`, `id` (representting the annotation) and `layerId` representing
    * the original layer that received the annotation.
@@ -354,12 +360,12 @@ export default class Painter {
   }
 
   /**
-   * @description Takes a layer name and builds the visual annotation on the Sketch artboard.
+   * @description Locates annotation text in a layer’s Settings object and
+   * builds the visual annotation on the Sketch artboard.
    *
    * @kind function
    * @name addAnnotation
-   * @param {Array} annotationText The text for the annotation.
-   * @returns {Object} A result object container success/error bool and log/toast messages.
+   * @returns {Object} A result object container success/error status and log/toast messages.
    */
   addAnnotation() {
     const result = INITIAL_RESULT_STATE;

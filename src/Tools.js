@@ -73,17 +73,19 @@ const findLayerById = (layers, layerId) => {
   return foundLayer;
 };
 
-/** WIP
- * @description Adds or removes data from the data set based on a key and
+/**
+ * @description A reusable helper function to take an array and add or remove data from it
+ * based on a top-level key and a defined action.
  * an action (`add` or `remove`).
  *
  * @kind function
  * @name updateArray
- * @param {string} key String representing the area of Settings to modify.
- * @param {Object} data Object containing the bit of data to add or
- * remove (must include an `id` string).
+ * @param {string} key String representing the top-level area of the array to modify.
+ * @param {Object} item Object containing the new bit of data to add or
+ * remove (must include an `id` string for comparison).
+ * @param {Array} array The array to be modified.
  * @param {string} action Constant string representing the action to take (`add` or `remove`).
- * @returns {Object} The modified data set.
+ * @returns {Object} The modified array.
  * @private
  */
 const updateArray = (key, item, array, action = 'add') => {

@@ -31,7 +31,7 @@ export default class Identifier {
    *
    * @kind function
    * @name getName
-   * @returns {Object} A result object container success/error bool and log/toast messages.
+   * @returns {Object} A result object containing success/error status and log/toast messages.
    */
   getName() {
     const result = INITIAL_RESULT_STATE;

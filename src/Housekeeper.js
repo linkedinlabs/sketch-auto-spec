@@ -2,16 +2,17 @@ import { Settings } from 'sketch';
 import { updateArray } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
-/** WIP
- * @description A class to handle traversing an array of selected items and return useful items
- * (parent layer, artboard, document, etc). It will also find items based on ID (or timestamp).
+/**
+ * @description A class to handle housekeeping tasks on Sketch, plugin, document, or
+ * layer Settings objects.
  *
  * @class
  * @name Housekeeper
  *
  * @constructor
  *
- * @property selectionArray The array of selected items.
+ * @property document The Sketch document that contains the layer.
+ * @property messenger An instance of the Messenger class.
  */
 export default class Housekeeper {
   constructor({ in: document, messenger }) {
@@ -19,6 +20,20 @@ export default class Housekeeper {
     this.messenger = messenger;
   }
 
+  /**
+   * @description Used to move plugin settings to document-level settings based on a set of
+   * keys used for comparisons.
+   *
+   * @kind function
+   * @name runMigrations
+   *
+   * @param {Object} pluginSettings An object containing the plugin settings.
+   * @param {Object} documentSettings An object containing the document settings.
+   * @param {Object} comparisonKeys An object containing a `mainKey` and `secondaryKey` used
+   * in addition to `id` to compare layer ID sets between plugin and document settings.
+   * @returns {Object} Returns an object containing (potentially) updated `documentSettings` and
+   * `pluginSettings` objects, and a `changed` flag indicating updates.
+   */
   fromPluginToDocument(pluginSettings, documentSettings, comparisonKeys) {
     const { mainKey, secondaryKey } = comparisonKeys;
     let settingsChanged = false;
@@ -76,12 +91,12 @@ export default class Housekeeper {
     };
   }
 
-  /** WIP
-   * @description Returns the first item in the array.
+  /**
+   * @description Checks for the existence of certain keys in the plugin Settings (`containerGroups`
+   * and `labeledLayers`) and runs any necessary migrations.
    *
    * @kind function
-   * @name first
-   * @returns {Object} The first layer item in the array.
+   * @name runMigrations
    */
   runMigrations() {
     const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
