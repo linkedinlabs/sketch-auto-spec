@@ -9,12 +9,6 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Dev: Draw Annotation",
-      "identifier": "dev-draw-annotation",
-      "script": "./main.js",
-      "handler": "drawAnnotation"
-    },
-    {
       "name": "Annotate Component",
       "identifier": "annotate-layer",
       "shortcut": "ctrl shift a",
@@ -58,7 +52,6 @@
     "items": [
       "annotate-layer",
       "view-gui",
-      "dev-draw-annotation"
     ]
   }
 }

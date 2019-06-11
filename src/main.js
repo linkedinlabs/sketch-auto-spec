@@ -1,4 +1,4 @@
-import { fromNative, Settings } from 'sketch';
+import { fromNative } from 'sketch';
 
 import Crawler from './Crawler';
 import Housekeeper from './Housekeeper';
@@ -6,7 +6,6 @@ import Identifier from './Identifier';
 import Messenger from './Messenger';
 import Painter from './Painter';
 import { getDocument, getSelection } from './Tools';
-import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -109,24 +108,6 @@ const annotateLayer = (context = null) => {
   return null;
 };
 
-/**
- * @description Temporary dev function to quickly draw an instance of a Component annotation.
- *
- * @kind function
- * @name drawAnnotation
- * @param {Object} context The current context (event) received from Sketch.
- */
-const drawAnnotation = (context) => {
-  const { document, selection } = assemble(context);
-  const layer = selection[0];
-  const layerSettings = { annotationText: 'Hello, I am Component' };
-  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, layerSettings);
-
-  const painter = new Painter({ for: selection[0], in: document });
-  painter.addAnnotation();
-  return null;
-};
-
 // listeners -------------------------------------------------
 
 /**
@@ -173,7 +154,6 @@ const onSelectionChange = (context) => {
 // export each used in manifest
 export {
   annotateLayer,
-  drawAnnotation,
   onOpenDocument,
   onSelectionChange,
 };
