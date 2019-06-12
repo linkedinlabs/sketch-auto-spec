@@ -42,12 +42,10 @@ const watchGui = () => {
    */
   const options = {
     identifier: webviewIdentifier,
-    width: 152,
-    height: 64, // height includes title bar, if visible
-    transparent: true,
+    width: 136,
+    height: 46, // height includes title bar, if visible
     frame: false,
     resizable: false,
-    hasShadow: false,
     center: true,
     minimizable: false,
     maximizable: false,
