@@ -1,13 +1,13 @@
 {
   "name": "sketch-speccing",
   "description": "A Sketch plugin for easily spec’ing design system components.",
-  "version": "0.1.0",
+  "version": "1.0.0-beta.7",
   "repository": {
     "type": "git",
-    "url": "https://github.com/linkedinlabs/sketch-auto-spec.git"
+    "url": "git+https://github.com/linkedinlabs/sketch-auto-spec.git"
   },
   "engines": {
-    "sketch": ">=49.0"
+    "sketch": ">=55.0"
   },
   "scripts": {
     "build": "skpm-build",
