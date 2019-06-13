@@ -5,7 +5,7 @@
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
   "version": "0.0.7",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
-  "appcast": "https://raw.githubusercontent.com/github.com/linkedinlabs/sketch-auto-spec/master/.appcast.xml",
+  "appcast": "https://raw.githubusercontent.com/linkedinlabs/sketch-auto-spec/master/.appcast.xml",
   "compatibleVersion": "55.0",
   "bundleVersion": 1,
   "commands": [
