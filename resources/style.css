@@ -61,6 +61,12 @@ svg {
   background: #fff;
 }
 
+@media (prefers-color-scheme: dark) {
+  .actions {
+    background: #141517;
+  }
+}
+
 .actions ul {
   display: flex;
   justify-content: space-between;
@@ -80,6 +86,12 @@ svg {
 .actions ul li.action-close {
   width: 46px;
   border-right: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .actions ul li.action-close {
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
+  }
 }
 
 .actions li a {
@@ -124,6 +136,13 @@ svg polygon {
   fill: rgba(0, 0, 0, 0.6);
 }
 
+@media (prefers-color-scheme: dark) {
+  svg path,
+  svg polygon {
+    fill: rgba(255, 255, 255, 0.7);
+  }
+}
+
 @media (hover: hover) {
   a:hover svg path,
   a:hover svg polygon {
@@ -137,6 +156,17 @@ svg polygon {
 
   .actions li.action-measure a:hover svg polygon {
     fill: rgba(0, 0, 0, 0.6);
+  }
+}
+
+@media (prefers-color-scheme: dark) and (hover: hover) {
+  a:hover svg path,
+  a:hover svg polygon {
+    fill: rgba(255, 255, 255, 0.9);
+  }
+
+  .actions li.action-measure a:hover svg polygon {
+    fill: rgba(255, 255, 255, 0.6);
   }
 }
 
