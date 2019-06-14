@@ -80,17 +80,9 @@ export default class Identifier {
 
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
-    const { id, symbolId, type } = layerJSON;
+    const { id, symbolId } = layerJSON;
 
     this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
-
-    // return if we do not actually have a Symbol selected
-    if (!symbolId) {
-      // result.status = 'error';
-      // result.messages.log = `${id} is not a SymbolInstance; it is a ${type}`;
-      // result.messages.toast = '🆘 This layer is not a Symbol.';
-      // return result;
-    }
 
     if (symbolId) {
       // use the API to find the MasterSymbol instance based on the `symbolId`
