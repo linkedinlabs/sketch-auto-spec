@@ -53,10 +53,12 @@ export default class Identifier {
     this.messenger = messenger;
   }
 
-  /** WIP
-   * @description Identifies the Kit-verified master symbol name of a layer and adds it to the
-   * layer’s settings object: Cross-references a symbol’s `symbolId` with the master symbol
-   * instance, and looks the name up from connected Lingo Kit symbols.
+  /**
+   * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
+   * layer name of a layer, and adds the name to the layer’s settings object:
+   * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
+   * and then looking the name up in the connected Lingo Kit symbols, or matching the layer to
+   * the Lingo Kit list of layers.
    *
    * @kind function
    * @name getLingoName
@@ -84,6 +86,7 @@ export default class Identifier {
 
     this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
 
+    // locate a symbol in Lingo
     if (symbolId) {
       // use the API to find the MasterSymbol instance based on the `symbolId`
       const masterSymbol = this.documentData.symbolWithID(symbolId);
@@ -93,7 +96,7 @@ export default class Identifier {
       // parse the connected Lingo Kit data and find the corresponding Kit Symbol
       const kitSymbol = kitSymbols[masterSymbolId];
 
-      // could not find a matching master symbole in the Lingo Kit
+      // could not find a matching master symbol in the Lingo Kit
       if (!kitSymbol) {
         result.status = 'error';
         result.messages.log = `${masterSymbolId} was not found in a connected Lingo Kit`;
@@ -115,9 +118,10 @@ export default class Identifier {
       return result;
     }
 
+    // locate a layer in Lingo
     const kitLayer = kitLayers[id];
 
-    // could not find a matching master symbole in the Lingo Kit
+    // could not find a matching layer in the Lingo Kit
     if (!kitLayer) {
       result.status = 'error';
       result.messages.log = `${id} was not found in a connected Lingo Kit`;
@@ -127,10 +131,10 @@ export default class Identifier {
 
     // take only the last segment of the name (after a “/”, if available)
     let kitLayerNameClean = kitLayer.name.split('/').pop();
-    // otherwise, fall back to the kit symbol name
+    // otherwise, fall back to the kit layer name
     kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
 
-    // set `annotationText` on the layer settings as the kit symbol name
+    // set `annotationText` on the layer settings as the kit layer name
     setAnnotationTextSettings(kitLayerNameClean, this.layer);
 
     // log the official name alongside the original layer name and set as success
