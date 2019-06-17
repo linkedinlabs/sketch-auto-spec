@@ -20,10 +20,15 @@ import {
  * @name buildAnnotationElements
  * @param {Object} artboard The artboard to draw within.
  * @param {Object} annotationText The text for the annotation.
+ * @param {string} type A string representing the type of annotation (component or foundation).
  * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
  * @private
  */
-const buildAnnotationElements = (artboard, annotationText) => {
+const buildAnnotationElements = (artboard, annotationText, type = 'component') => {
+  let colorHex = '#027aff';
+  if (type === 'foundation') {
+    colorHex = '#f5a623';
+  }
   // build the text box
   const text = new Text({
     frame: {
@@ -57,7 +62,7 @@ const buildAnnotationElements = (artboard, annotationText) => {
         enabled: false,
         thickness: 0,
       }],
-      fills: ['#027affff'],
+      fills: [`${colorHex}ff`],
     },
   });
 
@@ -78,7 +83,7 @@ const buildAnnotationElements = (artboard, annotationText) => {
         enabled: false,
         thickness: 0,
       }],
-      fills: ['#027affff'],
+      fills: [`${colorHex}ff`],
     },
     transform: {
       rotation: 45,
