@@ -18,15 +18,16 @@ import {
  *
  * @kind function
  * @name buildAnnotationElements
- * @param {Object} artboard The artboard to draw within.
  * @param {Object} annotationText The text for the annotation.
- * @param {string} type A string representing the type of annotation (component or foundation).
+ * @param {string} annotationType A string representing the type of annotation
+ * (component or foundation).
+ * @param {Object} artboard The artboard to draw within.
  * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
  * @private
  */
-const buildAnnotationElements = (artboard, annotationText, type = 'component') => {
+const buildAnnotationElements = (annotationText, annotationType = 'component', artboard) => {
   let colorHex = '#027aff';
-  if (type === 'foundation') {
+  if (annotationType === 'foundation') {
     colorHex = '#f5a623';
   }
   // build the text box
@@ -391,7 +392,7 @@ export default class Painter {
     }
 
     // set up some information
-    const { annotationText } = layerSettings;
+    const { annotationText, annotationType } = layerSettings;
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
     const groupName = `Annotation for ${layerName}`;
@@ -422,7 +423,11 @@ export default class Painter {
     }
 
     // construct the base annotation elements
-    const annotationElements = buildAnnotationElements(this.artboard, annotationText);
+    const annotationElements = buildAnnotationElements(
+      annotationText,
+      annotationType,
+      this.artboard,
+    );
 
     // group and position the base annotation elements
     const layerFrame = {

@@ -9,18 +9,21 @@ import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
  * @kind function
  * @name setAnnotationTextSettings
  * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationType The type of annotation (`component` or `foundation`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
  */
-const setAnnotationTextSettings = (annotationText, layer) => {
+const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
 
   // set `annotationText` on the layer settings
   if (!layerSettings) {
     layerSettings = {
       annotationText,
+      annotationType,
     };
   } else {
     layerSettings.annotationText = annotationText;
+    layerSettings.annotationType = annotationType;
   }
 
   // commit the settings update
@@ -110,7 +113,7 @@ export default class Identifier {
       kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(kitSymbolNameClean, this.layer);
+      setAnnotationTextSettings(kitSymbolNameClean, 'component', this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -135,7 +138,7 @@ export default class Identifier {
     kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
 
     // set `annotationText` on the layer settings as the kit layer name
-    setAnnotationTextSettings(kitLayerNameClean, this.layer);
+    setAnnotationTextSettings(kitLayerNameClean, 'component', this.layer);
 
     // log the official name alongside the original layer name and set as success
     result.status = 'success';
@@ -203,7 +206,7 @@ export default class Identifier {
 
     const customName = customInput.value;
     // set `annotationText` on the layer settings as the custom name
-    setAnnotationTextSettings(customName, this.layer);
+    setAnnotationTextSettings(customName, 'component', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';
