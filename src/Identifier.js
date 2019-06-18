@@ -58,7 +58,7 @@ export default class Identifier {
 
   /** WIP
    * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
-   * layer name of a layer, and adds the name to the layer’s settings object:
+   * layer name of a layer, and adds the name to the layer’s `annotationText` settings object:
    * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
    * and then looking the name up in the connected Lingo Kit symbols, or matching the layer to
    * the Lingo Kit list of layers.
@@ -186,10 +186,10 @@ export default class Identifier {
    * and need to be rechecked each time, wheras Custom annotations do not.
    *
    * @kind function
-   * @name hasCustomName
+   * @name hasCustomText
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  hasCustomName() {
+  hasCustomText() {
     const result = INITIAL_RESULT_STATE;
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
@@ -200,10 +200,10 @@ export default class Identifier {
       && (layerSettings.annotationType === 'custom')
     ) {
       result.status = 'success';
-      result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
+      result.messages.log = `Custom text set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
     } else {
       result.status = 'error';
-      result.messages.log = `No name is set for “${this.layer.name()}”`;
+      result.messages.log = `No custom text is set for “${this.layer.name()}”`;
     }
 
     return result;
@@ -214,10 +214,10 @@ export default class Identifier {
    * annotation text and adds the text to the layer’s settings object.
    *
    * @kind function
-   * @name setName
+   * @name setText
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  setName() {
+  setText() {
     const result = INITIAL_RESULT_STATE;
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
     let initialValue = this.layer.name();
@@ -240,17 +240,17 @@ export default class Identifier {
     if (customInput.error) {
       // most likely the user canceled the input
       result.status = 'error';
-      result.messages.log = 'Set name was canceled by user';
+      result.messages.log = 'Set text was canceled by user';
       return result;
     }
 
-    const customName = customInput.value;
-    // set `annotationText` on the layer settings as the custom name
-    setAnnotationTextSettings(customName, 'custom', this.layer);
+    const customText = customInput.value;
+    // set `annotationText` on the layer settings as the custom text
+    setAnnotationTextSettings(customText, 'custom', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';
-    result.messages.log = `Custom Name set for “${this.layer.name()}” is “${customName}”`;
+    result.messages.log = `Custom Text set for “${this.layer.name()}” is “${customText}”`;
     return result;
   }
 }

@@ -69,31 +69,31 @@ const annotateLayer = (context = null) => {
     const painter = new Painter({ for: layer, in: document });
 
     // determine the annotation text
-    let hasName = false;
-    const hasCustomNameResult = layerToAnnotate.hasCustomName();
+    let hasText = false;
+    const hasCustomTextResult = layerToAnnotate.hasCustomText();
 
-    if (hasCustomNameResult.status === 'error') {
-      let setNameResult = null;
+    if (hasCustomTextResult.status === 'error') {
+      let setTextResult = null;
       const getLingoNameResult = layerToAnnotate.getLingoName();
       if (getLingoNameResult.status === 'error') {
         messenger.handleResult(getLingoNameResult);
 
-        setNameResult = layerToAnnotate.setName();
-        messenger.handleResult(setNameResult);
+        setTextResult = layerToAnnotate.setText();
+        messenger.handleResult(setTextResult);
 
-        if (setNameResult.status === 'success') {
-          hasName = true;
+        if (setTextResult.status === 'success') {
+          hasText = true;
         }
       } else {
-        hasName = true;
+        hasText = true;
       }
     } else {
-      hasName = true;
+      hasText = true;
     }
 
     // draw the annotation (if the text exists)
     let paintResult = null;
-    if (hasName) {
+    if (hasText) {
       paintResult = painter.addAnnotation();
     }
 
@@ -148,10 +148,10 @@ const annotateLayerCustom = (context = null) => {
   const painter = new Painter({ for: layer, in: document });
 
   // determine the annotation text
-  const setNameResult = layerToAnnotate.setName();
-  messenger.handleResult(setNameResult);
+  const setTextResult = layerToAnnotate.setText();
+  messenger.handleResult(setTextResult);
 
-  if (setNameResult.status === 'success') {
+  if (setTextResult.status === 'success') {
     // draw the annotation (if the text exists)
     let paintResult = null;
     paintResult = painter.addAnnotation();
