@@ -182,14 +182,14 @@ export default class Identifier {
 
   /**
    * @description Checks the layer’s settings object for the existence of `annotationText` and
-   * and that `annotationType` is not 'foundation' (Foundation annotations can be easily updated
-   * and need to be rechecked each time.
+   * and that `annotationType` is 'custom' (Component and Style annotations can be easily updated
+   * and need to be rechecked each time, wheras Custom annotations do not.
    *
    * @kind function
-   * @name hasName
+   * @name hasCustomName
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  hasName() {
+  hasCustomName() {
     const result = INITIAL_RESULT_STATE;
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
@@ -197,7 +197,7 @@ export default class Identifier {
     if (
       layerSettings
       && layerSettings.annotationText
-      && (layerSettings.annotationType !== 'foundation')
+      && (layerSettings.annotationType === 'custom')
     ) {
       result.status = 'success';
       result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;

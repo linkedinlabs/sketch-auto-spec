@@ -70,9 +70,9 @@ const annotateLayer = (context = null) => {
 
     // determine the annotation text
     let hasName = false;
-    const hasNameResult = layerToAnnotate.hasName();
+    const hasCustomNameResult = layerToAnnotate.hasCustomName();
 
-    if (hasNameResult.status === 'error') {
+    if (hasCustomNameResult.status === 'error') {
       let setNameResult = null;
       const getLingoNameResult = layerToAnnotate.getLingoName();
       if (getLingoNameResult.status === 'error') {
