@@ -56,12 +56,12 @@ export default class Identifier {
     this.messenger = messenger;
   }
 
-  /** WIP
+  /**
    * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
    * layer name of a layer, and adds the name to the layer’s `annotationText` settings object:
-   * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
-   * and then looking the name up in the connected Lingo Kit symbols, or matching the layer to
-   * the Lingo Kit list of layers.
+   * The identification is achieved by cross-referencing a symbol’s `symbolId` with the master
+   * symbol instance, and then looking the name up in the connected Lingo Kit symbols, or by
+   * matching the layer to the Lingo Kit list of layers.
    *
    * @kind function
    * @name getLingoName
@@ -129,14 +129,6 @@ export default class Identifier {
 
     // locate a layer in Lingo
     const kitLayer = kitLayers[id];
-
-    // could not find a matching layer in the Lingo Kit
-    // if (!kitLayer) {
-    //   result.status = 'error';
-    //   result.messages.log = `${id} was not found in a connected Lingo Kit`;
-    //   result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
-    //   return result;
-    // }
 
     if (kitLayer) {
       // take only the last segment of the name (after a “/”, if available)
