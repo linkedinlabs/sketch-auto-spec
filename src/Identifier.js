@@ -56,7 +56,7 @@ export default class Identifier {
     this.messenger = messenger;
   }
 
-  /**
+  /** WIP
    * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
    * layer name of a layer, and adds the name to the layer’s settings object:
    * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
@@ -181,7 +181,9 @@ export default class Identifier {
   }
 
   /**
-   * @description Checks the layer’s settings object for the existence of `annotationText`.
+   * @description Checks the layer’s settings object for the existence of `annotationText` and
+   * and that `annotationType` is not 'foundation' (Foundation annotations can be easily updated
+   * and need to be rechecked each time.
    *
    * @kind function
    * @name hasName
@@ -192,7 +194,11 @@ export default class Identifier {
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for existing `annotationText`
-    if (layerSettings && layerSettings.annotationText) {
+    if (
+      layerSettings
+      && layerSettings.annotationText
+      && (layerSettings.annotationType !== 'foundation')
+    ) {
       result.status = 'success';
       result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
     } else {
