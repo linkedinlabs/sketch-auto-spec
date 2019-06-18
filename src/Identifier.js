@@ -9,7 +9,7 @@ import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
  * @kind function
  * @name setAnnotationTextSettings
  * @param {string} annotationText The text to add to the layer’s settings.
- * @param {string} annotationType The type of annotation (`component` or `foundation`).
+ * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
  */
 const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
@@ -164,7 +164,7 @@ export default class Identifier {
         kitStyleNameClean = !kitStyleNameClean ? kitStyle.name : kitStyleNameClean;
 
         // set `annotationText` on the layer settings as the kit layer name
-        setAnnotationTextSettings(kitStyleNameClean, 'foundation', this.layer);
+        setAnnotationTextSettings(kitStyleNameClean, 'style', this.layer);
 
         // log the official name alongside the original layer name and set as success
         result.status = 'success';
@@ -246,7 +246,7 @@ export default class Identifier {
 
     const customName = customInput.value;
     // set `annotationText` on the layer settings as the custom name
-    setAnnotationTextSettings(customName, 'component', this.layer);
+    setAnnotationTextSettings(customName, 'custom', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';

@@ -27,7 +27,7 @@ import {
  */
 const buildAnnotationElements = (annotationText, annotationType = 'component', artboard) => {
   let colorHex = '#027aff';
-  if (annotationType === 'foundation') {
+  if (annotationType === 'style') {
     colorHex = '#f5a623';
   }
   // build the text box
