@@ -82,10 +82,16 @@ export default class Identifier {
     }
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
     const kitLayers = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layers;
+    const kitLayerStyles = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layerStyles;
+    const kitTextStyles = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.textStyles;
 
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
-    const { id, symbolId } = layerJSON;
+    const {
+      id,
+      sharedStyleId,
+      symbolId,
+    } = layerJSON;
 
     this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
 
@@ -125,24 +131,52 @@ export default class Identifier {
     const kitLayer = kitLayers[id];
 
     // could not find a matching layer in the Lingo Kit
-    if (!kitLayer) {
-      result.status = 'error';
-      result.messages.log = `${id} was not found in a connected Lingo Kit`;
-      result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
+    // if (!kitLayer) {
+    //   result.status = 'error';
+    //   result.messages.log = `${id} was not found in a connected Lingo Kit`;
+    //   result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
+    //   return result;
+    // }
+
+    if (kitLayer) {
+      // take only the last segment of the name (after a “/”, if available)
+      let kitLayerNameClean = kitLayer.name.split('/').pop();
+      // otherwise, fall back to the kit layer name
+      kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
+
+      // set `annotationText` on the layer settings as the kit layer name
+      setAnnotationTextSettings(kitLayerNameClean, 'component', this.layer);
+
+      // log the official name alongside the original layer name and set as success
+      result.status = 'success';
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitLayerNameClean}”`;
       return result;
     }
 
-    // take only the last segment of the name (after a “/”, if available)
-    let kitLayerNameClean = kitLayer.name.split('/').pop();
-    // otherwise, fall back to the kit layer name
-    kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
+    // locate a shared style in Lingo
+    if (sharedStyleId) {
+      const kitStyle = kitLayerStyles[sharedStyleId] || kitTextStyles[sharedStyleId];
 
-    // set `annotationText` on the layer settings as the kit layer name
-    setAnnotationTextSettings(kitLayerNameClean, 'component', this.layer);
+      if (kitStyle) {
+        // take only the last segment of the name (after a “/”, if available)
+        let kitStyleNameClean = kitStyle.name.split('/').pop();
+        // otherwise, fall back to the kit layer name
+        kitStyleNameClean = !kitStyleNameClean ? kitStyle.name : kitStyleNameClean;
 
-    // log the official name alongside the original layer name and set as success
-    result.status = 'success';
-    result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitLayerNameClean}”`;
+        // set `annotationText` on the layer settings as the kit layer name
+        setAnnotationTextSettings(kitStyleNameClean, 'foundation', this.layer);
+
+        // log the official name alongside the original layer name and set as success
+        result.status = 'success';
+        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${kitStyleNameClean}”`;
+        return result;
+      }
+    }
+
+    // could not find a matching layer in the Lingo Kit
+    result.status = 'error';
+    result.messages.log = `${id} was not found in a connected Lingo Kit`;
+    result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
     return result;
   }
 
