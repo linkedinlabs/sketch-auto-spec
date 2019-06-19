@@ -32,6 +32,14 @@ const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   return null;
 };
 
+const cleanName = (name) => {
+  // take only the last segment of the name (after a “/”, if available)
+  let cleanedName = name.split('/').pop();
+  // otherwise, fall back to the kit layer name
+  cleanedName = !cleanedName ? name : cleanedName;
+  return cleanedName;
+};
+
 // --- main Identifier class function
 /**
  * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
@@ -114,16 +122,14 @@ export default class Identifier {
       }
 
       // take only the last segment of the name (after a “/”, if available)
-      let kitSymbolNameClean = kitSymbol.name.split('/').pop();
-      // otherwise, fall back to the kit symbol name
-      kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
+      const textToSet = cleanName(kitSymbol.name);
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(kitSymbolNameClean, 'component', this.layer);
+      setAnnotationTextSettings(textToSet, 'component', this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
-      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
       return result;
     }
 
@@ -132,16 +138,14 @@ export default class Identifier {
 
     if (kitLayer) {
       // take only the last segment of the name (after a “/”, if available)
-      let kitLayerNameClean = kitLayer.name.split('/').pop();
-      // otherwise, fall back to the kit layer name
-      kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
+      const textToSet = cleanName(kitLayer.name);
 
       // set `annotationText` on the layer settings as the kit layer name
-      setAnnotationTextSettings(kitLayerNameClean, 'component', this.layer);
+      setAnnotationTextSettings(textToSet, 'component', this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
-      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitLayerNameClean}”`;
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
       return result;
     }
 
@@ -151,16 +155,14 @@ export default class Identifier {
 
       if (kitStyle) {
         // take only the last segment of the name (after a “/”, if available)
-        let kitStyleNameClean = kitStyle.name.split('/').pop();
-        // otherwise, fall back to the kit layer name
-        kitStyleNameClean = !kitStyleNameClean ? kitStyle.name : kitStyleNameClean;
+        const textToSet = cleanName(kitStyle.name);
 
         // set `annotationText` on the layer settings as the kit layer name
-        setAnnotationTextSettings(kitStyleNameClean, 'style', this.layer);
+        setAnnotationTextSettings(textToSet, 'style', this.layer);
 
         // log the official name alongside the original layer name and set as success
         result.status = 'success';
-        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${kitStyleNameClean}”`;
+        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
         return result;
       }
     }
