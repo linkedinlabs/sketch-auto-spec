@@ -211,6 +211,92 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
   return group;
 };
 
+/** WIP
+ * @description Builds the parent container group that holds all of the annotations and makes
+ * updates to the accompanying document settings object.
+ *
+ * @kind function
+ * @name drawContainerGroupElements
+ * @param {Object} artboard The artboard to draw within.
+ * @param {Object} documentSettings An instance of the document’s settings object.
+ * @returns {Object} The container group layer object and the accompanying
+ * updated document settings object.
+ * @private
+ */
+const drawContainerGroupElements = (groupSettings) => {
+  const {
+    name,
+    width,
+    height,
+    parent,
+    keystone,
+  } = groupSettings;
+
+  const containerGroup = new Group({
+    frame: {
+      x: 0,
+      y: 0,
+      width,
+      height,
+    },
+    locked: true,
+    name,
+    parent,
+  });
+
+  if (keystone) {
+    // add placeholder rectangle to keep everything relative to 0, 0 on the artboard
+    new ShapePath({ // eslint-disable-line no-new
+      frame: new Rectangle(0, 0, 1, 1),
+      locked: true,
+      name: '--- keystone - please DO NOT delete me 🤗',
+      parent: containerGroup,
+    });
+  }
+
+  return containerGroup;
+};
+
+/** WIP
+ * @description Builds the parent container group that holds all of the annotations and makes
+ * updates to the accompanying document settings object.
+ *
+ * @kind function
+ * @name createInnerContainerGroup
+ * @param {Object} artboard The artboard to draw within.
+ * @param {Object} documentSettings An instance of the document’s settings object.
+ * @returns {Object} The container group layer object and the accompanying
+ * updated document settings object.
+ * @private
+ */
+const createInnerContainerGroup = (
+  containerGroupLayer,
+  containerSet,
+  annotationType,
+) => {
+  // const containerId = fromNative(containerGroupLayer).id;
+  const groupName = (annotationType === 'style') ? 'Foundation Annotations' : 'Component Annotations';
+  const groupKey = (annotationType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
+
+  // set up new container group layer on the artboard
+  const newInnerContainerGroup = drawContainerGroupElements({
+    name: groupName,
+    parent: containerGroupLayer,
+    width: containerGroupLayer.frame.width,
+    height: containerGroupLayer.frame.height,
+    keystone: true,
+  });
+
+  // update the `containerSet` object
+  const updatedContainerSet = containerSet;
+  updatedContainerSet[groupKey] = newInnerContainerGroup.id;
+
+  return {
+    newInnerContainerGroup,
+    updatedContainerSet,
+  };
+};
+
 /**
  * @description Builds the parent container group that holds all of the annotations and makes
  * updates to the accompanying document settings object.
@@ -223,26 +309,19 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
  * updated document settings object.
  * @private
  */
-const createContainerGroup = (artboard, documentSettings) => {
+const createContainerGroup = (
+  artboard,
+  documentSettings,
+  annotationType,
+) => {
   const artboardId = fromNative(artboard).id;
-  const newContainerGroup = new Group({
-    frame: {
-      x: 0,
-      y: 0,
-      width: artboard.frame().width(),
-      height: artboard.frame().height(),
-    },
-    locked: true,
+  // set up new container group layer on the artboard
+  const newContainerGroup = drawContainerGroupElements({
     name: `+++ ${PLUGIN_NAME} Annotations +++`,
     parent: artboard,
-  });
-
-  // add placeholder rectangle to keep everything relative to 0, 0 on the artboard
-  new ShapePath({ // eslint-disable-line no-new
-    frame: new Rectangle(0, 0, 1, 1),
-    locked: true,
-    name: '--- keystone - please DO NOT delete me 🤗',
-    parent: newContainerGroup,
+    width: artboard.frame().width(),
+    height: artboard.frame().height(),
+    keystone: false,
   });
 
   // new object with IDs to add to settings
@@ -251,16 +330,23 @@ const createContainerGroup = (artboard, documentSettings) => {
     id: newContainerGroup.id,
   };
 
+  const cicgResult = createInnerContainerGroup(
+    newContainerGroup,
+    newContainerGroupSet,
+    annotationType,
+  );
+
   // update the `documentSettings` array
   const newDocumentSettings = updateArray(
     'containerGroups',
-    newContainerGroupSet,
+    cicgResult.updatedContainerSet,
     documentSettings,
     'add',
   );
 
   return {
     newContainerGroup,
+    newInnerContainerGroup: cicgResult.newInnerContainerGroup,
     newDocumentSettings,
   };
 };
@@ -270,37 +356,44 @@ const createContainerGroup = (artboard, documentSettings) => {
  * updates the document settings (if a new container group has been created).
  *
  * @kind function
- * @name createContainerGroup
+ * @name setContainerGroup
  * @param {Object} artboard The artboard to draw within.
  * @param {Object} document The document to draw within.
  * @returns {Object} The container group layer.
  * @private
  */
-const setContainerGroup = (artboard, document) => {
+const setContainerGroup = (artboard, document, annotationType) => {
+  const groupKey = (annotationType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
   let containerGroup = null;
   let containerGroupId = null;
+  let containerGroupSet = null;
+  let innerContainerGroup = null;
+  let innerContainerGroupId = null;
 
   // find the existing `containerGroup` (if it exists)
   if (documentSettings && documentSettings.containerGroups) {
     documentSettings.containerGroups.forEach((containerGroupLookupPair) => {
       if (containerGroupLookupPair.artboardId === artboardId) {
         containerGroupId = containerGroupLookupPair.id;
+        containerGroupSet = containerGroupLookupPair;
+        innerContainerGroupId = containerGroupLookupPair[groupKey];
       }
       return null;
     });
     containerGroup = document.getLayerWithID(containerGroupId);
+    innerContainerGroup = document.getLayerWithID(innerContainerGroupId);
   }
 
   // create a new `containerGroup` if one does not exist (or it cannot be found)
-  if (!containerGroup) {
+  if (!containerGroup || !innerContainerGroup) {
     let newDocumentSettings = {};
     if (documentSettings) {
       newDocumentSettings = documentSettings;
     }
 
-    // remove the ID that cannot be found from the `newDocumentSettings` array
+    // remove the existing lookup pair so it does not conflict with the new one
     if (containerGroupId) {
       newDocumentSettings = updateArray(
         'containerGroups',
@@ -310,10 +403,33 @@ const setContainerGroup = (artboard, document) => {
       );
     }
 
-    // create the new `containerGroup` layer (and update the settings array to include it)
-    const ccgResult = createContainerGroup(artboard, newDocumentSettings);
-    containerGroup = ccgResult.newContainerGroup;
-    newDocumentSettings = ccgResult.newDocumentSettings; // eslint-disable-line prefer-destructuring
+
+    // if the entire `containerGroup` is missing, add a new one
+    if (!containerGroup) {
+      // create the new `containerGroup` layer, inner layer and
+      // update the settings array to include them
+      const ccgResult = createContainerGroup(artboard, newDocumentSettings, annotationType);
+      containerGroup = ccgResult.newContainerGroup;
+      innerContainerGroup = ccgResult.newInnerContainerGroup;
+      newDocumentSettings = ccgResult.newDocumentSettings; // eslint-disable-line prefer-destructuring, max-len
+    } else {
+      // if only the `innerContainerGroup` for this `annotationType` is missing, add it
+      const cicgResult = createInnerContainerGroup(
+        containerGroup,
+        containerGroupSet,
+        annotationType,
+      );
+
+      innerContainerGroup = cicgResult.newInnerContainerGroup;
+
+      // update the `newDocumentSettings` array
+      newDocumentSettings = updateArray(
+        'containerGroups',
+        cicgResult.updatedContainerSet,
+        newDocumentSettings,
+        'add',
+      );
+    }
 
     // commit the `Settings` update
     Settings.setDocumentSettingForKey(
@@ -326,7 +442,7 @@ const setContainerGroup = (artboard, document) => {
   // move the group layer to the front
   fromNative(containerGroup).moveToFront();
 
-  return containerGroup;
+  return { containerGroup, innerContainerGroup };
 };
 
 // --- main Painter class function
@@ -398,7 +514,11 @@ export default class Painter {
     const groupName = `Annotation for ${layerName}`;
 
     // create or locate the container group
-    const containerGroup = setContainerGroup(this.artboard, this.document);
+    const { containerGroup, innerContainerGroup } = setContainerGroup(
+      this.artboard,
+      this.document,
+      annotationType,
+    );
 
     // retrieve document settings
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
@@ -439,7 +559,7 @@ export default class Painter {
       index: fromNative(this.layer).index,
     };
     const group = positionAnnotationElements(
-      containerGroup,
+      innerContainerGroup,
       groupName,
       annotationElements,
       layerFrame,
