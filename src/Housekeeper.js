@@ -27,25 +27,19 @@ export default class Housekeeper {
    * @kind function
    * @name runMigrations
    *
+   * @param {Object} comparisonKeys An object containing a `mainKey` and `secondaryKey` used
    * @param {Object} pluginSettings An object containing the plugin settings.
    * @param {Object} documentSettings An object containing the document settings.
-   * @param {Object} comparisonKeys An object containing a `mainKey` and `secondaryKey` used
    * in addition to `id` to compare layer ID sets between plugin and document settings.
    * @returns {Object} Returns an object containing (potentially) updated `documentSettings` and
    * `pluginSettings` objects, and a `changed` flag indicating updates.
    */
-  fromPluginToDocument(pluginSettings, documentSettings, comparisonKeys) {
+  fromPluginToDocument(comparisonKeys, pluginSettings, documentSettings = {}) {
     const { mainKey, secondaryKey, newMainKey } = comparisonKeys;
     const mainKeyToUse = newMainKey || mainKey;
-    let settingsChanged = false;
-    let newDocumentSettings = documentSettings;
+    const newDocumentSettings = documentSettings;
     let newPluginSettings = pluginSettings;
-
-    // set up `documentSettings` placeholder
-    if (!newDocumentSettings) {
-      newDocumentSettings = {};
-      newDocumentSettings[mainKey] = [];
-    }
+    let settingsChanged = false;
 
     // set up placeholder in `documentSettings` for the main key
     if (!newDocumentSettings[mainKey]) {
@@ -120,9 +114,9 @@ export default class Housekeeper {
       };
       this.messenger.log('Run “containerGroups” settings migration…');
       settingsToUpdate = this.fromPluginToDocument(
+        comparisonKeys,
         settingsToUpdate.pluginSettings,
         settingsToUpdate.documentSettings,
-        comparisonKeys,
       );
     }
 
@@ -135,9 +129,9 @@ export default class Housekeeper {
       };
       this.messenger.log('Run “labeledLayers” settings migration…');
       settingsToUpdate = this.fromPluginToDocument(
+        comparisonKeys,
         settingsToUpdate.pluginSettings,
         settingsToUpdate.documentSettings,
-        comparisonKeys,
       );
     }
 
