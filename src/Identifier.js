@@ -11,6 +11,7 @@ import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
  * @param {string} annotationText The text to add to the layer’s settings.
  * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
+ * @private
  */
 const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
@@ -32,18 +33,19 @@ const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   return null;
 };
 
-/** WIP
- * @description Sets the `annotationText` on a given layer’s settings object.
+/**
+ * @description Checks the Kit name against a list of known Foundation Kit names
+ * and sets `annotationType` appropriately.
  *
  * @kind function
- * @name setAnnotationTextSettings
- * @param {string} annotationText The text to add to the layer’s settings.
- * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
- * @param {Object} layer The Sketch layer object receiving the settings update.
+ * @name checkNameForType
+ * @param {string} name The full name of the Layer.
+ * @returns {string} The `annotationType` – either `component` or `style`.
+ * @private
  */
 const checkNameForType = (name) => {
   let annotationType = 'component';
-  // grab the first segment of the name (before the first “/”)
+  // grab the first segment of the name (before the first “/”) – top-level Kit name
   const kitName = name.split('/')[0];
 
   if (kitName.includes('Icons') || kitName.includes('Illustration')) {
@@ -53,14 +55,14 @@ const checkNameForType = (name) => {
   return annotationType;
 };
 
-/** WIP
- * @description Sets the `annotationText` on a given layer’s settings object.
+/**
+ * @description Removes any Lingo Kit/grouping names from the layer name
  *
  * @kind function
- * @name setAnnotationTextSettings
- * @param {string} annotationText The text to add to the layer’s settings.
- * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
- * @param {Object} layer The Sketch layer object receiving the settings update.
+ * @name cleanName
+ * @param {string} name The full name of the Layer.
+ * @returns {string} The last segment of the layer name as a string.
+ * @private
  */
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
@@ -118,11 +120,8 @@ export default class Identifier {
       result.messages.toast = '🆘 Lingo does not seem to be connected to this file.';
       return result;
     }
-    const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
-    const kitLayers = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layers;
-    const kitLayerStyles = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layerStyles;
-    const kitTextStyles = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.textStyles;
 
+    const lingoData = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes;
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
     const {
@@ -141,7 +140,7 @@ export default class Identifier {
       const masterSymbolId = masterSymbolJSON.id;
 
       // parse the connected Lingo Kit data and find the corresponding Kit Symbol
-      const kitSymbol = kitSymbols[masterSymbolId];
+      const kitSymbol = lingoData.symbols[masterSymbolId];
 
       // could not find a matching master symbol in the Lingo Kit
       if (!kitSymbol) {
@@ -165,7 +164,7 @@ export default class Identifier {
     }
 
     // locate a layer in Lingo
-    const kitLayer = kitLayers[id];
+    const kitLayer = lingoData.layers[id];
 
     if (kitLayer) {
       const symbolType = checkNameForType(kitLayer.name);
@@ -183,7 +182,7 @@ export default class Identifier {
 
     // locate a shared style in Lingo
     if (sharedStyleId) {
-      const kitStyle = kitLayerStyles[sharedStyleId] || kitTextStyles[sharedStyleId];
+      const kitStyle = lingoData.layerStyles[sharedStyleId] || lingoData.textStyles[sharedStyleId];
 
       if (kitStyle) {
         // take only the last segment of the name (after a “/”, if available)
