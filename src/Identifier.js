@@ -1,6 +1,6 @@
 import { fromNative, Settings } from 'sketch';
 import { getInputFromUser, INPUT_TYPE } from 'sketch/ui';
-import { INITIAL_RESULT_STATE, PLUGIN_IDENTIFIER } from './constants';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 // --- private functions
 /**
@@ -65,7 +65,13 @@ export default class Identifier {
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
   getLingoName() {
-    const result = INITIAL_RESULT_STATE;
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
 
     // check for Lingo data - not much else we can do at the moment if it does not exist
     if (
@@ -151,7 +157,13 @@ export default class Identifier {
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
   hasName() {
-    const result = INITIAL_RESULT_STATE;
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for existing `annotationText`
@@ -175,7 +187,13 @@ export default class Identifier {
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
   setName() {
-    const result = INITIAL_RESULT_STATE;
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
     let initialValue = this.layer.name();
 
