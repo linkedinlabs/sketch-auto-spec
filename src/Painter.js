@@ -6,11 +6,7 @@ import {
   Text,
 } from 'sketch/dom';
 import { updateArray } from './Tools';
-import {
-  INITIAL_RESULT_STATE,
-  PLUGIN_IDENTIFIER,
-  PLUGIN_NAME,
-} from './constants';
+import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Sketch file
 /**
@@ -504,7 +500,13 @@ export default class Painter {
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
   addAnnotation() {
-    const result = INITIAL_RESULT_STATE;
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {

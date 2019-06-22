@@ -22,23 +22,7 @@ const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
  */
 const PLUGIN_NAME = 'Spec’ing';
 
-/**
- * @description Initial starting point for tracking the result of an action.
- *
- * @kind constant
- * @name initialResultState
- * @type {Object}
- */
-const INITIAL_RESULT_STATE = {
-  status: null,
-  messages: {
-    toast: null,
-    log: null,
-  },
-};
-
 export {
-  INITIAL_RESULT_STATE,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
 };
