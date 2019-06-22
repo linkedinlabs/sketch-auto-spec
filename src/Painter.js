@@ -443,8 +443,15 @@ const setContainerGroups = (artboard, document, annotationType) => {
     );
   }
 
-  // move the group layer to the front
+  // move the outer container layer to the front
   fromNative(outerGroup).moveToFront();
+
+  // set the order of the inner container layers
+  if (annotationType !== 'style') {
+    fromNative(innerGroup).moveToFront();
+  } else {
+    fromNative(innerGroup).moveToBack();
+  }
 
   return {
     containerGroup: outerGroup,
