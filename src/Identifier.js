@@ -54,9 +54,11 @@ export default class Identifier {
   }
 
   /**
-   * @description Identifies the Kit-verified master symbol name of a layer and adds it to the
-   * layer’s settings object: Cross-references a symbol’s `symbolId` with the master symbol
-   * instance, and looks the name up from connected Lingo Kit symbols.
+   * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
+   * layer name of a layer, and adds the name to the layer’s settings object:
+   * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
+   * and then looking the name up in the connected Lingo Kit symbols, or matching the layer to
+   * the Lingo Kit list of layers.
    *
    * @kind function
    * @name getLingoName
@@ -76,48 +78,68 @@ export default class Identifier {
       return result;
     }
     const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
+    const kitLayers = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layers;
 
     // convert to json to expose params and find the `symbolId`
     const layerJSON = fromNative(this.layer);
-    const { id, symbolId, type } = layerJSON;
+    const { id, symbolId } = layerJSON;
 
     this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
 
-    // return if we do not actually have a Symbol selected
-    if (!symbolId) {
-      result.status = 'error';
-      result.messages.log = `${id} is not a SymbolInstance; it is a ${type}`;
-      result.messages.toast = '🆘 This layer is not a Symbol.';
+    // locate a symbol in Lingo
+    if (symbolId) {
+      // use the API to find the MasterSymbol instance based on the `symbolId`
+      const masterSymbol = this.documentData.symbolWithID(symbolId);
+      const masterSymbolJSON = fromNative(masterSymbol);
+      const masterSymbolId = masterSymbolJSON.id;
+
+      // parse the connected Lingo Kit data and find the corresponding Kit Symbol
+      const kitSymbol = kitSymbols[masterSymbolId];
+
+      // could not find a matching master symbol in the Lingo Kit
+      if (!kitSymbol) {
+        result.status = 'error';
+        result.messages.log = `${masterSymbolId} was not found in a connected Lingo Kit`;
+        result.messages.toast = '😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.';
+        return result;
+      }
+
+      // take only the last segment of the name (after a “/”, if available)
+      let kitSymbolNameClean = kitSymbol.name.split('/').pop();
+      // otherwise, fall back to the kit symbol name
+      kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
+
+      // set `annotationText` on the layer settings as the kit symbol name
+      setAnnotationTextSettings(kitSymbolNameClean, this.layer);
+
+      // log the official name alongside the original layer name and set as success
+      result.status = 'success';
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
       return result;
     }
 
-    // use the API to find the MasterSymbol instance based on the `symbolId`
-    const masterSymbol = this.documentData.symbolWithID(symbolId);
-    const masterSymbolJSON = fromNative(masterSymbol);
-    const masterSymbolId = masterSymbolJSON.id;
+    // locate a layer in Lingo
+    const kitLayer = kitLayers[id];
 
-    // parse the connected Lingo Kit data and find the corresponding Kit Symbol
-    const kitSymbol = kitSymbols[masterSymbolId];
-
-    // could not find a matching master symbole in the Lingo Kit
-    if (!kitSymbol) {
+    // could not find a matching layer in the Lingo Kit
+    if (!kitLayer) {
       result.status = 'error';
-      result.messages.log = `${masterSymbolId} was not found in a connected Lingo Kit`;
-      result.messages.toast = '😢 This symbol could not be found in a connected Lingo Kit. Please make sure your Kits are up-to-date.';
+      result.messages.log = `${id} was not found in a connected Lingo Kit`;
+      result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
       return result;
     }
 
     // take only the last segment of the name (after a “/”, if available)
-    let kitSymbolNameClean = kitSymbol.name.split('/').pop();
-    // otherwise, fall back to the kit symbol name
-    kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
+    let kitLayerNameClean = kitLayer.name.split('/').pop();
+    // otherwise, fall back to the kit layer name
+    kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
 
-    // set `annotationText` on the layer settings as the kit symbol name
-    setAnnotationTextSettings(kitSymbolNameClean, this.layer);
+    // set `annotationText` on the layer settings as the kit layer name
+    setAnnotationTextSettings(kitLayerNameClean, this.layer);
 
     // log the official name alongside the original layer name and set as success
     result.status = 'success';
-    result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
+    result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitLayerNameClean}”`;
     return result;
   }
 
