@@ -32,6 +32,36 @@ const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   return null;
 };
 
+/** WIP
+ * @description Sets the `annotationText` on a given layer’s settings object.
+ *
+ * @kind function
+ * @name setAnnotationTextSettings
+ * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
+ * @param {Object} layer The Sketch layer object receiving the settings update.
+ */
+const checkNameForType = (name) => {
+  let annotationType = 'component';
+  // grab the first segment of the name (before the first “/”)
+  const kitName = name.split('/')[0];
+
+  if (kitName.includes('Icons') || kitName.includes('Illustration')) {
+    annotationType = 'style';
+  }
+
+  return annotationType;
+};
+
+/** WIP
+ * @description Sets the `annotationText` on a given layer’s settings object.
+ *
+ * @kind function
+ * @name setAnnotationTextSettings
+ * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
+ * @param {Object} layer The Sketch layer object receiving the settings update.
+ */
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
   let cleanedName = name.split('/').pop();
@@ -121,11 +151,12 @@ export default class Identifier {
         return result;
       }
 
+      const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitSymbol.name);
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(textToSet, 'component', this.layer);
+      setAnnotationTextSettings(textToSet, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -137,11 +168,12 @@ export default class Identifier {
     const kitLayer = kitLayers[id];
 
     if (kitLayer) {
+      const symbolType = checkNameForType(kitLayer.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitLayer.name);
 
       // set `annotationText` on the layer settings as the kit layer name
-      setAnnotationTextSettings(textToSet, 'component', this.layer);
+      setAnnotationTextSettings(textToSet, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
