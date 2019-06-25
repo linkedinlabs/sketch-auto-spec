@@ -48,7 +48,13 @@ const checkNameForType = (name) => {
   // grab the first segment of the name (before the first “/”) – top-level Kit name
   const kitName = name.split('/')[0];
 
-  if (kitName.includes('Icons') || kitName.includes('Illustration')) {
+  if (
+    kitName.includes('Divider')
+    || kitName.includes('Flood')
+    || kitName.includes('Icons')
+    || kitName.includes('Illustration')
+    || kitName.includes('Logos')
+  ) {
     annotationType = 'style';
   }
 
