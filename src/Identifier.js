@@ -130,8 +130,10 @@ export default class Identifier {
       return result;
     }
 
+    // lingo data from their storage hashes
     const lingoData = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes;
-    // convert to json to expose params and find the `symbolId`
+
+    // convert layer to be identified into json to expose params to match with Lingo
     const layerJSON = fromNative(this.layer);
     const {
       id,
@@ -217,7 +219,7 @@ export default class Identifier {
   /**
    * @description Checks the layer’s settings object for the existence of `annotationText` and
    * and that `annotationType` is 'custom' (Component and Style annotations can be easily updated
-   * and need to be rechecked each time, wheras Custom annotations do not.
+   * and need to be rechecked each time, whereas Custom annotations do not.
    *
    * @kind function
    * @name hasCustomText
