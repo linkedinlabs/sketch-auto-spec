@@ -35,7 +35,6 @@ const INITIAL_RESULT_STATE = {
     toast: null,
     log: null,
   },
-  data: null,
 };
 
 export {

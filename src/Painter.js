@@ -5,73 +5,12 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { findLayerById } from './Tools';
+import { updateArray } from './Tools';
 import {
   INITIAL_RESULT_STATE,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
 } from './constants';
-
-// --- settings/state management
-// good candidate to move this all to its own class once it gets re-used
-
-/**
- * @description Initial starting point for the data layer that connects annotations with
- * layers that have been annotated.
- *
- * @kind constant
- * @name initialSettingsState
- * @type {Object}
- */
-const initialSettingsState = {
-  containerGroups: [],
-  labeledLayers: [],
-};
-
-/**
- * @description Adds or removes data from the data set based on a key and
- * an action (`add` or `remove`).
- *
- * @kind function
- * @name updateSettings
- * @param {string} key String representing the area of Settings to modify.
- * @param {Object} data Object containing the bit of data to add or
- * remove (must include an `id` string).
- * @param {string} action Constant string representing the action to take (`add` or `remove`).
- * @returns {Object} The modified data set.
- * @private
- */
-const updateSettings = (key, data, action = 'add') => {
-  let settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
-
-  if (!settings) {
-    settings = initialSettingsState;
-  }
-
-  if (action === 'add') {
-    if (!settings[key]) {
-      settings[key] = [];
-    }
-
-    settings[key].push(data);
-  }
-
-  if (action === 'remove') {
-    let updatedItems = null;
-    // find the items array index of the item to remove
-    const itemIndex = settings[key].findIndex(foundItem => (foundItem.id === data.id));
-
-    updatedItems = [
-      ...settings[key].slice(0, itemIndex),
-      ...settings[key].slice(itemIndex + 1),
-    ];
-
-    settings[key] = updatedItems;
-  }
-
-  Settings.setSettingForKey(PLUGIN_IDENTIFIER, settings);
-  return settings;
-};
 
 // --- private functions for drawing/positioning annotation elements in the Sketch file
 /**
@@ -267,15 +206,18 @@ const positionAnnotationElements = (containerGroup, groupName, annotationElement
 };
 
 /**
- * @description Builds the parent container group that holds all of the annotations.
+ * @description Builds the parent container group that holds all of the annotations and makes
+ * updates to the accompanying document settings object.
  *
  * @kind function
  * @name createContainerGroup
  * @param {Object} artboard The artboard to draw within.
- * @returns {Object} The container group layer.
+ * @param {Object} documentSettings An instance of the document’s settings object.
+ * @returns {Object} The container group layer object and the accompanying
+ * updated document settings object.
  * @private
  */
-const createContainerGroup = (artboard) => {
+const createContainerGroup = (artboard, documentSettings) => {
   const artboardId = fromNative(artboard).id;
   const newContainerGroup = new Group({
     frame: {
@@ -297,49 +239,85 @@ const createContainerGroup = (artboard) => {
     parent: newContainerGroup,
   });
 
-  const newContainerGroupSetting = {
+  // new object with IDs to add to settings
+  const newContainerGroupSet = {
     artboardId,
     id: newContainerGroup.id,
   };
 
-  updateSettings('containerGroups', newContainerGroupSetting);
+  // update the `documentSettings` array
+  const newDocumentSettings = updateArray(
+    'containerGroups',
+    newContainerGroupSet,
+    documentSettings,
+    'add',
+  );
 
-  return newContainerGroup;
+  return {
+    newContainerGroup,
+    newDocumentSettings,
+  };
 };
 
 /**
- * @description Sets (finds or builds) the parent container group.
+ * @description Sets (finds or builds) the parent container group and
+ * updates the document settings (if a new container group has been created).
  *
  * @kind function
  * @name createContainerGroup
  * @param {Object} artboard The artboard to draw within.
+ * @param {Object} document The document to draw within.
  * @returns {Object} The container group layer.
  * @private
  */
-const setContainerGroup = (artboard) => {
-  const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+const setContainerGroup = (artboard, document) => {
+  const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
   let containerGroup = null;
   let containerGroupId = null;
 
-  if (settings && settings.containerGroups) {
-    settings.containerGroups.forEach((containerGroupLookupPair) => {
+  // find the existing `containerGroup` (if it exists)
+  if (documentSettings && documentSettings.containerGroups) {
+    documentSettings.containerGroups.forEach((containerGroupLookupPair) => {
       if (containerGroupLookupPair.artboardId === artboardId) {
         containerGroupId = containerGroupLookupPair.id;
       }
       return null;
     });
-    containerGroup = findLayerById(artboard.layers(), containerGroupId);
+    containerGroup = document.getLayerWithID(containerGroupId);
   }
 
+  // create a new `containerGroup` if one does not exist (or it cannot be found)
   if (!containerGroup) {
-    if (containerGroupId) {
-      updateSettings('containerGroups', { id: containerGroupId }, 'remove');
+    let newDocumentSettings = {};
+    if (documentSettings) {
+      newDocumentSettings = documentSettings;
     }
-    containerGroup = createContainerGroup(artboard);
+
+    // remove the ID that cannot be found from the `newDocumentSettings` array
+    if (containerGroupId) {
+      newDocumentSettings = updateArray(
+        'containerGroups',
+        { id: containerGroupId },
+        newDocumentSettings,
+        'remove',
+      );
+    }
+
+    // create the new `containerGroup` layer (and update the settings array to include it)
+    const ccgResult = createContainerGroup(artboard, newDocumentSettings);
+    containerGroup = ccgResult.newContainerGroup;
+    newDocumentSettings = ccgResult.newDocumentSettings; // eslint-disable-line prefer-destructuring
+
+    // commit the `Settings` update
+    Settings.setDocumentSettingForKey(
+      document,
+      PLUGIN_IDENTIFIER,
+      newDocumentSettings,
+    );
   }
 
-  // move to the front
+  // move the group layer to the front
   fromNative(containerGroup).moveToFront();
 
   return containerGroup;
@@ -357,8 +335,9 @@ const setContainerGroup = (artboard) => {
  * @property layer The layer in the Sketch file that we want to annotate or modify.
  */
 export default class Painter {
-  constructor({ for: layer }) {
+  constructor({ for: layer, in: document }) {
     this.layer = layer;
+    this.document = document;
     this.artboard = this.layer.parentArtboard();
   }
 
@@ -368,30 +347,35 @@ export default class Painter {
    *
    * @kind function
    * @name removeAnnotation
+   *
    * @param {Object} existingItemData The data object containing a
    * `containerGroupId`, `id` (representting the annotation) and `layerId` representing
    * the original layer that received the annotation.
    */
   removeAnnotation(existingItemData) {
-    const layerContainer = findLayerById(this.artboard.layers(), existingItemData.containerGroupId);
-    if (layerContainer) {
-      const layerToDelete = findLayerById(layerContainer.layers(), existingItemData.id);
-      if (layerToDelete) {
-        fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
-      }
+    const layerToDelete = this.document.getLayerWithID(existingItemData.id);
+    if (layerToDelete) {
+      fromNative(layerToDelete).remove(); // .remove() only works on a js object, not obj-c
     }
   }
 
   /**
-   * @description Takes a layer name and builds the visual annotation on the Sketch artboard.
+   * @description Locates annotation text in a layer’s Settings object and
+   * builds the visual annotation on the Sketch artboard.
    *
    * @kind function
    * @name addAnnotation
-   * @param {Array} annotationText The text for the annotation.
-   * @returns {Object} A result object container success/error bool and log/toast messages.
+   * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  addAnnotation(annotationText = 'New Annotation') {
+  addAnnotation() {
     const result = INITIAL_RESULT_STATE;
+    const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+
+    if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
+      result.status = 'true';
+      result.messages.log = 'Layer missing annotationText';
+      return result;
+    }
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
@@ -402,25 +386,34 @@ export default class Painter {
     }
 
     // set up some information
+    const { annotationText } = layerSettings;
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
     const groupName = `Annotation for ${layerName}`;
-    const settings = Settings.settingForKey(PLUGIN_IDENTIFIER);
 
     // create or locate the container group
-    const containerGroup = setContainerGroup(this.artboard);
+    const containerGroup = setContainerGroup(this.artboard, this.document);
+
+    // retrieve document settings
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+    let newDocumentSettings = documentSettings;
 
     // check if we have already annotated this element and remove the old annotation
-    if (settings && settings.labeledLayers) {
-      const existingItemData = settings.labeledLayers.find(
-        foundItem => (foundItem.originalId === layerId),
-      );
+    if (documentSettings && documentSettings.annotatedLayers) {
+      // remove the old ID pair(s) from the `newDocumentSettings` array
+      documentSettings.annotatedLayers.forEach((layerSet) => {
+        if (layerSet.originalId === layerId) {
+          this.removeAnnotation(layerSet);
 
-      // remove old annotation layer + remove from data
-      if (existingItemData) {
-        updateSettings('labeledLayers', { id: existingItemData.id }, 'remove');
-        this.removeAnnotation(existingItemData);
-      }
+          // remove the ID that cannot be found from the `newDocumentSettings` array
+          newDocumentSettings = updateArray(
+            'annotatedLayers',
+            { id: layerSet.id },
+            newDocumentSettings,
+            'remove',
+          );
+        }
+      });
     }
 
     // construct the base annotation elements
@@ -442,13 +435,27 @@ export default class Painter {
       layerFrame,
     );
 
-    // update data (connect new annotation with layer receiving annotation)
-    const newSettingsEntry = {
+    // new object with IDs to add to settings
+    const newAnnotatedLayerSet = {
       containerGroupId: fromNative(containerGroup).id,
       id: group.id,
       originalId: layerId,
     };
-    updateSettings('labeledLayers', newSettingsEntry);
+
+    // update the `newDocumentSettings` array
+    newDocumentSettings = updateArray(
+      'annotatedLayers',
+      newAnnotatedLayerSet,
+      newDocumentSettings,
+      'add',
+    );
+
+    // commit the `Settings` update
+    Settings.setDocumentSettingForKey(
+      this.document,
+      PLUGIN_IDENTIFIER,
+      newDocumentSettings,
+    );
 
     // return a successful result
     result.status = 'success';

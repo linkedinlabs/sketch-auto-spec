@@ -1,9 +1,10 @@
 import { fromNative, Settings } from 'sketch';
 
 import Crawler from './Crawler';
-import Painter from './Painter';
+import Housekeeper from './Housekeeper';
 import Identifier from './Identifier';
 import Messenger from './Messenger';
+import Painter from './Painter';
 import { getDocument, getSelection } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
@@ -21,11 +22,13 @@ const assemble = (context = null) => {
   const jsDocument = fromNative(objcDocument); // move from obj-c object to JSON object
   const documentData = objcDocument.documentData(); // obj-c object
   const messenger = new Messenger({ for: context, in: jsDocument });
+  const housekeeper = new Housekeeper({ in: jsDocument, messenger });
   const selection = getSelection(objcDocument);
 
   return {
     document: jsDocument,
     documentData,
+    housekeeper,
     messenger,
     selection,
   };
@@ -43,6 +46,7 @@ const assemble = (context = null) => {
  */
 const annotateLayer = (context = null) => {
   const {
+    document,
     documentData,
     messenger,
     selection,
@@ -63,7 +67,7 @@ const annotateLayer = (context = null) => {
       messenger,
     });
     // set up Painter instance for the layer
-    const painter = new Painter({ for: layer });
+    const painter = new Painter({ for: layer, in: document });
 
     // determine the annotation text
     const getNameResult = layerToAnnotate.getName();
@@ -74,7 +78,7 @@ const annotateLayer = (context = null) => {
     // draw the annotation (if the text exists)
     let paintResult = null;
     if (getNameResult.status === 'success') {
-      paintResult = painter.addAnnotation(getNameResult.data);
+      paintResult = painter.addAnnotation();
     }
 
     // read the response from Painter; if it was unsuccessful, log and display the error
@@ -96,21 +100,13 @@ const annotateLayer = (context = null) => {
  * @param {Object} context The current context (event) received from Sketch.
  */
 const drawAnnotation = (context) => {
-  const { selection } = assemble(context);
+  const { document, selection } = assemble(context);
+  const layer = selection[0];
+  const layerSettings = { annotationText: 'Hello, I am Component' };
+  Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, layerSettings);
 
-  const painter = new Painter({ for: selection[0] });
-  painter.addAnnotation('Hello, I am Component');
-  return null;
-};
-
-/**
- * @description Temporary dev function to remove data in the `PLUGIN_IDENTIFIER` namespace.
- *
- * @kind function
- * @name resetData
- */
-const resetData = () => {
-  Settings.setSettingForKey(PLUGIN_IDENTIFIER, null);
+  const painter = new Painter({ for: selection[0], in: document });
+  painter.addAnnotation();
   return null;
 };
 
@@ -125,10 +121,18 @@ const resetData = () => {
  */
 const onOpenDocument = (context) => {
   if (context.actionContext.document) {
-    const { document, messenger } = assemble(context);
+    const {
+      document,
+      housekeeper,
+      messenger,
+    } = assemble(context);
 
     if (document) {
       messenger.log(`Document “${document.id}” Opened 😻`);
+
+      setTimeout(() => {
+        housekeeper.runMigrations();
+      }, 500);
     }
   }
 };
@@ -155,5 +159,4 @@ export {
   drawAnnotation,
   onOpenDocument,
   onSelectionChange,
-  resetData,
 };

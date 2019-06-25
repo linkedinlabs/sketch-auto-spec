@@ -16,12 +16,6 @@
       "handler": "drawAnnotation"
     },
     {
-      "name": "Dev: Reset Data",
-      "identifier": "dev-reset-data",
-      "script": "./main.js",
-      "handler": "resetData"
-    },
-    {
       "name": "Annotate Component",
       "identifier": "annotate-layer",
       "shortcut": "ctrl shift a",
@@ -65,8 +59,7 @@
     "items": [
       "annotate-layer",
       "view-gui",
-      "dev-draw-annotation",
-      "dev-reset-data"
+      "dev-draw-annotation"
     ]
   }
 }
