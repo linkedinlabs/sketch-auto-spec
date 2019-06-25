@@ -47,14 +47,11 @@ const checkNameForType = (name) => {
   let annotationType = 'component';
   // grab the first segment of the name (before the first “/”) – top-level Kit name
   const kitName = name.split('/')[0];
+  // kit name substrings, exclusive to Foundations
+  const foundations = ['Divider', 'Flood', 'Icons', 'Illustration', 'Logos'];
 
-  if (
-    kitName.includes('Divider')
-    || kitName.includes('Flood')
-    || kitName.includes('Icons')
-    || kitName.includes('Illustration')
-    || kitName.includes('Logos')
-  ) {
+  // check if one of the foundation substrings exists in the `kitName`
+  if (foundations.some(foundation => kitName.indexOf(foundation) >= 0)) {
     annotationType = 'style';
   }
 
