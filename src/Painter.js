@@ -109,7 +109,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   };
 };
 
-/**
+/** WIP
  * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
@@ -126,8 +126,9 @@ const buildBoundingBox = (frame, artboard) => {
   const colorOpactiy = '4d'; // 30% opacity
 
   // build the rounded rectangle
-  new ShapePath({ // eslint-disable-line no-new
+  const boundingBoxElement = new ShapePath({
     frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
+    name: 'Bounding Box',
     parent: artboard,
     style: {
       borders: [{
@@ -138,7 +139,7 @@ const buildBoundingBox = (frame, artboard) => {
     },
   });
 
-  return null;
+  return boundingBoxElement;
 };
 
 /**
@@ -244,6 +245,44 @@ const positionAnnotationElements = (
   return group;
 };
 
+const setGroupName = (elementType) => {
+  let groupName = null;
+  switch (elementType) {
+    case 'style':
+      groupName = 'Foundation Annotations';
+      break;
+    case 'component':
+    case 'custom':
+      groupName = 'Component Annotations';
+      break;
+    case 'boundingBox':
+      groupName = 'Bounding Boxes';
+      break;
+    default:
+      groupName = 'Component Annotations';
+  }
+  return groupName;
+};
+
+const setGroupKey = (elementType) => {
+  let groupKey = null;
+  switch (elementType) {
+    case 'style':
+      groupKey = 'styleInnerGroupId';
+      break;
+    case 'component':
+    case 'custom':
+      groupKey = 'componentInnerGroupId';
+      break;
+    case 'boundingBox':
+      groupKey = 'boundingInnerGroupId';
+      break;
+    default:
+      groupKey = 'componentInnerGroupId';
+  }
+  return groupKey;
+};
+
 /**
  * @description Sets up the individual elements for a container group (inner or outer).
  *
@@ -297,6 +336,7 @@ const drawContainerGroupElements = (groupSettings) => {
  * @name createInnerGroup
  * @param {Object} outerGroupLayer The layer to draw within.
  * @param {Object} containerSet An instance of the parent container group’s settings object.
+ * @param {string} elementType A string representing the type of element going inside the continer.
  * @returns {Object} The inner container group layer object and the accompanying
  * updated parent container group settings object.
  * @private
@@ -304,11 +344,10 @@ const drawContainerGroupElements = (groupSettings) => {
 const createInnerGroup = (
   outerGroupLayer,
   containerSet,
-  annotationType,
+  elementType,
 ) => {
-  // const containerId = fromNative(outerGroupLayer).id;
-  const groupName = (annotationType === 'style') ? 'Foundation Annotations' : 'Component Annotations';
-  const groupKey = (annotationType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
+  const groupName = setGroupName(elementType);
+  const groupKey = setGroupKey(elementType);
 
   // set up new container group layer on the artboard
   const newInnerGroup = drawContainerGroupElements({
@@ -337,6 +376,7 @@ const createInnerGroup = (
  * @name createOuterGroup
  * @param {Object} artboard The artboard to draw within.
  * @param {Object} documentSettings An instance of the document’s settings object.
+ * @param {string} elementType A string representing the type of element going inside the continer.
  * @returns {Object} The container group layer object and the accompanying
  * updated document settings object.
  * @private
@@ -344,12 +384,12 @@ const createInnerGroup = (
 const createOuterGroup = (
   artboard,
   documentSettings,
-  annotationType,
+  elementType,
 ) => {
   const artboardId = fromNative(artboard).id;
   // set up new container group layer on the artboard
   const newOuterGroup = drawContainerGroupElements({
-    name: `+++ ${PLUGIN_NAME} Annotations +++`,
+    name: `+++ ${PLUGIN_NAME} +++`,
     parent: artboard,
     width: artboard.frame().width(),
     height: artboard.frame().height(),
@@ -365,7 +405,7 @@ const createOuterGroup = (
   const cigResult = createInnerGroup(
     newOuterGroup,
     newOuterGroupSet,
-    annotationType,
+    elementType,
   );
 
   // update the `documentSettings` array
@@ -394,8 +434,10 @@ const createOuterGroup = (
  * @returns {Object} The container group layer.
  * @private
  */
-const setContainerGroups = (artboard, document, annotationType) => {
-  const groupKey = (annotationType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
+const setContainerGroups = (artboard, document, elementType) => {
+  const groupKey = setGroupKey(elementType);
+
+  // const groupKey = (elementType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
   let outerGroup = null;
@@ -440,16 +482,16 @@ const setContainerGroups = (artboard, document, annotationType) => {
     if (!outerGroup) {
       // create the new `outerGroup` layer, inner layer and
       // update the settings array to include them
-      const cogResult = createOuterGroup(artboard, newDocumentSettings, annotationType);
+      const cogResult = createOuterGroup(artboard, newDocumentSettings, elementType);
       outerGroup = cogResult.newOuterGroup;
       innerGroup = cogResult.newInnerGroup;
       newDocumentSettings = cogResult.newDocumentSettings; // eslint-disable-line prefer-destructuring, max-len
     } else {
-      // if only the `innerGroup` for this `annotationType` is missing, add it
+      // if only the `innerGroup` for this `elementType` is missing, add it
       const cigResult = createInnerGroup(
         outerGroup,
         outerGroupSet,
-        annotationType,
+        elementType,
       );
 
       innerGroup = cigResult.newInnerGroup;
@@ -475,10 +517,17 @@ const setContainerGroups = (artboard, document, annotationType) => {
   fromNative(outerGroup).moveToFront();
 
   // set the order of the inner container layers
-  if (annotationType !== 'style') {
-    fromNative(innerGroup).moveToFront();
-  } else {
-    fromNative(innerGroup).moveToBack();
+  switch (elementType) {
+    case 'component':
+    case 'custom':
+      fromNative(innerGroup).moveToFront();
+      break;
+    case 'boundingBox':
+    case 'style':
+      fromNative(innerGroup).moveToBack();
+      break;
+    default:
+      fromNative(innerGroup).moveToBack();
   }
 
   return {
@@ -657,12 +706,25 @@ export default class Painter {
       },
     };
 
-    buildBoundingBox(frame, this.artboard);
+    // create or locate the container group
+    const { innerContainerGroup } = setContainerGroups(
+      this.artboard,
+      this.document,
+      'boundingBox',
+    );
 
-    result.messages.log = 'Draw me! 🗳';
-    result.messages.toast = 'Draw bounding box 🗳';
+    // draw the bounding box
+    const boundingBox = buildBoundingBox(frame, innerContainerGroup);
 
-    result.status = 'error';
+    if (!boundingBox) {
+      result.status = 'error';
+      result.messages.log = 'Failed to draw the bounding box for a selection';
+      result.messages.toast = 'Hmm… an error occured drawing that bounding box 😬';
+
+      return result;
+    }
+
+    result.status = 'success';
     return result;
   }
 }
