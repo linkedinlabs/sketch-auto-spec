@@ -5,8 +5,8 @@ import { PLUGIN_IDENTIFIER } from './constants';
 // add new migrations to the top
 // `new Date().getTime();` for timestamp
 const migrationKeys = [
-  1561504830673,
-  1561503084280,
+  1561504830674,
+  1561503084281,
 ];
 
 /**
@@ -94,7 +94,11 @@ export default class Housekeeper {
   }
 
   initializeMigrationsSchema() {
-    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+    let documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    if (!documentSettings) {
+      documentSettings = {};
+    }
 
     if (!documentSettings.migrations) {
       documentSettings.migrations = [];
@@ -153,61 +157,11 @@ export default class Housekeeper {
       }
     });
 
-    // const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
-    // const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
-
-    // let settingsToUpdate = {
-    //   pluginSettings,
-    //   documentSettings,
-    //   changed: false,
-    // };
-
-    // if (!pluginSettings) {
-    //   return null;
-    // }
-
-    // // migrate the `containerGroups` into local document settings
-    // if (pluginSettings.containerGroups && pluginSettings.containerGroups.length > 0) {
-    //   const comparisonKeys = {
-    //     mainKey: 'containerGroups',
-    //     secondaryKey: 'artboardId',
-    //   };
-    //   this.messenger.log('Run “containerGroups” settings migration…');
-    //   settingsToUpdate = this.fromPluginToDocument(
-    //     comparisonKeys,
-    //     settingsToUpdate.pluginSettings,
-    //     settingsToUpdate.documentSettings,
-    //   );
-    // }
-
-    // // migrate the `labeledLayers` into local document settings as `annotatedLayeres`
-    // if (pluginSettings.labeledLayers && pluginSettings.labeledLayers.length > 0) {
-    //   const comparisonKeys = {
-    //     mainKey: 'labeledLayers',
-    //     newMainKey: 'annotatedLayers',
-    //     secondaryKey: 'originalId',
-    //   };
-    //   this.messenger.log('Run “labeledLayers” settings migration…');
-    //   settingsToUpdate = this.fromPluginToDocument(
-    //     comparisonKeys,
-    //     settingsToUpdate.pluginSettings,
-    //     settingsToUpdate.documentSettings,
-    //   );
-    // }
-
-    // if (settingsToUpdate.changed) {
-    //   Settings.setDocumentSettingForKey(
-    //     this.document,
-    //     PLUGIN_IDENTIFIER,
-    //     settingsToUpdate.documentSettings,
-    //   );
-    //   Settings.setSettingForKey(PLUGIN_IDENTIFIER, settingsToUpdate.pluginSettings);
-    //   this.messenger.log('Migration: settings were updated');
-    // }
     return null;
   }
 
-  migration1561504830673() {
+  // migrate the `labeledLayers` into local document settings as `annotatedLayeres`
+  migration1561504830674() {
     const result = {
       status: null,
       messages: {
@@ -215,15 +169,60 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1561504830673;
+    const migrationKey = 1561504830674;
+    const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    let settingsToUpdate = {
+      pluginSettings,
+      documentSettings,
+      changed: false,
+    };
+
+    // this app does not have any plugin settings; no further work needed
+    if (!pluginSettings) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    // there are un-migrated `labeledLayers` in the plugin settings; check them
+    if (pluginSettings.labeledLayers && pluginSettings.labeledLayers.length > 0) {
+      const comparisonKeys = {
+        mainKey: 'labeledLayers',
+        newMainKey: 'annotatedLayers',
+        secondaryKey: 'originalId',
+      };
+      this.messenger.log('Run “labeledLayers” settings migration…');
+
+      // if a `labeledLayer` in the plugin settings matches a layer in the docoment,
+      // it will be migrated and removed from `pluginSettings`
+      settingsToUpdate = this.fromPluginToDocument(
+        comparisonKeys,
+        settingsToUpdate.pluginSettings,
+        settingsToUpdate.documentSettings,
+      );
+    }
+
+    // update the document settings, if necessary
+    if (settingsToUpdate.changed) {
+      Settings.setDocumentSettingForKey(
+        this.document,
+        PLUGIN_IDENTIFIER,
+        settingsToUpdate.documentSettings,
+      );
+      Settings.setSettingForKey(PLUGIN_IDENTIFIER, settingsToUpdate.pluginSettings);
+      result.messages.log = `Migration: ${migrationKey} (labeledLayers) Run; settings were updated`;
+    } else {
+      result.messages.log = `Migration: ${migrationKey} (labeledLayers) Run; settings were not updated`;
+    }
 
     result.status = 'success';
-    result.messages.log = `migration: ${migrationKey} ran`;
-
     return result;
   }
 
-  migration1561503084280() {
+  // migrate the `containerGroups` into local document settings
+  migration1561503084281() {
     const result = {
       status: null,
       messages: {
@@ -231,11 +230,54 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1561503084280;
+    const migrationKey = 1561503084281;
+    const pluginSettings = Settings.settingForKey(PLUGIN_IDENTIFIER);
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    let settingsToUpdate = {
+      pluginSettings,
+      documentSettings,
+      changed: false,
+    };
+
+    // this app does not have any plugin settings; no further work needed
+    if (!pluginSettings) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    // there are un-migrated `containerGroups` in the plugin settings; check them
+    if (pluginSettings.containerGroups && pluginSettings.containerGroups.length > 0) {
+      const comparisonKeys = {
+        mainKey: 'containerGroups',
+        secondaryKey: 'artboardId',
+      };
+      this.messenger.log(`Run “containerGroups” (${migrationKey}) settings migration…`);
+
+      // if a `containerGroup` in the plugin settings matches a layer in the docoment,
+      // it will be migrated and removed from `pluginSettings`
+      settingsToUpdate = this.fromPluginToDocument(
+        comparisonKeys,
+        settingsToUpdate.pluginSettings,
+        settingsToUpdate.documentSettings,
+      );
+    }
+
+    // update the document settings, if necessary
+    if (settingsToUpdate.changed) {
+      Settings.setDocumentSettingForKey(
+        this.document,
+        PLUGIN_IDENTIFIER,
+        settingsToUpdate.documentSettings,
+      );
+      Settings.setSettingForKey(PLUGIN_IDENTIFIER, settingsToUpdate.pluginSettings);
+      result.messages.log = `Migration: ${migrationKey} (containerGroups) Run; settings were updated`;
+    } else {
+      result.messages.log = `Migration: ${migrationKey} (containerGroups) Run; settings were not updated`;
+    }
 
     result.status = 'success';
-    result.messages.log = `migration: ${migrationKey} ran`;
-
     return result;
   }
 }
