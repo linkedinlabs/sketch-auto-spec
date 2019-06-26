@@ -151,8 +151,8 @@ export default class Housekeeper {
     // get the file creation date as a timestamp
     const fileTimestamp = documentCreationTimestamp(this.document);
 
-    // iterrate through available migrations
-    migrationKeys.forEach((migrationKey) => {
+    // iterrate through available migrations, oldest to newest
+    migrationKeys.sort().forEach((migrationKey) => {
       // don’t bother with a migration that is older than the creation of the file
       if (fileTimestamp > migrationKey) {
         return null;
