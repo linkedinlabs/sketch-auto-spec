@@ -2,12 +2,38 @@ import { Settings } from 'sketch';
 import { updateArray } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
+// WIP
 // add new migrations to the top
 // `new Date().getTime();` for timestamp
 const migrationKeys = [
   1561504830674,
   1561503084281,
 ];
+
+// WIP
+const documentCreationTimestamp = (document) => {
+  // assume brand new file
+  let creationTimestamp = new Date().getTime();
+
+  // if the file has been saved before, it will have a `fileURL`
+  const fileURLObj = document.sketchObject.fileURL();
+
+  // file is not brand new, get its creation date
+  if (fileURLObj) {
+    const fileManager = NSFileManager.defaultManager(); // eslint-disable-line no-undef
+
+    // get the file attributes from macOS and then the creation date
+    const attributes = fileManager.attributesOfItemAtPath_error_(fileURLObj.path(), nil); // eslint-disable-line no-underscore-dangle, no-undef, max-len
+    const fileCreationDate = attributes.fileCreationDate();
+
+    // take '2019-05-16 17:28:59 +0000' and format as '2019-05-16T17:28:59'
+    const dateForParsing = fileCreationDate.toString().split(' +')[0].split(' ').join('T');
+
+    creationTimestamp = Date.parse(dateForParsing);
+  }
+
+  return creationTimestamp;
+};
 
 /**
  * @description A class to handle housekeeping tasks on Sketch, plugin, document, or
@@ -122,8 +148,17 @@ export default class Housekeeper {
   runMigrations() {
     this.initializeMigrationsSchema();
 
+    // get the file creation date as a timestamp
+    const fileTimestamp = documentCreationTimestamp(this.document);
+
     // iterrate through available migrations
     migrationKeys.forEach((migrationKey) => {
+      // don’t bother with a migration that is older than the creation of the file
+      if (fileTimestamp > migrationKey) {
+        return null;
+      }
+
+      // assume it will not run
       let runMigration = false;
 
       // some migrations will likely update document settings, so do a fresh lookup
@@ -155,6 +190,7 @@ export default class Housekeeper {
           this.messenger.log(migrationResult.messages.log, logType);
         }
       }
+      return null;
     });
 
     return null;
