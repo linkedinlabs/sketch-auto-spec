@@ -165,7 +165,7 @@ const annotateLayerCustom = (context = null) => {
   return null;
 };
 
-/**
+/** WIP
  * @description Annotates a selected layer in a Sketch file with user input.
  *
  * @kind function
@@ -177,13 +177,35 @@ const annotateLayerCustom = (context = null) => {
 const drawBoundingBox = (context = null) => {
   const {
     document,
-    documentData,
     messenger,
     selection,
   } = assemble(context);
 
-  messenger.toast('Draw me! 🗳');
-  messenger.log('Draw bounding box 🗳');
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() === 0) {
+    return messenger.toast('At least one layer must be selected');
+  }
+
+  // grab the frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+  const frame = crawler.frame();
+
+  // set up Painter instance for the layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // draw the bounding box (if frame exists)
+  let paintResult = null;
+  if (frame) {
+    paintResult = painter.addBoundingBox(frame);
+  }
+
+  // read the response from Painter; if it was unsuccessful, log and display the error
+  if (paintResult && (paintResult.status === 'error')) {
+    return messenger.handleResult(paintResult);
+  }
+
+  return null;
 };
 
 // listeners -------------------------------------------------

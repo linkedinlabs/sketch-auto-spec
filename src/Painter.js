@@ -110,6 +110,38 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
 };
 
 /**
+ * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
+ *
+ * @kind function
+ * @name buildBoundingBox
+ * @param {Object} annotationText The text for the annotation.
+ * @param {string} annotationType A string representing the type of annotation
+ * (component or foundation).
+ * @param {Object} artboard The artboard to draw within.
+ * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
+ * @private
+ */
+const buildBoundingBox = (frame, artboard) => {
+  const colorHex = '#ff00ff';
+  const colorOpactiy = '4d'; // 30% opacity
+
+  // build the rounded rectangle
+  new ShapePath({ // eslint-disable-line no-new
+    frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
+    parent: artboard,
+    style: {
+      borders: [{
+        enabled: false,
+        thickness: 0,
+      }],
+      fills: [`${colorHex}${colorOpactiy}`], // i.e. #ffcc33ff
+    },
+  });
+
+  return null;
+};
+
+/**
  * @description Takes the individual annotation elements, the specs for the layer receiving the
  * annotation, and adds the annotation to the container group in the proper position.
  *
@@ -605,6 +637,32 @@ export default class Painter {
 
     // return a successful result
     result.status = 'success';
+    return result;
+  }
+
+  /** WIP
+   * @description Locates annotation text in a layer’s Settings object and
+   * builds the visual annotation on the Sketch artboard.
+   *
+   * @kind function
+   * @name addBoundingBox
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  addBoundingBox(frame) {
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+
+    buildBoundingBox(frame, this.artboard);
+
+    result.messages.log = 'Draw me! 🗳';
+    result.messages.toast = 'Draw bounding box 🗳';
+
+    result.status = 'error';
     return result;
   }
 }
