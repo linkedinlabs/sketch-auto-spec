@@ -10,7 +10,7 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Annotate Component",
+      "name": "Annotate",
       "identifier": "annotate-layer",
       "shortcut": "ctrl shift a",
       "script": "./main.js",
