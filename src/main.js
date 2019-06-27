@@ -57,8 +57,10 @@ const annotateLayer = (context = null) => {
   }
 
   // iterate through each layer in a selection
-  const layers = new Crawler({ for: selection });
-  layers.all().forEach((layer) => {
+  const layers = new Crawler({ for: selection }).all();
+  const multipleLayers = (layers.length > 1);
+
+  layers.forEach((layer) => {
     // set up Identifier instance for the layer
     const layerToAnnotate = new Identifier({
       for: layer,
@@ -78,11 +80,13 @@ const annotateLayer = (context = null) => {
       if (getLingoNameResult.status === 'error') {
         messenger.handleResult(getLingoNameResult);
 
-        setTextResult = layerToAnnotate.setText();
-        messenger.handleResult(setTextResult);
+        if (!multipleLayers) {
+          setTextResult = layerToAnnotate.setText();
+          messenger.handleResult(setTextResult);
 
-        if (setTextResult.status === 'success') {
-          hasText = true;
+          if (setTextResult.status === 'success') {
+            hasText = true;
+          }
         }
       } else {
         hasText = true;
