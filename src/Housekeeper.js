@@ -2,15 +2,31 @@ import { Settings } from 'sketch';
 import { updateArray } from './Tools';
 import { PLUGIN_IDENTIFIER } from './constants';
 
-// WIP
-// add new migrations to the top
-// `new Date().getTime();` for timestamp
+/**
+ * @description A list of the unique keys that match to a migration function.
+ * The keys are timestamps. To generate a new key: `new Date().getTime();`
+ *
+ * @kind constant
+ * @name migrationKeys
+ * @type {Array}
+ */
 const migrationKeys = [
   1561504830674,
   1561503084281,
 ];
 
-// WIP
+/**
+ * @description A helper function to extract the file creation date from a Sketch
+ * file. If no creation date can be found, it assumes a new temp (un-saved) file
+ * and assigns the creation date to the current date/time.
+ *
+ * @kind function
+ * @name documentCreationTimestamp
+ *
+ * @param {Object} document The Sketch document to erxtract the creation date from.
+ * @returns {string} Returns a string with the creation date/time as a timestamp.
+ * @private
+ */
 const documentCreationTimestamp = (document) => {
   // assume brand new file
   let creationTimestamp = new Date().getTime();
@@ -29,6 +45,7 @@ const documentCreationTimestamp = (document) => {
     // take '2019-05-16 17:28:59 +0000' and format as '2019-05-16T17:28:59'
     const dateForParsing = fileCreationDate.toString().split(' +')[0].split(' ').join('T');
 
+    // i.e. 1558027739000
     creationTimestamp = Date.parse(dateForParsing);
   }
 
@@ -58,12 +75,12 @@ export default class Housekeeper {
    * keys used for comparisons.
    *
    * @kind function
-   * @name runMigrations
+   * @name fromPluginToDocument
    *
-   * @param {Object} comparisonKeys An object containing a `mainKey` and `secondaryKey` used
+   * @param {Object} comparisonKeys An object containing a `mainKey` and `secondaryKey` used.
    * @param {Object} pluginSettings An object containing the plugin settings.
    * @param {Object} documentSettings An object containing the document settings.
-   * in addition to `id` to compare layer ID sets between plugin and document settings.
+   *
    * @returns {Object} Returns an object containing (potentially) updated `documentSettings` and
    * `pluginSettings` objects, and a `changed` flag indicating updates.
    */
@@ -119,6 +136,12 @@ export default class Housekeeper {
     };
   }
 
+  /**
+   * @description A helper function to set up the `documentSettings` structure for migrations.
+   *
+   * @kind function
+   * @name initializeMigrationsSchema
+   */
   initializeMigrationsSchema() {
     let documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
@@ -138,9 +161,11 @@ export default class Housekeeper {
     return null;
   }
 
-  /** WIP
-   * @description Checks for the existence of certain keys in the plugin Settings (`containerGroups`
-   * and `labeledLayers`) and runs any necessary migrations.
+  /**
+   * @description Iterates through the list of available migrations. Skips any migration
+   * older than the creation of the Sketch file. And skips any migration that has already
+   * been run on the file. Remaining migrations are run in order (oldest-to-newest) and then
+   * marked as run, if successful, so that they do not run twice.
    *
    * @kind function
    * @name runMigrations
@@ -196,7 +221,17 @@ export default class Housekeeper {
     return null;
   }
 
-  // migrate the `labeledLayers` into local document settings as `annotatedLayeres`
+  /**
+   * @description Migrates any `labeledLayers` recorded in plugin settings into local document
+   * settings as `annotatedLayeres`. It first checks to make sure the layer actually exists in
+   * the document before “moving” the representation in settings.
+   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/9}
+   *
+   * @kind function
+   * @name migration1561504830674
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
   migration1561504830674() {
     const result = {
       status: null,
@@ -257,7 +292,17 @@ export default class Housekeeper {
     return result;
   }
 
-  // migrate the `containerGroups` into local document settings
+  /**
+   * @description Migrates any `containerGroups` recorded in plugin settings into local document
+   * settings. It first checks to make sure the layer actually exists in
+   * the document before “moving” the representation in settings.
+   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/9}
+   *
+   * @kind function
+   * @name migration1561504830674
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
   migration1561503084281() {
     const result = {
       status: null,
