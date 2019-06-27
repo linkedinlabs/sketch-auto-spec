@@ -611,6 +611,7 @@ export default class Painter {
     const result = {
       status: null,
       messages: {
+        alert: null,
         toast: null,
         log: null,
       },
@@ -627,7 +628,7 @@ export default class Painter {
     if (!this.artboard) {
       result.status = 'error';
       result.messages.log = 'Selection not on artboard';
-      result.messages.toast = 'Your selection needs to be on an artboard';
+      result.messages.alert = 'Your selection needs to be on an artboard';
       return result;
     }
 

@@ -53,7 +53,7 @@ const annotateLayer = (context = null) => {
 
   // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
-    return messenger.toast('A layer must be selected');
+    return messenger.alert('A layer must be selected');
   }
 
   // iterate through each layer in a selection
@@ -131,12 +131,12 @@ const annotateLayerCustom = (context = null) => {
 
   // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
-    return messenger.toast('A layer must be selected');
+    return messenger.alert('A layer must be selected');
   }
 
   // need a selected layer to annotate it
   if (selection.count() > 1) {
-    return messenger.toast('Only one layer must be selected');
+    return messenger.alert('Only one layer may be selected');
   }
 
   // grab the layer form the selection
@@ -186,7 +186,7 @@ const drawBoundingBox = (context = null) => {
 
   // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
-    return messenger.toast('At least one layer must be selected');
+    return messenger.alert('At least one layer must be selected');
   }
 
   // grab the frame from the selection
