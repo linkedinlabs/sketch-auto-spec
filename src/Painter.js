@@ -283,6 +283,45 @@ const setGroupKey = (elementType) => {
   return groupKey;
 };
 
+/** WIP
+ * @description Sets up the individual elements for a container group (inner or outer).
+ *
+ * @kind function
+ * @name orderContainerLayers
+ * @param {Object} groupSettings Object containing the `name`, `width`, `height`, `parent` layer,
+ * and a `bool` named `keystone` indicating whether or not a keystone layer should be inserted.
+ * @returns {Object} The container group layer object.
+ * @private
+ */
+const orderContainerLayers = (outerGroupId, document) => {
+  const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
+  let componentGroupId = null;
+  let boundingGroupId = null;
+
+  // find the correct group set and inner groups based on the `outerGroupId`
+  documentSettings.containerGroups.forEach((groupSet) => {
+    if (groupSet.id === outerGroupId) {
+      componentGroupId = groupSet.componentInnerGroupId;
+      boundingGroupId = groupSet.boundingInnerGroupId;
+    }
+    return null;
+  });
+
+  // always move component group to top of list
+  const componentGroup = document.getLayerWithID(componentGroupId);
+  if (componentGroup) {
+    fromNative(componentGroup).moveToFront();
+  }
+
+  // always move bounding box group to bottom of list
+  const boundingBoxGroup = document.getLayerWithID(boundingGroupId);
+  if (boundingBoxGroup) {
+    fromNative(boundingBoxGroup).moveToBack();
+  }
+
+  return null;
+};
+
 /**
  * @description Sets up the individual elements for a container group (inner or outer).
  *
@@ -517,18 +556,7 @@ const setContainerGroups = (artboard, document, elementType) => {
   fromNative(outerGroup).moveToFront();
 
   // set the order of the inner container layers
-  switch (elementType) {
-    case 'component':
-    case 'custom':
-      fromNative(innerGroup).moveToFront();
-      break;
-    case 'boundingBox':
-    case 'style':
-      fromNative(innerGroup).moveToBack();
-      break;
-    default:
-      fromNative(innerGroup).moveToBack();
-  }
+  orderContainerLayers(outerGroup.id, document);
 
   return {
     containerGroup: outerGroup,
