@@ -5,7 +5,7 @@ import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import Messenger from './Messenger';
 import * as theWebview from '../resources/webview.html';
-import { annotateLayer } from './main';
+import { annotateLayer, drawBoundingBox } from './main';
 import { PLUGIN_IDENTIFIER } from './constants';
 
 /**
@@ -42,7 +42,7 @@ const watchGui = () => {
    */
   const options = {
     identifier: webviewIdentifier,
-    width: 136,
+    width: 178,
     height: 46, // height includes title bar, if visible
     frame: false,
     resizable: false,
@@ -86,6 +86,9 @@ const watchGui = () => {
 
   // call the annotateLayer function in main.js
   webContents.on('annotateLayer', () => annotateLayer());
+
+  // call the drawBoundingBox function in main.js
+  webContents.on('drawBoundingBox', () => drawBoundingBox());
 
   // close the webview window
   webContents.on('closeWindow', () => {
