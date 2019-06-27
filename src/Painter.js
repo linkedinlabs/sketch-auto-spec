@@ -109,16 +109,14 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   };
 };
 
-/** WIP
- * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
+/**
+ * @description Builds the rectangle shape styled as a bounding box.
  *
  * @kind function
  * @name buildBoundingBox
- * @param {Object} annotationText The text for the annotation.
- * @param {string} annotationType A string representing the type of annotation
- * (component or foundation).
+ * @param {Object} frame The frame coordinates (`x`, `y`, `width`, and `height`) for the box.
  * @param {Object} artboard The artboard to draw within.
- * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
+ * @returns {Object} The Sketch ShapePath object for the box.
  * @private
  */
 const buildBoundingBox = (frame, artboard) => {
@@ -283,14 +281,15 @@ const setGroupKey = (elementType) => {
   return groupKey;
 };
 
-/** WIP
- * @description Sets up the individual elements for a container group (inner or outer).
+/**
+ * @description Resets the layer order for the Component, Foundation, and Bounding Box layers
+ * within the outer container group layer.
  *
  * @kind function
  * @name orderContainerLayers
- * @param {Object} groupSettings Object containing the `name`, `width`, `height`, `parent` layer,
- * and a `bool` named `keystone` indicating whether or not a keystone layer should be inserted.
- * @returns {Object} The container group layer object.
+ * @param {string} outerGroupId String ID for finding the outer container group.
+ * @param {Object} document The document containing the outer container group.
+ *
  * @private
  */
 const orderContainerLayers = (outerGroupId, document) => {
@@ -717,12 +716,13 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Sketch artboard.
+  /**
+   * @description Adds a semi-transparent rectangle to a specific artboard based on the parameters
+   * received in the `frame` object.
    *
    * @kind function
    * @name addBoundingBox
+   * @param {Object} frame The frame coordinates (`x`, `y`, `width`, and `height`) for the box.
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
   addBoundingBox(frame) {
