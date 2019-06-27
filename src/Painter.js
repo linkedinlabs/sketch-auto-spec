@@ -122,7 +122,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
  * @private
  */
 const buildBoundingBox = (frame, artboard) => {
-  const colorHex = '#ff00ff';
+  const colorHex = '#ff5500';
   const colorOpactiy = '4d'; // 30% opacity
 
   // build the rounded rectangle
