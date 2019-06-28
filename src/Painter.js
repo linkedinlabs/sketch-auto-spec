@@ -171,7 +171,6 @@ const positionAnnotationElements = (
   const layerWidth = layerFrame.width;
   const layerX = layerFrame.x;
   const layerY = layerFrame.y;
-  const originalLayerIndex = layerFrame.index;
 
   // create the annotation group
   const group = new Group({
@@ -190,9 +189,6 @@ const positionAnnotationElements = (
 
   // position the group within the artboard, above the layer receiving the annotation
   let diamondAdjustment = null;
-
-  // move group to z-index right above layer to annotate
-  group.index = originalLayerIndex + 1;
 
   // initial placement based on layer to annotate
   let placementX = (
