@@ -114,9 +114,40 @@ const updateArray = (key, item, array, action = 'add') => {
   return updatedArray;
 };
 
+/** WIP
+ * @description Takes context (if made available) and returns the document
+ * or derives the `currentDocument` from `NSDocumentController` (necessary
+ * when a command froms from the GUI)
+ *
+ * @kind function
+ * @name getPositionOnArtboard
+ * @param {Object} context The current context (event) received from Sketch (optional).
+ * @returns {Object} Contains an objective-c object with the current document.
+ */
+const getPositionOnArtboard = (layer) => {
+  // original layer frame position
+  const coordinates = {
+    x: layer.frame().x(),
+    y: layer.frame().y(),
+  };
+  // look for an immediate parent
+  let { parent } = fromNative(layer);
+
+  // loop through each parent and adjust the coordinates
+  if (parent) {
+    while (parent.name && parent.type !== 'Artboard') {
+      coordinates.x += parent.frame.x;
+      coordinates.y += parent.frame.y;
+      parent = parent.parent; // eslint-disable-line prefer-destructuring
+    }
+  }
+  return coordinates;
+};
+
 export {
   findLayerById,
   getDocument,
+  getPositionOnArtboard,
   getSelection,
   setArray,
   updateArray,

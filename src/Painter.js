@@ -5,7 +5,7 @@ import {
   ShapePath,
   Text,
 } from 'sketch/dom';
-import { updateArray } from './Tools';
+import { getPositionOnArtboard, updateArray } from './Tools';
 import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Sketch file
@@ -671,12 +671,13 @@ export default class Painter {
     );
 
     // group and position the base annotation elements
+    const layerCoordinates = getPositionOnArtboard(this.layer);
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
       width: this.layer.frame().width(),
       height: this.layer.frame().height(),
-      x: this.layer.frame().x(),
-      y: this.layer.frame().y(),
+      x: layerCoordinates.x,
+      y: layerCoordinates.y,
       index: fromNative(this.layer).index,
     };
     const group = positionAnnotationElements(
