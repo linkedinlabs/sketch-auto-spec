@@ -1,4 +1,4 @@
-import { setArray } from './Tools';
+import { getPositionOnArtboard, setArray } from './Tools';
 
 /**
  * @description A class to handle traversing an array of selected items and return useful items
@@ -39,7 +39,9 @@ export default class Crawler {
   }
 
   /**
-   * @description Simulates Sketch’s frame() object, but for an entire selection
+   * @description Simulates Sketch’s frame() object, but for an entire selection,
+   * and keeps the coordinates relative to the artboard, ignoring if some of the items
+   * are grouped inside other layers.
    *
    * @kind function
    * @name frame
@@ -60,8 +62,9 @@ export default class Crawler {
     // iterate through the selected layers and update the frame inner `x`/`y` values and
     // the outer `x`/`y` values
     this.all().forEach((layer) => {
-      const layerX = layer.frame().x();
-      const layerY = layer.frame().y();
+      const layerCoordinates = getPositionOnArtboard(layer);
+      const layerX = layerCoordinates.x;
+      const layerY = layerCoordinates.y;
       const layerW = layer.frame().width();
       const layerH = layer.frame().height();
       const layerOuterX = layerX + layerW;
