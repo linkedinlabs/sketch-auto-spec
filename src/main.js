@@ -169,6 +169,52 @@ const annotateLayerCustom = (context = null) => {
   return null;
 };
 
+/** WIP
+ * @description Annotates a selected layer in a Sketch file with user input.
+ *
+ * @kind function
+ * @name annotateMeasurement
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected or
+ * if multiple layers are selected.
+ */
+const annotateMeasurement = (context = null) => {
+  const {
+    document,
+    documentData,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() !== 2) {
+    return messenger.alert('Two layers must be selected');
+  }
+
+  messenger.toast('Let’s measure! 📏');
+
+  // // grab the frame from the selection
+  // const crawler = new Crawler({ for: selection });
+  // const layer = crawler.first();
+  // const frame = crawler.frame();
+
+  // // set up Painter instance for the layer
+  // const painter = new Painter({ for: layer, in: document });
+
+  // // draw the bounding box (if frame exists)
+  // let paintResult = null;
+  // if (frame) {
+  //   paintResult = painter.addBoundingBox(frame);
+  // }
+
+  // // read the response from Painter; if it was unsuccessful, log and display the error
+  // if (paintResult && (paintResult.status === 'error')) {
+  //   return messenger.handleResult(paintResult);
+  // }
+
+  return null;
+};
+
 /**
  * @description Draws a semi-transparent “Bounding Box” around any selected elements.
  *
@@ -242,6 +288,7 @@ const onOpenDocument = (context) => {
 export {
   annotateLayer,
   annotateLayerCustom,
+  annotateMeasurement,
   drawBoundingBox,
   onOpenDocument,
 };

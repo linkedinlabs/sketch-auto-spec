@@ -24,6 +24,13 @@
       "handler": "annotateLayerCustom"
     },
     {
+      "name": "Set Measurement",
+      "identifier": "annotate-measurement",
+      "shortcut": "ctrl shift m",
+      "script": "./main.js",
+      "handler": "annotateMeasurement"
+    },
+    {
       "name": "Draw Bounding Box",
       "identifier": "draw-bounding-box",
       "shortcut": "ctrl shift b",
@@ -57,6 +64,7 @@
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
+      "annotate-measurement",
       "draw-bounding-box",
       "view-gui"
     ]
