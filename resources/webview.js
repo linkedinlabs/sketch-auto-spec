@@ -77,6 +77,9 @@ const AutoSpecWebview = {
           case 'annotate':
             window.postMessage('annotateLayer');
             break;
+          case 'measure':
+            window.postMessage('annotateMeasurement');
+            break;
           case 'bind':
             window.postMessage('drawBoundingBox');
             break;
