@@ -22,10 +22,22 @@ import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
  * @private
  */
 const buildAnnotationElements = (annotationText, annotationType = 'component', artboard) => {
-  let colorHex = '#027aff';
-  if (annotationType === 'style') {
-    colorHex = '#f5a623';
+  // set the dominant color
+  let colorHex = null;
+  switch (annotationType) {
+    case 'component':
+      colorHex = '#027aff';
+      break;
+    case 'custom':
+      colorHex = '#027aff'; // this is changing; waiting on new color
+      break;
+    case 'style':
+      colorHex = '#f5a623';
+      break;
+    default:
+      colorHex = '#027aff';
   }
+
   // build the text box
   const text = new Text({
     frame: {
