@@ -238,27 +238,10 @@ const onOpenDocument = (context) => {
   }
 };
 
-/**
- * @description Writes to the log whenever the selection changes and displays a Toast indicator.
- *
- * @kind function
- * @name onSelectionChange
- * @param {Object} context The current context (event) received from Sketch.
- */
-const onSelectionChange = (context) => {
-  if (String(context.action) === 'SelectionChanged.finish') {
-    const { document, messenger } = assemble(context);
-
-    messenger.log(`Selection Changed in Doc “${document.id}”`);
-  }
-  return null;
-};
-
 // export each used in manifest
 export {
   annotateLayer,
   annotateLayerCustom,
   drawBoundingBox,
   onOpenDocument,
-  onSelectionChange,
 };

@@ -50,16 +50,6 @@
           "OpenDocument": "onOpenDocument"
         }
       }
-    },
-    {
-      "name" : "Selection Change Listener",
-      "identifier": "selection-change-listener",
-      "script": "./main.js",
-      "handlers" : {
-        "actions": {
-          "SelectionChanged.finish": "onSelectionChange"
-        }
-      }
     }
   ],
   "menu": {
