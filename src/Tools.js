@@ -114,15 +114,14 @@ const updateArray = (key, item, array, action = 'add') => {
   return updatedArray;
 };
 
-/** WIP
- * @description Takes context (if made available) and returns the document
- * or derives the `currentDocument` from `NSDocumentController` (necessary
- * when a command froms from the GUI)
+/**
+ * @description Takes a Sketch layer object and returns a `frame` object with
+ * `x` and `y` coordinates, relative to the artboard the frame is on.
  *
  * @kind function
  * @name getPositionOnArtboard
- * @param {Object} context The current context (event) received from Sketch (optional).
- * @returns {Object} Contains an objective-c object with the current document.
+ * @param {Object} layer The Sketch layer object.
+ * @returns {Object} A `frame` object with `x` and `y` coordinates.
  */
 const getPositionOnArtboard = (layer) => {
   // original layer frame position
