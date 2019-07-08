@@ -51,7 +51,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
       borders: [{
         enabled: false,
       }],
-      fontFamily: 'helevetica neue',
+      fontFamily: 'Helvetica Neue',
       fontSize: 12,
       fontWeight: 4,
       kerning: 0,
