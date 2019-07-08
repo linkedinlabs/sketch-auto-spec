@@ -10,6 +10,27 @@ import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Sketch file
 /**
+ * @description Checks for an installed font family of a typeface at the system level.
+ *
+ * @kind function
+ * @name checkInstalledFont
+ * @param {string} fontFamily A string representing the name of the font family.
+ * @returns {boolean} A `true` if installed; `false` if not.
+ * @private
+ */
+const checkInstalledFont = (fontFamily) => {
+  const fontManager = NSFontManager.sharedFontManager(); // eslint-disable-line no-undef
+  const installedFontFamilies = fontManager.availableFontFamilies();
+  let familyExists = false;
+  installedFontFamilies.forEach((fam) => {
+    if (String(fam) === fontFamily) {
+      familyExists = true;
+    }
+  });
+  return familyExists;
+};
+
+/**
  * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
@@ -38,6 +59,17 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
       colorHex = '#027aff';
   }
 
+  // set the typeface
+  let fontFamily = 'Helvetica Neue';
+  // set backup
+  if (!checkInstalledFont(fontFamily)) {
+    fontFamily = 'Lato';
+  }
+  // revert to system default
+  if (!checkInstalledFont(fontFamily)) {
+    fontFamily = 'system';
+  }
+
   // build the text box
   const text = new Text({
     frame: {
@@ -51,7 +83,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
       borders: [{
         enabled: false,
       }],
-      fontFamily: 'Helvetica Neue',
+      fontFamily,
       fontSize: 12,
       fontWeight: 4,
       kerning: 0,
