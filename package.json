@@ -1,6 +1,6 @@
 {
   "name": "sketch-speccing",
-  "description": "A Sketch plugin for easily spec’ing design system components.",
+  "description": "A Sketch plugin for easily spec’ing design system elements.",
   "version": "0.0.13",
   "repository": {
     "type": "git",
