@@ -1,6 +1,6 @@
 {
   "name": "Spec’ing",
-  "description": "Plugin to annotate symbols",
+  "description": "Annotate and spec design system elements",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
   "version": "0.0.13",
