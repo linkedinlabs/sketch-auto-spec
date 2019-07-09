@@ -181,7 +181,6 @@ const annotateLayerCustom = (context = null) => {
 const annotateMeasurement = (context = null) => {
   const {
     document,
-    documentData,
     messenger,
     selection,
   } = assemble(context);
@@ -193,24 +192,24 @@ const annotateMeasurement = (context = null) => {
 
   messenger.toast('Let’s measure! 📏');
 
-  // // grab the frame from the selection
-  // const crawler = new Crawler({ for: selection });
-  // const layer = crawler.first();
-  // const frame = crawler.frame();
+  // grab the gap frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+  const gapFrame = crawler.gapFrame();
 
-  // // set up Painter instance for the layer
-  // const painter = new Painter({ for: layer, in: document });
+  // set up Painter instance for the layer - temp temp
+  const painter = new Painter({ for: layer, in: document });
 
-  // // draw the bounding box (if frame exists)
-  // let paintResult = null;
-  // if (frame) {
-  //   paintResult = painter.addBoundingBox(frame);
-  // }
+  // draw the bounding box (if frame exists) - temp temp
+  let paintResult = null;
+  if (gapFrame) {
+    paintResult = painter.addBoundingBox(gapFrame);
+  }
 
-  // // read the response from Painter; if it was unsuccessful, log and display the error
-  // if (paintResult && (paintResult.status === 'error')) {
-  //   return messenger.handleResult(paintResult);
-  // }
+  // read the response from Painter; if it was unsuccessful, log and display the error
+  if (paintResult && (paintResult.status === 'error')) {
+    return messenger.handleResult(paintResult);
+  }
 
   return null;
 };

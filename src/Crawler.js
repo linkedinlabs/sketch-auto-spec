@@ -107,4 +107,108 @@ export default class Crawler {
 
     return theFrame;
   }
+
+  /** WIP
+   * @description Simulates Sketch’s frame() object, but for the space between two
+   * selected layers. It keeps the coordinates relative to the artboard, ignoring
+   * if some of the items are grouped inside other layers. Assumes only 2 layers
+   * are selected.
+   *
+   * @kind function
+   * @name gapFrame
+   * @returns {Object} The `x`, `y` coordinates and `width` and `height` of an entire selection.
+   */
+  gapFrame() {
+    const theFrame = {
+      x: null,
+      y: null,
+      width: 0,
+      height: 0,
+    };
+
+    let layerA = this.all()[0];
+    let layerB = this.all()[0];
+    let horizontalGap = false;
+
+    // find left-most (`layerA`) and right-most (`layerB`) layers
+    this.all().forEach((layer) => {
+      if (layer.frame().x() < layerA.frame().x()) {
+        layerA = layer;
+      }
+
+      if (layer.frame().x() > layerB.frame().x()) {
+        layerB = layer;
+      }
+    });
+
+    if (layerA && layerB) {
+      let leftEdgeX = null; // lowest x within gap
+      let rightEdgeX = null; // highest x within gap
+      let topEdgeY = null;
+
+      // make sure the layers are not overlapped (a gap exists)
+      if ((layerA.frame().x() + layerA.frame().width()) < layerB.frame().x()) {
+        // set the left/right edges of the gap
+        leftEdgeX = layerA.frame().x() + layerA.frame().width(); // lowest x within gap
+        rightEdgeX = layerB.frame().x(); // highest x within gap
+
+        // set Y
+        if (layerA.frame().y() < layerB.frame().y()) {
+          topEdgeY = layerA.frame().y();
+        } else {
+          topEdgeY = layerB.frame().y();
+        }
+
+        theFrame.x = leftEdgeX;
+        theFrame.y = topEdgeY;
+        theFrame.width = rightEdgeX - leftEdgeX;
+        theFrame.height = 20;
+      } else {
+        horizontalGap = true;
+      }
+    }
+
+
+    if (horizontalGap) {
+      // find top-most (`layerA`) and bottom-most (`layerB`) layers
+      this.all().forEach((layer) => {
+        if (layer.frame().y() < layerA.frame().y()) {
+          layerA = layer;
+        }
+
+        if (layer.frame().y() > layerB.frame().y()) {
+          layerB = layer;
+        }
+      });
+
+      let topEdgeY = null; // lowest y within gap
+      let bottomEdgeY = null; // highest y within gap
+      let leftEdgeX = null;
+
+      // make sure the layers are not overlapped (a gap exists)
+      if ((layerA.frame().y() + layerA.frame().height()) < layerB.frame().y()) {
+        // set the top/bottom edges of the gap
+        topEdgeY = layerA.frame().y() + layerA.frame().height(); // lowest y within gap
+        bottomEdgeY = layerB.frame().y(); // highest y within gap
+
+        // set X
+        if (layerA.frame().x() < layerB.frame().x()) {
+          leftEdgeX = layerA.frame().x();
+        } else {
+          leftEdgeX = layerB.frame().x();
+        }
+
+        theFrame.x = leftEdgeX;
+        theFrame.y = topEdgeY;
+        theFrame.width = 20;
+        theFrame.height = bottomEdgeY - topEdgeY;
+      }
+    }
+
+    if (!theFrame.x) {
+      return null;
+    }
+
+    return theFrame;
+  }
 }
