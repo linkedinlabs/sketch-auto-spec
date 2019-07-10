@@ -52,6 +52,9 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
     case 'custom':
       colorHex = '#027aff'; // this is changing; waiting on new color
       break;
+    case 'measurement':
+      colorHex = '#91c475';
+      break;
     case 'style':
       colorHex = '#f5a623';
       break;
@@ -71,10 +74,20 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   }
 
   // build the text box
+  const textFrame = {
+    x: 16,
+    y: 3,
+  };
+
+  if (annotationType === 'measurement') {
+    textFrame.x = 4;
+    textFrame.y = -1;
+  }
+
   const text = new Text({
     frame: {
-      x: 16,
-      y: 3,
+      x: textFrame.x,
+      y: textFrame.y,
     },
     parent: artboard,
     text: annotationText,
@@ -95,8 +108,9 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   text.adjustToFit();
 
   // build the rounded rectangle
+  const rectHeight = (annotationType === 'measurement' ? 22 : 30);
   const rectangle = new ShapePath({
-    frame: new Rectangle(0, 0, 200, 30),
+    frame: new Rectangle(0, 0, 200, rectHeight),
     parent: artboard,
     style: {
       borders: [{
@@ -115,8 +129,9 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   });
 
   // build the dangling diamond
+  const diamondOffset = (annotationType === 'measurement' ? 19 : 27);
   const diamond = new ShapePath({
-    frame: new Rectangle(0, 27, 6, 6),
+    frame: new Rectangle(0, diamondOffset, 6, 6),
     name: 'Diamond',
     parent: artboard,
     style: {
@@ -133,7 +148,8 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
 
   // set rectangle width based on text width
   const textWidth = text.frame.width;
-  const rectangleWidth = textWidth + 32;
+  const textPadding = (annotationType === 'measurement' ? 6 : 32);
+  const rectangleWidth = textWidth + textPadding;
   rectangle.frame.width = rectangleWidth;
 
   // move the diamond to the mid-point of the rectangle
@@ -196,6 +212,8 @@ const buildBoundingBox = (frame, artboard) => {
  * @param {Object} annotationElements Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
  * for the layer receiving the annotation + the artboard width (`artboardWidth`).
+ * @param {string} annotationType A string representing the type of annotation
+ *
  * @returns {Object} The final annotation as a layer group.
  * @private
  */
@@ -204,6 +222,7 @@ const positionAnnotationElements = (
   groupName,
   annotationElements,
   layerFrame,
+  annotationType = 'component',
 ) => {
   const {
     diamond,
@@ -240,7 +259,8 @@ const positionAnnotationElements = (
       (layerWidth - group.frame.width) / 2
     )
   );
-  let placementY = layerY - 38;
+  const offsetY = (annotationType === 'measurement' ? 30 : 38);
+  let placementY = layerY - offsetY;
 
   // correct for left bleed
   if (placementX < 0) {
@@ -319,6 +339,21 @@ const setGroupKey = (elementType) => {
       groupKey = 'componentInnerGroupId';
   }
   return groupKey;
+};
+
+/** WIP
+ * @description Checks for an installed font family of a typeface at the system level.
+ *
+ * @kind function
+ * @name setSpacingText
+ * @param {string} fontFamily A string representing the name of the font family.
+ * @returns {boolean} A `true` if installed; `false` if not.
+ * @private
+ */
+const setSpacingText = (length) => {
+  const itemSpacingValue = Math.round(length / 4);
+  const text = `IS-${itemSpacingValue}`;
+  return text;
 };
 
 /**
@@ -659,7 +694,7 @@ export default class Painter {
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
-      result.status = 'true';
+      result.status = 'error';
       result.messages.log = 'Layer missing annotationText';
       return result;
     }
@@ -794,6 +829,122 @@ export default class Painter {
       return result;
     }
 
+    result.status = 'success';
+    return result;
+  }
+
+  /** WIP
+   * @description Locates annotation text in a layer’s Settings object and
+   * builds the visual annotation on the Sketch artboard.
+   *
+   * @kind function
+   * @name addMeasurement
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  addMeasurement(gapFrame) {
+    const result = {
+      status: null,
+      messages: {
+        alert: null,
+        toast: null,
+        log: null,
+      },
+    };
+    // const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
+
+    // return an error if the selection is not placed on an artboard
+    if (!this.artboard) {
+      result.status = 'error';
+      result.messages.log = 'Selection not on artboard';
+      result.messages.alert = 'Your selection needs to be on an artboard';
+      return result;
+    }
+
+    // set up some information
+    // const { annotationText, annotationType } = layerSettings;
+    const annotationText = gapFrame.orientation === 'vertical' ? setSpacingText(gapFrame.width) : setSpacingText(gapFrame.height);
+    const annotationType = 'measurement';
+    const layerName = this.layer.name();
+    const layerId = fromNative(this.layer).id;
+    const groupName = `Measurement for ${layerName}`;
+
+    // create or locate the container group
+    const { containerGroup, innerContainerGroup } = setContainerGroups(
+      this.artboard,
+      this.document,
+      annotationType,
+    );
+
+    // retrieve document settings
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+    let newDocumentSettings = documentSettings;
+
+    // check if we have already annotated this element and remove the old annotation
+    if (documentSettings && documentSettings.annotatedSpacings) {
+      // remove the old ID pair(s) from the `newDocumentSettings` array
+      documentSettings.annotatedSpacings.forEach((layerSet) => {
+        if (layerSet.originalId === layerId) {
+          this.removeAnnotation(layerSet);
+
+          // remove the ID that cannot be found from the `newDocumentSettings` array
+          newDocumentSettings = updateArray(
+            'annotatedSpacings',
+            { id: layerSet.id },
+            newDocumentSettings,
+            'remove',
+          );
+        }
+      });
+    }
+
+    // construct the base annotation elements
+    const annotationElements = buildAnnotationElements(
+      annotationText,
+      annotationType,
+      this.artboard,
+    );
+
+    // group and position the base annotation elements
+    const layerFrame = {
+      artboardWidth: this.artboard.frame().width(),
+      width: gapFrame.width,
+      height: gapFrame.height,
+      x: gapFrame.x,
+      y: gapFrame.y,
+      index: fromNative(this.layer).index,
+    };
+    const group = positionAnnotationElements(
+      innerContainerGroup,
+      groupName,
+      annotationElements,
+      layerFrame,
+      annotationType,
+    );
+
+    // new object with IDs to add to settings
+    const newAnnotatedSpacingSet = {
+      containerGroupId: fromNative(containerGroup).id,
+      id: group.id,
+      layerAId: gapFrame.layerAId,
+      layerBId: gapFrame.layerBId,
+    };
+
+    // update the `newDocumentSettings` array
+    newDocumentSettings = updateArray(
+      'annotatedSpacings',
+      newAnnotatedSpacingSet,
+      newDocumentSettings,
+      'add',
+    );
+
+    // commit the `Settings` update
+    Settings.setDocumentSettingForKey(
+      this.document,
+      PLUGIN_IDENTIFIER,
+      newDocumentSettings,
+    );
+
+    // return a successful result
     result.status = 'success';
     return result;
   }

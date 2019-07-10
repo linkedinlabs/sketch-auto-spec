@@ -204,6 +204,7 @@ const annotateMeasurement = (context = null) => {
   let paintResult = null;
   if (gapFrame) {
     paintResult = painter.addBoundingBox(gapFrame);
+    paintResult = painter.addMeasurement(gapFrame);
   }
 
   // read the response from Painter; if it was unsuccessful, log and display the error

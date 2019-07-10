@@ -1,3 +1,4 @@
+import { fromNative } from 'sketch';
 import { getPositionOnArtboard, setArray } from './Tools';
 
 /**
@@ -118,7 +119,8 @@ export default class Crawler {
    * @kind function
    * @name gapFrame
    * @returns {Object} The `x`, `y` coordinates, `width`, `height`, and `orientation`
-   * of an entire selection.
+   * of an entire selection. It also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap frame.
    */
   gapFrame() {
     const theFrame = {
@@ -127,6 +129,8 @@ export default class Crawler {
       width: 0,
       height: 0,
       orientation: 'vertical',
+      layerAId: null,
+      layerBId: null,
     };
 
     // set the layers to a default for comparions
@@ -177,6 +181,8 @@ export default class Crawler {
         theFrame.y = topEdgeY;
         theFrame.width = rightEdgeX - leftEdgeX;
         theFrame.height = frameHeight;
+        theFrame.layerAId = fromNative(layerA).id;
+        theFrame.layerBId = fromNative(layerB).id;
       } else {
         horizontalGap = true;
       }
@@ -226,6 +232,8 @@ export default class Crawler {
         theFrame.width = frameWidth;
         theFrame.height = bottomEdgeY - topEdgeY;
         theFrame.orientation = 'horizontal';
+        theFrame.layerAId = fromNative(layerA).id;
+        theFrame.layerBId = fromNative(layerB).id;
       }
     }
 
