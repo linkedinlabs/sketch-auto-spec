@@ -347,13 +347,14 @@ const setGroupKey = (elementType) => {
   return groupKey;
 };
 
-/** WIP
- * @description Checks for an installed font family of a typeface at the system level.
+/**
+ * @description Determines the spacing value (multiples of four) based on length and returns
+ * the appropriate spacing annotation text.
  *
  * @kind function
  * @name setSpacingText
- * @param {string} fontFamily A string representing the name of the font family.
- * @returns {boolean} A `true` if installed; `false` if not.
+ * @param {number} length A number representing length.
+ * @returns {string} A text label based on the spacing value.
  * @private
  */
 const setSpacingText = (length) => {
@@ -375,13 +376,15 @@ const setSpacingText = (length) => {
  */
 const orderContainerLayers = (outerGroupId, document) => {
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
-  let componentGroupId = null;
   let boundingGroupId = null;
+  let componentGroupId = null;
+  let measurementGroupId = null;
 
   // find the correct group set and inner groups based on the `outerGroupId`
   documentSettings.containerGroups.forEach((groupSet) => {
     if (groupSet.id === outerGroupId) {
       componentGroupId = groupSet.componentInnerGroupId;
+      measurementGroupId = groupSet.measurementInnerGroupId;
       boundingGroupId = groupSet.boundingInnerGroupId;
     }
     return null;
@@ -391,6 +394,12 @@ const orderContainerLayers = (outerGroupId, document) => {
   const componentGroup = document.getLayerWithID(componentGroupId);
   if (componentGroup) {
     fromNative(componentGroup).moveToFront();
+  }
+
+  // always move measurement annotations group to second from bottom of list
+  const measurementBoxGroup = document.getLayerWithID(measurementGroupId);
+  if (measurementBoxGroup) {
+    fromNative(measurementBoxGroup).moveToBack();
   }
 
   // always move bounding box group to bottom of list
