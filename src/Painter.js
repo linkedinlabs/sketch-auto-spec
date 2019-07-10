@@ -306,15 +306,18 @@ const positionAnnotationElements = (
 const setGroupName = (elementType) => {
   let groupName = null;
   switch (elementType) {
-    case 'style':
-      groupName = 'Foundation Annotations';
+    case 'boundingBox':
+      groupName = 'Bounding Boxes';
       break;
     case 'component':
     case 'custom':
       groupName = 'Component Annotations';
       break;
-    case 'boundingBox':
-      groupName = 'Bounding Boxes';
+    case 'measurement':
+      groupName = 'Spacing Annotations';
+      break;
+    case 'style':
+      groupName = 'Foundation Annotations';
       break;
     default:
       groupName = 'Component Annotations';
@@ -325,15 +328,18 @@ const setGroupName = (elementType) => {
 const setGroupKey = (elementType) => {
   let groupKey = null;
   switch (elementType) {
-    case 'style':
-      groupKey = 'styleInnerGroupId';
+    case 'boundingBox':
+      groupKey = 'boundingInnerGroupId';
       break;
     case 'component':
     case 'custom':
       groupKey = 'componentInnerGroupId';
       break;
-    case 'boundingBox':
-      groupKey = 'boundingInnerGroupId';
+    case 'measurement':
+      groupKey = 'measurementInnerGroupId';
+      break;
+    case 'style':
+      groupKey = 'styleInnerGroupId';
       break;
     default:
       groupKey = 'componentInnerGroupId';
@@ -589,7 +595,6 @@ const setContainerGroups = (artboard, document, elementType) => {
         'remove',
       );
     }
-
 
     // if the entire `outerGroup` is missing, add a new one
     if (!outerGroup) {
