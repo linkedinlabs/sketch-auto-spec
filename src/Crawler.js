@@ -108,15 +108,17 @@ export default class Crawler {
     return theFrame;
   }
 
-  /** WIP
+  /**
    * @description Simulates Sketch’s frame() object, but for the space between two
    * selected layers. It keeps the coordinates relative to the artboard, ignoring
-   * if some of the items are grouped inside other layers. Assumes only 2 layers
+   * if some of the items are grouped inside other layers. It also adds an orientation
+   * `horizontal` or `vertical` based on the gap orientation. Assumes only 2 layers
    * are selected.
    *
    * @kind function
    * @name gapFrame
-   * @returns {Object} The `x`, `y` coordinates and `width` and `height` of an entire selection.
+   * @returns {Object} The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection.
    */
   gapFrame() {
     const theFrame = {
@@ -124,10 +126,13 @@ export default class Crawler {
       y: null,
       width: 0,
       height: 0,
+      orientation: 'vertical',
     };
 
+    // set the layers to a default for comparions
     let layerA = this.all()[0];
     let layerB = this.all()[0];
+    // assume the gap orientation is vertical
     let horizontalGap = false;
 
     // find left-most (`layerA`) and right-most (`layerB`) layers
@@ -145,6 +150,7 @@ export default class Crawler {
       let leftEdgeX = null; // lowest x within gap
       let rightEdgeX = null; // highest x within gap
       let topEdgeY = null;
+      let frameHeight = null;
 
       // make sure the layers are not overlapped (a gap exists)
       if ((layerA.frame().x() + layerA.frame().width()) < layerB.frame().x()) {
@@ -159,16 +165,24 @@ export default class Crawler {
           topEdgeY = layerB.frame().y();
         }
 
+        // set height
+        if (layerA.frame().height() < layerB.frame().height()) {
+          frameHeight = layerA.frame().height();
+        } else {
+          frameHeight = layerB.frame().height();
+        }
+
+        // set the final frame params
         theFrame.x = leftEdgeX;
         theFrame.y = topEdgeY;
         theFrame.width = rightEdgeX - leftEdgeX;
-        theFrame.height = 20;
+        theFrame.height = frameHeight;
       } else {
         horizontalGap = true;
       }
     }
 
-
+    // the gap is horizontal (if overlap does not exist)
     if (horizontalGap) {
       // find top-most (`layerA`) and bottom-most (`layerB`) layers
       this.all().forEach((layer) => {
@@ -184,6 +198,7 @@ export default class Crawler {
       let topEdgeY = null; // lowest y within gap
       let bottomEdgeY = null; // highest y within gap
       let leftEdgeX = null;
+      let frameWidth = null;
 
       // make sure the layers are not overlapped (a gap exists)
       if ((layerA.frame().y() + layerA.frame().height()) < layerB.frame().y()) {
@@ -198,13 +213,23 @@ export default class Crawler {
           leftEdgeX = layerB.frame().x();
         }
 
+        // set width
+        if (layerA.frame().width() < layerB.frame().width()) {
+          frameWidth = layerA.frame().width();
+        } else {
+          frameWidth = layerB.frame().width();
+        }
+
+        // set the final frame params
         theFrame.x = leftEdgeX;
         theFrame.y = topEdgeY;
-        theFrame.width = 20;
+        theFrame.width = frameWidth;
         theFrame.height = bottomEdgeY - topEdgeY;
+        theFrame.orientation = 'horizontal';
       }
     }
 
+    // no gap exists
     if (!theFrame.x) {
       return null;
     }
