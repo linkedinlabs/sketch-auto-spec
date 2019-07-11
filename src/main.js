@@ -203,7 +203,7 @@ const annotateMeasurement = (context = null) => {
   // draw the bounding box (if frame exists) - temp temp
   let paintResult = null;
   if (gapFrame) {
-    paintResult = painter.addBoundingBox(gapFrame);
+    // paintResult = painter.addBoundingBox(gapFrame);
     paintResult = painter.addMeasurement(gapFrame);
   }
 

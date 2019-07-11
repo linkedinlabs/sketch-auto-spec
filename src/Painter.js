@@ -153,7 +153,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   rectangle.frame.width = rectangleWidth;
 
   // move the diamond to the mid-point of the rectangle
-  const diamondMidX = ((rectangleWidth - 8) / 2);
+  const diamondMidX = ((rectangleWidth - 6) / 2);
   diamond.frame.x = diamondMidX;
 
   // set z-axis placement of all elements
@@ -200,7 +200,7 @@ const buildBoundingBox = (frame, artboard) => {
   return boundingBoxElement;
 };
 
-/**
+/** WIP
  * @description Takes the individual annotation elements, the specs for the layer receiving the
  * annotation, and adds the annotation to the container group in the proper position.
  *
@@ -223,6 +223,7 @@ const positionAnnotationElements = (
   annotationElements,
   layerFrame,
   annotationType = 'component',
+  orientation = 'horizontal',
 ) => {
   const {
     diamond,
@@ -232,6 +233,7 @@ const positionAnnotationElements = (
 
   const { artboardWidth } = layerFrame;
   const layerWidth = layerFrame.width;
+  const layerHeight = layerFrame.height;
   const layerX = layerFrame.x;
   const layerY = layerFrame.y;
 
@@ -254,13 +256,27 @@ const positionAnnotationElements = (
   let diamondAdjustment = null;
 
   // initial placement based on layer to annotate
-  let placementX = (
-    layerX + (
-      (layerWidth - group.frame.width) / 2
-    )
-  );
-  const offsetY = (annotationType === 'measurement' ? 30 : 38);
-  let placementY = layerY - offsetY;
+  let placementX = null;
+  let placementY = null;
+
+
+  if (orientation === 'horizontal') {
+    placementX = (
+      layerX + (
+        (layerWidth - group.frame.width) / 2
+      )
+    );
+    const offsetY = (annotationType === 'measurement' ? 30 : 38);
+    placementY = layerY - offsetY;
+  } else {
+    placementY = (
+      layerY + (
+        (layerHeight - group.frame.height) / 2
+      )
+    );
+    const offsetX = (annotationType === 'measurement' ? 43 : 38);
+    placementX = layerX - offsetX;
+  }
 
   // correct for left bleed
   if (placementX < 0) {
@@ -283,21 +299,28 @@ const positionAnnotationElements = (
   group.frame.x = placementX;
   group.frame.y = placementY;
 
-  // adjust diamond, if necessary
+  // adjust diamond on horizonal placement, if necessary
   if (diamondAdjustment) {
     // move the diamond to the mid-point of the layer to annotate
     let diamondLayerMidX = null;
     switch (diamondAdjustment) {
       case 'left':
-        diamondLayerMidX = ((layerX + layerWidth - 8) / 2);
+        diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
         break;
       case 'right':
-        diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 8) / 2));
+        diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
         break;
       default:
         diamondLayerMidX = 0;
     }
     diamond.frame.x = diamondLayerMidX;
+  }
+
+  // move diamand to vertical edge, if necessary
+  if (orientation === 'vertical') {
+    // move the diamond to the vertical mid-point of the layer to annotate
+    diamond.frame.y = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
+    diamond.frame.x = rectangle.frame.x + rectangle.frame.width - 3;
   }
 
   return group;
@@ -745,7 +768,7 @@ export default class Painter {
         if (layerSet.originalId === layerId) {
           this.removeAnnotation(layerSet);
 
-          // remove the ID that cannot be found from the `newDocumentSettings` array
+          // remove the layerSet from the `newDocumentSettings` array
           newDocumentSettings = updateArray(
             'annotatedLayers',
             { id: layerSet.id },
@@ -879,7 +902,6 @@ export default class Painter {
     const annotationText = gapFrame.orientation === 'vertical' ? setSpacingText(gapFrame.width) : setSpacingText(gapFrame.height);
     const annotationType = 'measurement';
     const layerName = this.layer.name();
-    const layerId = fromNative(this.layer).id;
     const groupName = `Measurement for ${layerName}`;
 
     // create or locate the container group
@@ -897,10 +919,10 @@ export default class Painter {
     if (documentSettings && documentSettings.annotatedSpacings) {
       // remove the old ID pair(s) from the `newDocumentSettings` array
       documentSettings.annotatedSpacings.forEach((layerSet) => {
-        if (layerSet.originalId === layerId) {
+        if ((layerSet.layerAId === gapFrame.layerAId) && layerSet.layerAId === gapFrame.layerAId) {
           this.removeAnnotation(layerSet);
 
-          // remove the ID that cannot be found from the `newDocumentSettings` array
+          // remove the layerSet from the `newDocumentSettings` array
           newDocumentSettings = updateArray(
             'annotatedSpacings',
             { id: layerSet.id },
@@ -927,12 +949,15 @@ export default class Painter {
       y: gapFrame.y,
       index: fromNative(this.layer).index,
     };
+
+    const annotationOrientation = (gapFrame.orientation === 'vertical' ? 'horizontal' : 'vertical');
     const group = positionAnnotationElements(
       innerContainerGroup,
       groupName,
       annotationElements,
       layerFrame,
       annotationType,
+      annotationOrientation,
     );
 
     // new object with IDs to add to settings
