@@ -169,14 +169,15 @@ const annotateLayerCustom = (context = null) => {
   return null;
 };
 
-/** WIP
- * @description Annotates a selected layer in a Sketch file with user input.
+/**
+ * @description Annotates a selection of layers in a Sketch file with the
+ * spacing number (“IS-X”) based on the gap between the two layers.
  *
  * @kind function
  * @name annotateMeasurement
  * @param {Object} context The current context (event) received from Sketch.
  * @returns {null} Shows a Toast in the UI if nothing is selected or
- * if multiple layers are selected.
+ * if more than two layers are selected.
  */
 const annotateMeasurement = (context = null) => {
   const {

@@ -200,9 +200,9 @@ const buildBoundingBox = (frame, artboard) => {
   return boundingBoxElement;
 };
 
-/** WIP
- * @description Takes the individual annotation elements, the specs for the layer receiving the
- * annotation, and adds the annotation to the container group in the proper position.
+/**
+ * @description Takes the individual annotation elements, the specs for the layer(s) receiving
+ * the annotation, and adds the annotation to the container group in the proper position.
  *
  * @kind function
  * @name positionAnnotationElements
@@ -212,7 +212,9 @@ const buildBoundingBox = (frame, artboard) => {
  * @param {Object} annotationElements Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
  * for the layer receiving the annotation + the artboard width (`artboardWidth`).
- * @param {string} annotationType A string representing the type of annotation
+ * @param {string} annotationType An optional string representing the type of annotation
+ * @param {string} orientation An optional string representing the orientation of the
+ * annotation (`horizontal` or `vertical`).
  *
  * @returns {Object} The final annotation as a layer group.
  * @private
@@ -321,6 +323,10 @@ const positionAnnotationElements = (
     // move the diamond to the vertical mid-point of the layer to annotate
     diamond.frame.y = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
     diamond.frame.x = rectangle.frame.x + rectangle.frame.width - 3;
+
+    // re-size the annotation group frame
+    group.frame.y += 2;
+    group.adjustToFit();
   }
 
   return group;
@@ -870,12 +876,16 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Sketch artboard.
+  /**
+   * @description Takes a `gapFrame` object from Crawler and creates a spacing measurement
+   * annotation with the correct spacing number (“IS-X”).
    *
    * @kind function
    * @name addMeasurement
+   * @param {Object} gapFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap.
+   *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
   addMeasurement(gapFrame) {
