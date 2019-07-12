@@ -954,6 +954,7 @@ export default class Painter {
     }
 
     result.status = 'success';
+    result.messages.log = `Bounding box drawn on “${this.artboard.name()}”`;
     return result;
   }
 
@@ -1076,6 +1077,7 @@ export default class Painter {
 
     // return a successful result
     result.status = 'success';
+    result.messages.log = `Spacing annotated for “${this.layer.name()}”`;
     return result;
   }
 }

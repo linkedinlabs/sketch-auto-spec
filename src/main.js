@@ -191,8 +191,6 @@ const annotateMeasurement = (context = null) => {
     return messenger.alert('Two layers must be selected');
   }
 
-  messenger.toast('Let’s measure! 📏');
-
   // grab the gap frame from the selection
   const crawler = new Crawler({ for: selection });
   const layer = crawler.first();
@@ -204,14 +202,11 @@ const annotateMeasurement = (context = null) => {
   // draw the bounding box (if frame exists) - temp temp
   let paintResult = null;
   if (gapFrame) {
-    // paintResult = painter.addBoundingBox(gapFrame);
     paintResult = painter.addMeasurement(gapFrame);
   }
 
-  // read the response from Painter; if it was unsuccessful, log and display the error
-  if (paintResult && (paintResult.status === 'error')) {
-    return messenger.handleResult(paintResult);
-  }
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
 
   return null;
 };
@@ -250,10 +245,8 @@ const drawBoundingBox = (context = null) => {
     paintResult = painter.addBoundingBox(frame);
   }
 
-  // read the response from Painter; if it was unsuccessful, log and display the error
-  if (paintResult && (paintResult.status === 'error')) {
-    return messenger.handleResult(paintResult);
-  }
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
 
   return null;
 };
