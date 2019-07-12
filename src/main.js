@@ -187,22 +187,26 @@ const annotateMeasurement = (context = null) => {
   } = assemble(context);
 
   // need a selected layer to annotate it
-  if (selection === null || selection.count() !== 2) {
-    return messenger.alert('Two layers must be selected');
+  if (selection === null || selection.count() > 2) {
+    return messenger.alert('One or two layers must be selected');
   }
 
   // grab the gap frame from the selection
   const crawler = new Crawler({ for: selection });
   const layer = crawler.first();
-  const gapFrame = crawler.gapFrame();
 
-  // set up Painter instance for the layer - temp temp
+  // set up Painter instance for the reference layer
   const painter = new Painter({ for: layer, in: document });
 
-  // draw the bounding box (if frame exists) - temp temp
+  // draw the spacing annotation (if gap frame exists)
   let paintResult = null;
-  if (gapFrame) {
-    paintResult = painter.addMeasurement(gapFrame);
+  if (selection.count() === 2) {
+    const gapFrame = crawler.gapFrame();
+    paintResult = painter.addGapMeasurement(gapFrame);
+  }
+
+  if (selection.count() === 1) {
+    paintResult = painter.addDimMeasurement();
   }
 
   // read the response from Painter; log and display message(s)

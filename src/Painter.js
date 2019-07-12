@@ -285,7 +285,7 @@ const buildBoundingBox = (frame, artboard) => {
  * for the layer receiving the annotation + the artboard width (`artboardWidth`).
  * @param {string} annotationType An optional string representing the type of annotation
  * @param {string} orientation An optional string representing the orientation of the
- * annotation (`horizontal` or `vertical`).
+ * annotation (`top` or `left`).
  *
  * @returns {Object} The final annotation as a layer group.
  * @private
@@ -296,7 +296,7 @@ const positionAnnotationElements = (
   annotationElements,
   layerFrame,
   annotationType = 'component',
-  orientation = 'horizontal',
+  orientation = 'top',
 ) => {
   const {
     diamond,
@@ -333,25 +333,36 @@ const positionAnnotationElements = (
   let diamondAdjustment = null;
 
   // initial placement based on layer to annotate
-  let placementX = null;
-  let placementY = null;
 
-  if (orientation === 'horizontal') {
-    placementX = (
-      layerX + (
-        (layerWidth - group.frame.width) / 2
-      )
-    );
-    const offsetY = (annotationType === 'measurement' ? 30 : 38);
-    placementY = layerY - offsetY;
-  } else {
-    placementY = (
-      layerY + (
-        (layerHeight - group.frame.height) / 2
-      )
-    );
-    const offsetX = (annotationType === 'measurement' ? 43 : 38);
-    placementX = layerX - offsetX;
+  // for top
+  let placementX = (
+    layerX + (
+      (layerWidth - group.frame.width) / 2
+    )
+  );
+  // for `left` or `right`
+  let placementY = (
+    layerY + (
+      (layerHeight - group.frame.height) / 2
+    )
+  );
+
+  let offsetX = null;
+  let offsetY = null;
+
+  // adjustments based on orientation
+  switch (orientation) {
+    case 'left':
+      offsetX = (annotationType === 'measurement' ? 40 : 38);
+      placementX = layerX - offsetX;
+      break;
+    case 'right':
+      offsetX = (annotationType === 'measurement' ? 12 : 5);
+      placementX = layerX + layerWidth + offsetX;
+      break;
+    default: // top
+      offsetY = (annotationType === 'measurement' ? 33 : 38);
+      placementY = layerY - offsetY;
   }
 
   // correct for left bleed
@@ -392,11 +403,19 @@ const positionAnnotationElements = (
     diamond.frame.x = diamondLayerMidX;
   }
 
-  // move diamand to vertical edge, if necessary
-  if (orientation === 'vertical') {
-    // move the diamond to the vertical mid-point of the layer to annotate
-    const diamondNewX = rectangle.frame.x + rectangle.frame.width - 3;
+  // move diamand to left/right edge, if necessary
+  if (orientation === 'left' || orientation === 'right') {
     const diamondNewY = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
+    let diamondNewX = null;
+
+    if (orientation === 'left') {
+      // move the diamond to the left mid-point of the layer to annotate
+      diamondNewX = rectangle.frame.x + rectangle.frame.width - 3;
+    } else {
+      // move the diamond to the right mid-point of the layer to annotate
+      diamondNewX = rectangle.frame.x - 3;
+    }
+
     diamond.frame.x = diamondNewX;
     diamond.frame.y = diamondNewY;
 
@@ -405,7 +424,11 @@ const positionAnnotationElements = (
 
     // move the icon
     icon.transform.rotation = 90;
-    icon.frame.x = diamondNewX + 4.5;
+    if (orientation === 'left') {
+      icon.frame.x = diamondNewX + 4.5;
+    } else {
+      icon.frame.x = diamondNewX - 4.5;
+    }
     icon.frame.y = diamondNewY + 1.5;
   }
 
@@ -958,19 +981,16 @@ export default class Painter {
     return result;
   }
 
-  /**
-   * @description Takes a `gapFrame` object from Crawler and creates a spacing measurement
-   * annotation with the correct spacing number (“IS-X”).
+  /** WIP
+   * @description Takes a layer and creates two measurement annotations with the layer’s
+   * `height` and `width`.
    *
    * @kind function
-   * @name addMeasurement
-   * @param {Object} gapFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
-   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
-   * for the two layers used to calculated the gap.
+   * @name addDimMeasurement
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  addMeasurement(gapFrame) {
+  addDimMeasurement() {
     const result = {
       status: null,
       messages: {
@@ -979,7 +999,6 @@ export default class Painter {
         log: null,
       },
     };
-    // const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // return an error if the selection is not placed on an artboard
     if (!this.artboard) {
@@ -990,11 +1009,177 @@ export default class Painter {
     }
 
     // set up some information
-    // const { annotationText, annotationType } = layerSettings;
+    const annotationType = 'measurement';
+    const layerId = fromNative(this.layer).id;
+    const layerName = this.layer.name();
+
+    // create or locate the container group
+    const { containerGroup, innerContainerGroup } = setContainerGroups(
+      this.artboard,
+      this.document,
+      annotationType,
+    );
+
+    // retrieve document settings
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+    let newDocumentSettings = documentSettings;
+
+    // check if we have already annotated this element and remove the old annotation
+    if (documentSettings && documentSettings.annotatedDimensions) {
+      // remove the old ID pair(s) from the `newDocumentSettings` array
+      documentSettings.annotatedDimensions.forEach((layerSet) => {
+        if (layerSet.originalId === layerId) {
+          this.removeAnnotation(layerSet);
+
+          // remove the layerSet from the `newDocumentSettings` array
+          newDocumentSettings = updateArray(
+            'annotatedDimensions',
+            { id: layerSet.id },
+            newDocumentSettings,
+            'remove',
+          );
+        }
+      });
+    }
+
+    // group and position the annotation elements
+    const layerFrame = {
+      artboardWidth: this.artboard.frame().width(),
+      width: this.layer.frame().width(),
+      height: this.layer.frame().height(),
+      x: this.layer.frame().x(),
+      y: this.layer.frame().y(),
+      index: fromNative(this.layer).index,
+    };
+
+    // ------------------------
+    // construct the width annotation elements
+    const annotationTextWidth = `${this.layer.frame().width()}dp`;
+    const groupNameWidth = `Dimension Width for layer ${layerName}`;
+    const annotationElementsWidth = buildAnnotationElements(
+      annotationTextWidth,
+      annotationType,
+      this.artboard,
+    );
+
+    const annotationOrientation = 'top';
+    const group = positionAnnotationElements(
+      innerContainerGroup,
+      groupNameWidth,
+      annotationElementsWidth,
+      layerFrame,
+      annotationType,
+      annotationOrientation,
+    );
+
+    // new object with IDs to add to settings
+    const newAnnotatedDimensionSetWidth = {
+      containerGroupId: fromNative(containerGroup).id,
+      id: group.id,
+      originalId: layerId,
+    };
+
+    // update the `newDocumentSettings` array
+    newDocumentSettings = updateArray(
+      'annotatedDimensions',
+      newAnnotatedDimensionSetWidth,
+      newDocumentSettings,
+      'add',
+    );
+
+    // ------------------------
+    // construct the height annotation elements
+    const annotationTextHeight = `${this.layer.frame().height()}dp`;
+    const groupNameHeight = `Dimension Width for layer ${layerName}`;
+    const annotationElementsHeight = buildAnnotationElements(
+      annotationTextHeight,
+      annotationType,
+      this.artboard,
+    );
+
+    const annotationOrientationHeight = 'right';
+    const groupHeight = positionAnnotationElements(
+      innerContainerGroup,
+      groupNameHeight,
+      annotationElementsHeight,
+      layerFrame,
+      annotationType,
+      annotationOrientationHeight,
+    );
+
+    // new object with IDs to add to settings
+    const newAnnotatedDimensionSetHeight = {
+      containerGroupId: fromNative(containerGroup).id,
+      id: groupHeight.id,
+      originalId: layerId,
+    };
+
+    // update the `newDocumentSettings` array
+    newDocumentSettings = updateArray(
+      'annotatedDimensions',
+      newAnnotatedDimensionSetHeight,
+      newDocumentSettings,
+      'add',
+    );
+
+    // ------------------------
+
+    // commit the `Settings` update
+    Settings.setDocumentSettingForKey(
+      this.document,
+      PLUGIN_IDENTIFIER,
+      newDocumentSettings,
+    );
+
+    // return a successful result
+    result.status = 'success';
+    result.messages.log = `Dimensions annotated for “${this.layer.name()}”`;
+    return result;
+  }
+
+  /**
+   * @description Takes a `gapFrame` object from Crawler and creates a spacing measurement
+   * annotation with the correct spacing number (“IS-X”).
+   *
+   * @kind function
+   * @name addGapMeasurement
+   * @param {Object} gapFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap.
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  addGapMeasurement(gapFrame) {
+    const result = {
+      status: null,
+      messages: {
+        alert: null,
+        toast: null,
+        log: null,
+      },
+    };
+
+    // return an error if the selection is not placed on an artboard
+    if (!this.artboard) {
+      result.status = 'error';
+      result.messages.log = 'Selection not on artboard';
+      result.messages.alert = 'Your selection needs to be on an artboard';
+      return result;
+    }
+
+    // return an error if the selection is not placed on an artboard
+    if (!gapFrame) {
+      result.status = 'error';
+      result.messages.log = 'gapFrame is missing';
+      result.messages.alert = 'Could not find a gap in your selection';
+      return result;
+    }
+
+    // set up some information
     const annotationText = gapFrame.orientation === 'vertical' ? setSpacingText(gapFrame.width) : setSpacingText(gapFrame.height);
     const annotationType = 'measurement';
     const layerName = this.layer.name();
-    const groupName = `Measurement for ${layerName}`;
+    const groupName = `Spacing for ${layerName}`;
 
     // create or locate the container group
     const { containerGroup, innerContainerGroup } = setContainerGroups(
@@ -1042,7 +1227,7 @@ export default class Painter {
       index: fromNative(this.layer).index,
     };
 
-    const annotationOrientation = (gapFrame.orientation === 'vertical' ? 'horizontal' : 'vertical');
+    const annotationOrientation = (gapFrame.orientation === 'vertical' ? 'top' : 'left');
     const group = positionAnnotationElements(
       innerContainerGroup,
       groupName,
