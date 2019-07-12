@@ -929,7 +929,7 @@ export default class Painter {
     if (documentSettings && documentSettings.annotatedSpacings) {
       // remove the old ID pair(s) from the `newDocumentSettings` array
       documentSettings.annotatedSpacings.forEach((layerSet) => {
-        if ((layerSet.layerAId === gapFrame.layerAId) && layerSet.layerAId === gapFrame.layerAId) {
+        if (layerSet.layerAId === gapFrame.layerAId && layerSet.layerBId === gapFrame.layerBId) {
           this.removeAnnotation(layerSet);
 
           // remove the layerSet from the `newDocumentSettings` array
