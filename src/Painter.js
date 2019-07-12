@@ -34,6 +34,68 @@ const checkInstalledFont = (fontFamily) => {
  * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
+ * @name buildMeasureIconElements
+ * @param {Object} artboard The artboard to draw within.
+ * @param {string} colorHex A string representing the hex color for the icon.
+ * @param {Object} artboard The artboard to draw within.
+ * @returns {Object} Layer group containing the icon.
+ * @private
+ */
+const buildMeasureIconElements = (artboard, colorHex) => {
+  const line1 = new ShapePath({
+    frame: new Rectangle(0, 0, 1, 5),
+    parent: artboard,
+    style: {
+      borders: [{
+        enabled: false,
+        thickness: 0,
+      }],
+      fills: [`${colorHex}ff`],
+    },
+  });
+
+  const line2 = new ShapePath({
+    frame: new Rectangle(9, 0, 1, 5),
+    parent: artboard,
+    style: {
+      borders: [{
+        enabled: false,
+        thickness: 0,
+      }],
+      fills: [`${colorHex}ff`],
+    },
+  });
+
+  const line3 = new ShapePath({
+    frame: new Rectangle(1, 2, 8, 1),
+    parent: artboard,
+    style: {
+      borders: [{
+        enabled: false,
+        thickness: 0,
+      }],
+      fills: [`${colorHex}ff`],
+    },
+  });
+
+  const group = new Group({
+    name: 'Icon',
+    parent: artboard,
+  });
+
+  line1.parent = group;
+  line2.parent = group;
+  line3.parent = group;
+
+  group.adjustToFit();
+
+  return group;
+};
+
+/**
+ * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
+ *
+ * @kind function
  * @name buildAnnotationElements
  * @param {Object} annotationText The text for the annotation.
  * @param {string} annotationType A string representing the type of annotation
@@ -161,11 +223,20 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
   text.index = rectangle.index + 1;
   diamond.index = rectangle.index - 1;
 
+  let icon = null;
+  if (annotationType === 'measurement') {
+    icon = buildMeasureIconElements(artboard, colorHex);
+    icon.moveToBack();
+    icon.frame.x = diamondMidX - 2;
+    icon.frame.y = rectangle.frame.height + 4;
+  }
+
   // return an object with each element
   return {
     diamond,
     rectangle,
     text,
+    icon,
   };
 };
 
@@ -231,6 +302,7 @@ const positionAnnotationElements = (
     diamond,
     rectangle,
     text,
+    icon,
   } = annotationElements;
 
   const { artboardWidth } = layerFrame;
@@ -253,6 +325,9 @@ const positionAnnotationElements = (
   rectangle.parent = group;
   diamond.parent = group;
   text.parent = group;
+  if (icon) {
+    icon.parent = group;
+  }
 
   // position the group within the artboard, above the layer receiving the annotation
   let diamondAdjustment = null;
@@ -260,7 +335,6 @@ const positionAnnotationElements = (
   // initial placement based on layer to annotate
   let placementX = null;
   let placementY = null;
-
 
   if (orientation === 'horizontal') {
     placementX = (
@@ -321,14 +395,21 @@ const positionAnnotationElements = (
   // move diamand to vertical edge, if necessary
   if (orientation === 'vertical') {
     // move the diamond to the vertical mid-point of the layer to annotate
-    diamond.frame.y = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
-    diamond.frame.x = rectangle.frame.x + rectangle.frame.width - 3;
+    const diamondNewX = rectangle.frame.x + rectangle.frame.width - 3;
+    const diamondNewY = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
+    diamond.frame.x = diamondNewX;
+    diamond.frame.y = diamondNewY;
 
     // re-size the annotation group frame
     group.frame.y += 2;
-    group.adjustToFit();
+
+    // move the icon
+    icon.transform.rotation = 90;
+    icon.frame.x = diamondNewX + 4.5;
+    icon.frame.y = diamondNewY + 1.5;
   }
 
+  group.adjustToFit();
   return group;
 };
 
