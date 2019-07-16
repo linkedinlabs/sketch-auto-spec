@@ -35,16 +35,58 @@ const checkInstalledFont = (fontFamily) => {
  *
  * @kind function
  * @name buildMeasureIconElements
- * @param {Object} artboard The artboard to draw within.
+ * @param {Object} parent The artboard or layer to draw within.
  * @param {string} colorHex A string representing the hex color for the icon.
- * @param {Object} artboard The artboard to draw within.
+ * @param {string} orientation A string representing the orientation (optional).
  * @returns {Object} Layer group containing the icon.
  * @private
  */
-const buildMeasureIconElements = (artboard, colorHex) => {
+const buildMeasureIconElements = (parent, colorHex, orientation = 'horizonal') => {
+  // horizontal orientation lines
+  let line1Params = {
+    x: 0,
+    y: 0,
+    width: 1,
+    height: 5,
+  };
+  let line2Params = {
+    x: 9,
+    y: 0,
+    width: 1,
+    height: 5,
+  };
+  let line3Params = {
+    x: 1,
+    y: 2,
+    width: 8,
+    height: 1,
+  };
+
+  // vertical orientation lines
+  if (orientation === 'vertical') {
+    line1Params = {
+      x: 0,
+      y: 0,
+      width: 5,
+      height: 1,
+    };
+    line2Params = {
+      x: 0,
+      y: 9,
+      width: 5,
+      height: 1,
+    };
+    line3Params = {
+      x: 2,
+      y: 1,
+      width: 1,
+      height: 8,
+    };
+  }
+
   const line1 = new ShapePath({
-    frame: new Rectangle(0, 0, 1, 5),
-    parent: artboard,
+    frame: new Rectangle(line1Params),
+    parent,
     style: {
       borders: [{
         enabled: false,
@@ -55,8 +97,8 @@ const buildMeasureIconElements = (artboard, colorHex) => {
   });
 
   const line2 = new ShapePath({
-    frame: new Rectangle(9, 0, 1, 5),
-    parent: artboard,
+    frame: new Rectangle(line2Params),
+    parent,
     style: {
       borders: [{
         enabled: false,
@@ -67,8 +109,8 @@ const buildMeasureIconElements = (artboard, colorHex) => {
   });
 
   const line3 = new ShapePath({
-    frame: new Rectangle(1, 2, 8, 1),
-    parent: artboard,
+    frame: new Rectangle(line3Params),
+    parent,
     style: {
       borders: [{
         enabled: false,
@@ -80,8 +122,24 @@ const buildMeasureIconElements = (artboard, colorHex) => {
 
   const group = new Group({
     name: 'Icon',
-    parent: artboard,
+    parent,
   });
+
+  if (orientation === 'horizonal') {
+    line1.sketchObject.hasFixedLeft = 1;
+    line1.sketchObject.hasFixedWidth = 1;
+    line2.sketchObject.hasFixedRight = 1;
+    line2.sketchObject.hasFixedWidth = 1;
+    line3.sketchObject.hasFixedRight = 1;
+    line3.sketchObject.hasFixedLeft = 1;
+  } else {
+    line1.sketchObject.hasFixedTop = 1;
+    line1.sketchObject.hasFixedHeight = 1;
+    line2.sketchObject.hasFixedBottom = 1;
+    line2.sketchObject.hasFixedHeight = 1;
+    line3.sketchObject.hasFixedTop = 1;
+    line3.sketchObject.hasFixedBottom = 1;
+  }
 
   line1.parent = group;
   line2.parent = group;
@@ -416,23 +474,46 @@ const positionAnnotationElements = (
       diamondNewX = rectangle.frame.x - 3;
     }
 
+    // re-position diamond
     diamond.frame.x = diamondNewX;
     diamond.frame.y = diamondNewY;
 
     // re-size the annotation group frame
     group.frame.y += 2;
+  }
 
-    // move the icon
-    icon.transform.rotation = 90;
-    if (orientation === 'left') {
-      icon.frame.x = diamondNewX + 4.5;
+  // adjust the measure icon width for top-oriented annotations
+  if (orientation === 'top' && icon) {
+    icon.frame.width = layerWidth;
+    icon.frame.x = (rectangle.frame.width - layerWidth) / 2;
+    icon.adjustToFit();
+  }
+
+  // adjust the measure icon height for left-/right-oriented annotations
+  if (orientation !== 'top') {
+    // remove horizontal icon (easier to re-draw)
+    icon.remove();
+
+    // redraw icon in vertical orientation
+    const iconNew = buildMeasureIconElements(group, '#91c475', 'vertical');
+
+    // resize icon based on gap/layer height
+    iconNew.frame.height = layerHeight;
+
+    // position icon based on orientation
+    if (orientation === 'right') {
+      iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
+      iconNew.frame.x = rectangle.frame.x - 10;
     } else {
-      icon.frame.x = diamondNewX - 4.5;
+      iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
+      iconNew.frame.x = rectangle.frame.x + rectangle.frame.width + 4;
     }
-    icon.frame.y = diamondNewY + 1.5;
+
+    iconNew.adjustToFit();
   }
 
   group.adjustToFit();
+  containerGroup.adjustToFit();
   return group;
 };
 
@@ -697,8 +778,6 @@ const createOuterGroup = (
  */
 const setContainerGroups = (artboard, document, elementType) => {
   const groupKey = setGroupKey(elementType);
-
-  // const groupKey = (elementType === 'style') ? 'styleInnerGroupId' : 'componentInnerGroupId';
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   const artboardId = fromNative(artboard).id;
   let outerGroup = null;
