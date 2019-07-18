@@ -34,14 +34,14 @@ const checkInstalledFont = (fontFamily) => {
  * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
- * @name buildMeasureIconElements
+ * @name buildMeasureIcon
  * @param {Object} parent The artboard or layer to draw within.
  * @param {string} colorHex A string representing the hex color for the icon.
  * @param {string} orientation A string representing the orientation (optional).
  * @returns {Object} Layer group containing the icon.
  * @private
  */
-const buildMeasureIconElements = (parent, colorHex, orientation = 'horizonal') => {
+const buildMeasureIcon = (parent, colorHex, orientation = 'horizonal') => {
   // horizontal orientation lines
   let line1Params = {
     x: 0,
@@ -154,7 +154,7 @@ const buildMeasureIconElements = (parent, colorHex, orientation = 'horizonal') =
  * @description Builds the initial annotation elements in Sketch (diamond, rectangle, text).
  *
  * @kind function
- * @name buildAnnotationElements
+ * @name buildAnnotation
  * @param {Object} annotationText The text for the annotation.
  * @param {string} annotationType A string representing the type of annotation
  * (component or foundation).
@@ -162,7 +162,7 @@ const buildMeasureIconElements = (parent, colorHex, orientation = 'horizonal') =
  * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
  * @private
  */
-const buildAnnotationElements = (annotationText, annotationType = 'component', artboard) => {
+const buildAnnotation = (annotationText, annotationType = 'component', artboard) => {
   // set the dominant color
   let colorHex = null;
   switch (annotationType) {
@@ -283,7 +283,7 @@ const buildAnnotationElements = (annotationText, annotationType = 'component', a
 
   let icon = null;
   if (annotationType === 'measurement') {
-    icon = buildMeasureIconElements(artboard, colorHex);
+    icon = buildMeasureIcon(artboard, colorHex);
     icon.moveToBack();
     icon.frame.x = diamondMidX - 2;
     icon.frame.y = rectangle.frame.height + 4;
@@ -313,7 +313,7 @@ const buildBoundingBox = (frame, artboard) => {
   const colorOpactiy = '4d'; // 30% opacity
 
   // build the rounded rectangle
-  const boundingBoxElement = new ShapePath({
+  const boundingBox = new ShapePath({
     frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
     name: 'Bounding Box',
     parent: artboard,
@@ -326,7 +326,7 @@ const buildBoundingBox = (frame, artboard) => {
     },
   });
 
-  return boundingBoxElement;
+  return boundingBox;
 };
 
 /**
@@ -334,11 +334,11 @@ const buildBoundingBox = (frame, artboard) => {
  * the annotation, and adds the annotation to the container group in the proper position.
  *
  * @kind function
- * @name positionAnnotationElements
+ * @name positionAnnotation
  * @param {Object} containerGroup The group layer that holds all annotations.
  * @param {string} groupName The name of the group that holds the annotation elements
  * inside the `containerGroup`.
- * @param {Object} annotationElements Each annotation element (`diamond`, `rectangle`, `text`).
+ * @param {Object} annotation Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
  * for the layer receiving the annotation + the artboard width (`artboardWidth`).
  * @param {string} annotationType An optional string representing the type of annotation
@@ -348,10 +348,10 @@ const buildBoundingBox = (frame, artboard) => {
  * @returns {Object} The final annotation as a layer group.
  * @private
  */
-const positionAnnotationElements = (
+const positionAnnotation = (
   containerGroup,
   groupName,
-  annotationElements,
+  annotation,
   layerFrame,
   annotationType = 'component',
   orientation = 'top',
@@ -361,7 +361,7 @@ const positionAnnotationElements = (
     rectangle,
     text,
     icon,
-  } = annotationElements;
+  } = annotation;
 
   const { artboardWidth } = layerFrame;
   const layerWidth = layerFrame.width;
@@ -495,7 +495,7 @@ const positionAnnotationElements = (
     icon.remove();
 
     // redraw icon in vertical orientation
-    const iconNew = buildMeasureIconElements(group, '#91c475', 'vertical');
+    const iconNew = buildMeasureIcon(group, '#91c475', 'vertical');
 
     // resize icon based on gap/layer height
     iconNew.frame.height = layerHeight;
@@ -629,13 +629,13 @@ const orderContainerLayers = (outerGroupId, document) => {
  * @description Sets up the individual elements for a container group (inner or outer).
  *
  * @kind function
- * @name drawContainerGroupElements
+ * @name drawContainerGroup
  * @param {Object} groupSettings Object containing the `name`, `width`, `height`, `parent` layer,
  * and a `bool` named `keystone` indicating whether or not a keystone layer should be inserted.
  * @returns {Object} The container group layer object.
  * @private
  */
-const drawContainerGroupElements = (groupSettings) => {
+const drawContainerGroup = (groupSettings) => {
   const {
     name,
     width,
@@ -692,7 +692,7 @@ const createInnerGroup = (
   const groupKey = setGroupKey(elementType);
 
   // set up new container group layer on the artboard
-  const newInnerGroup = drawContainerGroupElements({
+  const newInnerGroup = drawContainerGroup({
     name: groupName,
     parent: outerGroupLayer,
     width: outerGroupLayer.frame.width,
@@ -730,7 +730,7 @@ const createOuterGroup = (
 ) => {
   const artboardId = fromNative(artboard).id;
   // set up new container group layer on the artboard
-  const newOuterGroup = drawContainerGroupElements({
+  const newOuterGroup = drawContainerGroup({
     name: `+++ ${PLUGIN_NAME} +++`,
     parent: artboard,
     width: artboard.frame().width(),
@@ -969,7 +969,7 @@ export default class Painter {
     }
 
     // construct the base annotation elements
-    const annotationElements = buildAnnotationElements(
+    const annotation = buildAnnotation(
       annotationText,
       annotationType,
       this.artboard,
@@ -985,10 +985,10 @@ export default class Painter {
       y: layerCoordinates.y,
       index: fromNative(this.layer).index,
     };
-    const group = positionAnnotationElements(
+    const group = positionAnnotation(
       innerContainerGroup,
       groupName,
-      annotationElements,
+      annotation,
       layerFrame,
     );
 
@@ -1060,7 +1060,7 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
+  /**
    * @description Takes a layer and creates two measurement annotations with the layer’s
    * `height` and `width`.
    *
@@ -1135,17 +1135,17 @@ export default class Painter {
     // construct the width annotation elements
     const annotationTextWidth = `${this.layer.frame().width()}dp`;
     const groupNameWidth = `Dimension Width for layer ${layerName}`;
-    const annotationElementsWidth = buildAnnotationElements(
+    const annotationWidth = buildAnnotation(
       annotationTextWidth,
       annotationType,
       this.artboard,
     );
 
     const annotationOrientation = 'top';
-    const group = positionAnnotationElements(
+    const group = positionAnnotation(
       innerContainerGroup,
       groupNameWidth,
-      annotationElementsWidth,
+      annotationWidth,
       layerFrame,
       annotationType,
       annotationOrientation,
@@ -1170,17 +1170,17 @@ export default class Painter {
     // construct the height annotation elements
     const annotationTextHeight = `${this.layer.frame().height()}dp`;
     const groupNameHeight = `Dimension Width for layer ${layerName}`;
-    const annotationElementsHeight = buildAnnotationElements(
+    const annotationHeight = buildAnnotation(
       annotationTextHeight,
       annotationType,
       this.artboard,
     );
 
     const annotationOrientationHeight = 'right';
-    const groupHeight = positionAnnotationElements(
+    const groupHeight = positionAnnotation(
       innerContainerGroup,
       groupNameHeight,
-      annotationElementsHeight,
+      annotationHeight,
       layerFrame,
       annotationType,
       annotationOrientationHeight,
@@ -1290,7 +1290,7 @@ export default class Painter {
     }
 
     // construct the base annotation elements
-    const annotationElements = buildAnnotationElements(
+    const annotation = buildAnnotation(
       annotationText,
       annotationType,
       this.artboard,
@@ -1307,10 +1307,10 @@ export default class Painter {
     };
 
     const annotationOrientation = (gapFrame.orientation === 'vertical' ? 'top' : 'left');
-    const group = positionAnnotationElements(
+    const group = positionAnnotation(
       innerContainerGroup,
       groupName,
-      annotationElements,
+      annotation,
       layerFrame,
       annotationType,
       annotationOrientation,
