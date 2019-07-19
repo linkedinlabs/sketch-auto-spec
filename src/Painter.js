@@ -6,7 +6,11 @@ import {
   Text,
 } from 'sketch/dom';
 import { getPositionOnArtboard, updateArray } from './Tools';
-import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
+import {
+  COLORS,
+  PLUGIN_IDENTIFIER,
+  PLUGIN_NAME,
+} from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Sketch file
 /**
@@ -167,19 +171,19 @@ const buildAnnotation = (annotationText, annotationType = 'component', artboard)
   let colorHex = null;
   switch (annotationType) {
     case 'component':
-      colorHex = '#027aff';
+      colorHex = COLORS.component;
       break;
     case 'custom':
-      colorHex = '#027aff'; // this is changing; waiting on new color
+      colorHex = COLORS.custom;
       break;
     case 'measurement':
-      colorHex = '#91c475';
+      colorHex = COLORS.measure;
       break;
     case 'style':
-      colorHex = '#f5a623';
+      colorHex = COLORS.style;
       break;
     default:
-      colorHex = '#027aff';
+      colorHex = COLORS.component;
   }
 
   // set the typeface
@@ -309,7 +313,7 @@ const buildAnnotation = (annotationText, annotationType = 'component', artboard)
  * @private
  */
 const buildBoundingBox = (frame, artboard) => {
-  const colorHex = '#ff5500';
+  const colorHex = COLORS.style;
   const colorOpactiy = '4d'; // 30% opacity
 
   // build the rounded rectangle
@@ -322,7 +326,7 @@ const buildBoundingBox = (frame, artboard) => {
         enabled: false,
         thickness: 0,
       }],
-      fills: [`${colorHex}${colorOpactiy}`], // i.e. #ffcc33ff
+      fills: [`${colorHex}${colorOpactiy}`], // i.e. #ff6655
     },
   });
 
@@ -495,7 +499,7 @@ const positionAnnotation = (
     icon.remove();
 
     // redraw icon in vertical orientation
-    const iconNew = buildMeasureIcon(group, '#91c475', 'vertical');
+    const iconNew = buildMeasureIcon(group, COLORS.measure, 'vertical');
 
     // resize icon based on gap/layer height
     iconNew.frame.height = layerHeight;
