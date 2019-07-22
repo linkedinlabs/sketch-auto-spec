@@ -11,7 +11,7 @@ import { COLORS, PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
-  1563832001257,
+  1563951600000,
   1561504830674,
   1561503084281,
 ];
@@ -228,11 +228,11 @@ export default class Housekeeper {
    * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/31}
    *
    * @kind function
-   * @name migration1563832001257
+   * @name migration1563951600000
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1563832001257() {
+  migration1563951600000() {
     const result = {
       status: null,
       messages: {
@@ -240,7 +240,7 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1563832001257;
+    const migrationKey = 1563951600000;
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
     // this app does not have any plugin settings; no further work needed
@@ -295,7 +295,7 @@ export default class Housekeeper {
       });
     };
 
-    this.messenger.log('Run “labeledLayers” settings migration…');
+    this.messenger.log('Run “update colors” migration…');
 
     documentSettings.containerGroups.forEach((containerGroup) => {
       const boundingBoxContainer = this.document.getLayerWithID(
