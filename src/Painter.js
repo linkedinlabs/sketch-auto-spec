@@ -532,7 +532,7 @@ const setGroupName = (elementType) => {
       groupName = 'Component Annotations';
       break;
     case 'measurement':
-      groupName = 'Spacing Annotations';
+      groupName = 'Measurement Annotations';
       break;
     case 'style':
       groupName = 'Foundation Annotations';
