@@ -133,6 +133,9 @@ export default class Crawler {
       layerBId: null,
     };
 
+    // set shorthand for `getPositionOnArtboard`
+    const aPos = getPositionOnArtboard;
+
     // set the layers to a default for comparions
     let layerA = this.all()[0];
     let layerB = this.all()[0];
@@ -141,11 +144,11 @@ export default class Crawler {
 
     // find left-most (`layerA`) and right-most (`layerB`) layers
     this.all().forEach((layer) => {
-      if (layer.frame().x() < layerA.frame().x()) {
+      if (aPos(layer).x < aPos(layerA).x) {
         layerA = layer;
       }
 
-      if (layer.frame().x() > layerB.frame().x()) {
+      if (aPos(layer).x > aPos(layerB).x) {
         layerB = layer;
       }
     });
@@ -157,16 +160,16 @@ export default class Crawler {
       let frameHeight = null;
 
       // make sure the layers are not overlapped (a gap exists)
-      if ((layerA.frame().x() + layerA.frame().width()) < layerB.frame().x()) {
+      if ((aPos(layerA).x + layerA.frame().width()) < aPos(layerB).x) {
         // set the left/right edges of the gap
-        leftEdgeX = layerA.frame().x() + layerA.frame().width(); // lowest x within gap
-        rightEdgeX = layerB.frame().x(); // highest x within gap
+        leftEdgeX = aPos(layerA).x + layerA.frame().width(); // lowest x within gap
+        rightEdgeX = aPos(layerB).x; // highest x within gap
 
         // set Y
-        if (layerA.frame().y() < layerB.frame().y()) {
-          topEdgeY = layerA.frame().y();
+        if (aPos(layerA).y < aPos(layerB).y) {
+          topEdgeY = aPos(layerA).y;
         } else {
-          topEdgeY = layerB.frame().y();
+          topEdgeY = aPos(layerB).y;
         }
 
         // set height
@@ -192,11 +195,11 @@ export default class Crawler {
     if (horizontalGap) {
       // find top-most (`layerA`) and bottom-most (`layerB`) layers
       this.all().forEach((layer) => {
-        if (layer.frame().y() < layerA.frame().y()) {
+        if (aPos(layer).y < aPos(layerA).y) {
           layerA = layer;
         }
 
-        if (layer.frame().y() > layerB.frame().y()) {
+        if (aPos(layer).y > aPos(layerB).y) {
           layerB = layer;
         }
       });
@@ -207,16 +210,16 @@ export default class Crawler {
       let frameWidth = null;
 
       // make sure the layers are not overlapped (a gap exists)
-      if ((layerA.frame().y() + layerA.frame().height()) < layerB.frame().y()) {
+      if ((aPos(layerA).y + layerA.frame().height()) < aPos(layerB).y) {
         // set the top/bottom edges of the gap
-        topEdgeY = layerA.frame().y() + layerA.frame().height(); // lowest y within gap
-        bottomEdgeY = layerB.frame().y(); // highest y within gap
+        topEdgeY = aPos(layerA).y + layerA.frame().height(); // lowest y within gap
+        bottomEdgeY = aPos(layerB).y; // highest y within gap
 
         // set X
-        if (layerA.frame().x() < layerB.frame().x()) {
-          leftEdgeX = layerA.frame().x();
+        if (aPos(layerA).x < aPos(layerB).x) {
+          leftEdgeX = aPos(layerA).x;
         } else {
-          leftEdgeX = layerB.frame().x();
+          leftEdgeX = aPos(layerB).x;
         }
 
         // set width
