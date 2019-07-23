@@ -1126,12 +1126,13 @@ export default class Painter {
     }
 
     // group and position the annotation elements
+    const layerCoordinates = getPositionOnArtboard(this.layer);
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
       width: this.layer.frame().width(),
       height: this.layer.frame().height(),
-      x: this.layer.frame().x(),
-      y: this.layer.frame().y(),
+      x: layerCoordinates.x,
+      y: layerCoordinates.y,
       index: fromNative(this.layer).index,
     };
 
