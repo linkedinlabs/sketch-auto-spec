@@ -2,6 +2,9 @@
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
   <channel>
     <item>
+      <enclosure url="https://github.com/linkedinlabs/sketch-auto-spec/releases/download/v0.0.15/sketch-speccing.sketchplugin.0.0.15.zip" sparkle:version="0.0.15"/>
+    </item>
+    <item>
       <enclosure url="https://github.com/linkedinlabs/sketch-auto-spec/releases/download/v0.0.14/sketch-speccing.sketchplugin.0.0.14.zip" sparkle:version="0.0.14"/>
     </item>
     <item>
