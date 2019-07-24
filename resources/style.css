@@ -136,6 +136,10 @@ svg {
   width: 100%;
 }
 
+.actions a .icon svg.icons-bind rect {
+  fill: rgba(255, 102, 85, 0.3);
+}
+
 svg path,
 svg polygon {
   fill: rgba(0, 0, 0, 0.6);
