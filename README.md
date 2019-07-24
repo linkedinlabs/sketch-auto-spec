@@ -1,4 +1,4 @@
-# sketch-speccing
+# sketch-specter
 
 ## Installation
 

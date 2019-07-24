@@ -1,5 +1,5 @@
 {
-  "name": "Spec’ing",
+  "name": "Specter",
   "description": "Annotate and spec design system elements",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
@@ -60,7 +60,7 @@
     }
   ],
   "menu": {
-    "title": "Spec’ing",
+    "title": "Specter",
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
