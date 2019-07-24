@@ -1,7 +1,7 @@
 {
   "name": "sketch-specter",
   "description": "A Sketch plugin for easily spec’ing design system elements.",
-  "version": "0.0.15",
+  "version": "0.0.15a",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/linkedinlabs/sketch-auto-spec.git"
@@ -27,9 +27,9 @@
   },
   "pre-commit": "lint:staged",
   "skpm": {
-    "name": "sketch-speccing",
+    "name": "sketch-specter",
     "manifest": "src/manifest.json",
-    "main": "sketch-speccing.sketchplugin",
+    "main": "sketch-specter.sketchplugin",
     "assets": [
       "assets/**/*"
     ],
