@@ -136,7 +136,7 @@ export default class Crawler {
     // set shorthand for `getPositionOnArtboard`
     const aPos = getPositionOnArtboard;
 
-    // set the layers to a default for comparions
+    // set the layers to a default for comparisons
     let layerA = this.all()[0];
     let layerB = this.all()[0];
     // assume the gap orientation is vertical
