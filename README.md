@@ -1,10 +1,10 @@
-# sketch-speccing
+# sketch-specter
 
 ## Installation
 
-- [Download](../../releases/latest/download/sketch-speccing.sketchplugin.zip) the latest release of the plugin
+- [Download](../../releases/latest/download/sketch-specter.sketchplugin.zip) the latest release of the plugin
 - Un-zip
-- Double-click on sketch-speccing.sketchplugin
+- Double-click on sketch-specter.sketchplugin
 
 ## Development Guide
 

@@ -19,10 +19,10 @@ const ready = (fn) => { // eslint-disable-line no-unused-vars
  * @description A wrapper to contain all of the webview functionality.
  *
  * @kind function
- * @name AutoSpecWebview
+ * @name SpecterWebview
  * @type {module}
  */
-const AutoSpecWebview = {
+const SpecterWebview = {
   /**
    * @description The initializer that is called once the DOM is loaded.
    *
@@ -30,8 +30,8 @@ const AutoSpecWebview = {
    * @name init
    */
   init: () => {
-    AutoSpecWebview.disableRightClick();
-    AutoSpecWebview.watchTriggers();
+    SpecterWebview.disableRightClick();
+    SpecterWebview.watchTriggers();
   },
   /**
    * @description Disables the system-level contextual menu (eg. the right click menu)
@@ -94,5 +94,5 @@ const AutoSpecWebview = {
     });
   },
 };
-ready(AutoSpecWebview.init);
+ready(SpecterWebview.init);
 /* eslint-enable no-undef */

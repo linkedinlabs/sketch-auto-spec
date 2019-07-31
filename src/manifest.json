@@ -1,12 +1,13 @@
 {
-  "name": "Spec’ing",
+  "name": "Specter",
   "description": "Annotate and spec design system elements",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "appcast": "https://raw.githubusercontent.com/linkedinlabs/sketch-auto-spec/master/.appcast.xml",
   "compatibleVersion": "55.0",
+  "icon": "icon.png",
   "bundleVersion": 1,
   "commands": [
     {
@@ -60,7 +61,7 @@
     }
   ],
   "menu": {
-    "title": "Spec’ing",
+    "title": "Specter",
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
