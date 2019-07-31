@@ -161,6 +161,7 @@ export default class Identifier {
         return result;
       }
 
+      // sets symbol type to `foundation` or `component` based on name checks
       const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitSymbol.name);
@@ -268,7 +269,7 @@ export default class Identifier {
       },
     };
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
-    let initialValue = this.layer.name();
+    let initialValue = cleanName(this.layer.name());
 
     if (layerSettings && layerSettings.annotationText) {
       initialValue = layerSettings.annotationText;

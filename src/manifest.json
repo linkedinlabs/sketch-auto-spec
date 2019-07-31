@@ -1,12 +1,13 @@
 {
-  "name": "Spec’ing",
-  "description": "Plugin to annotate symbols",
+  "name": "Specter",
+  "description": "Annotate and spec design system elements",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
-  "version": "0.0.12a",
+  "version": "0.0.16",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "appcast": "https://raw.githubusercontent.com/linkedinlabs/sketch-auto-spec/master/.appcast.xml",
   "compatibleVersion": "55.0",
+  "icon": "icon.png",
   "bundleVersion": 1,
   "commands": [
     {
@@ -22,6 +23,13 @@
       "shortcut": "ctrl shift option a",
       "script": "./main.js",
       "handler": "annotateLayerCustom"
+    },
+    {
+      "name": "Set Measurement",
+      "identifier": "annotate-measurement",
+      "shortcut": "ctrl shift m",
+      "script": "./main.js",
+      "handler": "annotateMeasurement"
     },
     {
       "name": "Draw Bounding Box",
@@ -50,23 +58,14 @@
           "OpenDocument": "onOpenDocument"
         }
       }
-    },
-    {
-      "name" : "Selection Change Listener",
-      "identifier": "selection-change-listener",
-      "script": "./main.js",
-      "handlers" : {
-        "actions": {
-          "SelectionChanged.finish": "onSelectionChange"
-        }
-      }
     }
   ],
   "menu": {
-    "title": "Spec’ing",
+    "title": "Specter",
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
+      "annotate-measurement",
       "draw-bounding-box",
       "view-gui"
     ]
