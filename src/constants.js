@@ -20,9 +20,17 @@ const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
  * @name PLUGIN_NAME
  * @type {string}
  */
-const PLUGIN_NAME = 'Spec’ing';
+const PLUGIN_NAME = 'Specter';
+
+const COLORS = {
+  component: '#9966ff',
+  custom: '#ff3399',
+  measure: '#00cc99',
+  style: '#ff6655',
+};
 
 export {
+  COLORS,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
 };

@@ -170,6 +170,52 @@ const annotateLayerCustom = (context = null) => {
 };
 
 /**
+ * @description Annotates a selection of layers in a Sketch file with the
+ * spacing number (“IS-X”) based on the gap between the two layers.
+ *
+ * @kind function
+ * @name annotateMeasurement
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected or
+ * if more than two layers are selected.
+ */
+const annotateMeasurement = (context = null) => {
+  const {
+    document,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() > 2) {
+    return messenger.alert('One or two layers must be selected');
+  }
+
+  // grab the gap frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+
+  // set up Painter instance for the reference layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // draw the spacing annotation (if gap frame exists)
+  let paintResult = null;
+  if (selection.count() === 2) {
+    const gapFrame = crawler.gapFrame();
+    paintResult = painter.addGapMeasurement(gapFrame);
+  }
+
+  if (selection.count() === 1) {
+    paintResult = painter.addDimMeasurement();
+  }
+
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
+
+  return null;
+};
+
+/**
  * @description Draws a semi-transparent “Bounding Box” around any selected elements.
  *
  * @kind function
@@ -203,10 +249,8 @@ const drawBoundingBox = (context = null) => {
     paintResult = painter.addBoundingBox(frame);
   }
 
-  // read the response from Painter; if it was unsuccessful, log and display the error
-  if (paintResult && (paintResult.status === 'error')) {
-    return messenger.handleResult(paintResult);
-  }
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
 
   return null;
 };
@@ -242,6 +286,7 @@ const onOpenDocument = (context) => {
 export {
   annotateLayer,
   annotateLayerCustom,
+  annotateMeasurement,
   drawBoundingBox,
   onOpenDocument,
 };
