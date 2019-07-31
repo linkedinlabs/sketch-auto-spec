@@ -117,13 +117,16 @@ const parseOverrides = (layer, document) => {
 
       // look for Icon overrides
       if (
-        overrideTypeName.toLowerCase().includes('icon')
-        && !overrideTypeName.toLowerCase().includes('color')
+        (overrideTypeName.toLowerCase().includes('icon')
+          && !overrideTypeName.toLowerCase().includes('color'))
+        || overrideTypeName.toLowerCase() === 'checkbox'
+        || overrideTypeName.toLowerCase() === 'radio'
+        || overrideTypeName.toLowerCase() === 'type'
       ) {
         // default icon name (usually last element of the name)
         let iconName = overrideName.split('/').pop();
 
-        // ---------- set up exceptions
+        // ---------- set up formatting exceptions
         // parsing exception for Ghost Entity symbols
         if (overrideTypeName.toLowerCase().includes('ghost')) {
           iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
