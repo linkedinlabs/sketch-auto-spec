@@ -20,25 +20,17 @@ const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
  * @name PLUGIN_NAME
  * @type {string}
  */
-const PLUGIN_NAME = 'Spec’ing';
+const PLUGIN_NAME = 'Specter';
 
-/**
- * @description Initial starting point for tracking the result of an action.
- *
- * @kind constant
- * @name initialResultState
- * @type {Object}
- */
-const INITIAL_RESULT_STATE = {
-  status: null,
-  messages: {
-    toast: null,
-    log: null,
-  },
+const COLORS = {
+  component: '#9966ff',
+  custom: '#ff3399',
+  measure: '#00cc99',
+  style: '#ff6655',
 };
 
 export {
-  INITIAL_RESULT_STATE,
+  COLORS,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
 };
