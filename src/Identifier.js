@@ -9,24 +9,70 @@ import { PLUGIN_IDENTIFIER } from './constants';
  * @kind function
  * @name setAnnotationTextSettings
  * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
+ * @private
  */
-const setAnnotationTextSettings = (annotationText, layer) => {
+const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
   let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
 
   // set `annotationText` on the layer settings
   if (!layerSettings) {
     layerSettings = {
       annotationText,
+      annotationType,
     };
   } else {
     layerSettings.annotationText = annotationText;
+    layerSettings.annotationType = annotationType;
   }
 
   // commit the settings update
   Settings.setLayerSettingForKey(layer, PLUGIN_IDENTIFIER, layerSettings);
 
   return null;
+};
+
+/**
+ * @description Checks the Kit name against a list of known Foundation Kit names
+ * and sets `annotationType` appropriately.
+ *
+ * @kind function
+ * @name checkNameForType
+ * @param {string} name The full name of the Layer.
+ * @returns {string} The `annotationType` – either `component` or `style`.
+ * @private
+ */
+const checkNameForType = (name) => {
+  let annotationType = 'component';
+  // grab the first segment of the name (before the first “/”) – top-level Kit name
+  const kitName = name.split('/')[0];
+  // kit name substrings, exclusive to Foundations
+  const foundations = ['Divider', 'Flood', 'Icons', 'Illustration', 'Logos'];
+
+  // check if one of the foundation substrings exists in the `kitName`
+  if (foundations.some(foundation => kitName.indexOf(foundation) >= 0)) {
+    annotationType = 'style';
+  }
+
+  return annotationType;
+};
+
+/**
+ * @description Removes any Lingo Kit/grouping names from the layer name
+ *
+ * @kind function
+ * @name cleanName
+ * @param {string} name The full name of the Layer.
+ * @returns {string} The last segment of the layer name as a string.
+ * @private
+ */
+const cleanName = (name) => {
+  // take only the last segment of the name (after a “/”, if available)
+  let cleanedName = name.split('/').pop();
+  // otherwise, fall back to the kit layer name
+  cleanedName = !cleanedName ? name : cleanedName;
+  return cleanedName;
 };
 
 // --- main Identifier class function
@@ -55,10 +101,10 @@ export default class Identifier {
 
   /**
    * @description Identifies the Kit-verified master symbol name of a symbol, or the linked
-   * layer name of a layer, and adds the name to the layer’s settings object:
-   * It achieves this by cross-referencing a symbol’s `symbolId` with the master symbol instance,
-   * and then looking the name up in the connected Lingo Kit symbols, or matching the layer to
-   * the Lingo Kit list of layers.
+   * layer name of a layer, and adds the name to the layer’s `annotationText` settings object:
+   * The identification is achieved by cross-referencing a symbol’s `symbolId` with the master
+   * symbol instance, and then looking the name up in the connected Lingo Kit symbols, or by
+   * matching the layer to the Lingo Kit list of layers.
    *
    * @kind function
    * @name getLingoName
@@ -83,12 +129,17 @@ export default class Identifier {
       result.messages.toast = '🆘 Lingo does not seem to be connected to this file.';
       return result;
     }
-    const kitSymbols = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.symbols;
-    const kitLayers = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes.layers;
 
-    // convert to json to expose params and find the `symbolId`
+    // lingo data from their storage hashes
+    const lingoData = this.documentData.userInfo()['com.lingoapp.lingo'].storage.hashes;
+
+    // convert layer to be identified into json to expose params to match with Lingo
     const layerJSON = fromNative(this.layer);
-    const { id, symbolId } = layerJSON;
+    const {
+      id,
+      sharedStyleId,
+      symbolId,
+    } = layerJSON;
 
     this.messenger.log(`Simple name for layer: ${this.layer.name()}`);
 
@@ -100,7 +151,7 @@ export default class Identifier {
       const masterSymbolId = masterSymbolJSON.id;
 
       // parse the connected Lingo Kit data and find the corresponding Kit Symbol
-      const kitSymbol = kitSymbols[masterSymbolId];
+      const kitSymbol = lingoData.symbols[masterSymbolId];
 
       // could not find a matching master symbol in the Lingo Kit
       if (!kitSymbol) {
@@ -110,53 +161,72 @@ export default class Identifier {
         return result;
       }
 
+      // sets symbol type to `foundation` or `component` based on name checks
+      const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
-      let kitSymbolNameClean = kitSymbol.name.split('/').pop();
-      // otherwise, fall back to the kit symbol name
-      kitSymbolNameClean = !kitSymbolNameClean ? kitSymbol.name : kitSymbolNameClean;
+      const textToSet = cleanName(kitSymbol.name);
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(kitSymbolNameClean, this.layer);
+      setAnnotationTextSettings(textToSet, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
-      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitSymbolNameClean}”`;
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
       return result;
     }
 
     // locate a layer in Lingo
-    const kitLayer = kitLayers[id];
+    const kitLayer = lingoData.layers[id];
 
-    // could not find a matching layer in the Lingo Kit
-    if (!kitLayer) {
-      result.status = 'error';
-      result.messages.log = `${id} was not found in a connected Lingo Kit`;
-      result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
+    if (kitLayer) {
+      const symbolType = checkNameForType(kitLayer.name);
+      // take only the last segment of the name (after a “/”, if available)
+      const textToSet = cleanName(kitLayer.name);
+
+      // set `annotationText` on the layer settings as the kit layer name
+      setAnnotationTextSettings(textToSet, symbolType, this.layer);
+
+      // log the official name alongside the original layer name and set as success
+      result.status = 'success';
+      result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
       return result;
     }
 
-    // take only the last segment of the name (after a “/”, if available)
-    let kitLayerNameClean = kitLayer.name.split('/').pop();
-    // otherwise, fall back to the kit layer name
-    kitLayerNameClean = !kitLayerNameClean ? kitLayer.name : kitLayerNameClean;
+    // locate a shared style in Lingo
+    if (sharedStyleId) {
+      const kitStyle = lingoData.layerStyles[sharedStyleId] || lingoData.textStyles[sharedStyleId];
 
-    // set `annotationText` on the layer settings as the kit layer name
-    setAnnotationTextSettings(kitLayerNameClean, this.layer);
+      if (kitStyle) {
+        // take only the last segment of the name (after a “/”, if available)
+        const textToSet = cleanName(kitStyle.name);
 
-    // log the official name alongside the original layer name and set as success
-    result.status = 'success';
-    result.messages.log = `Name in Lingo Kit for “${this.layer.name()}” is “${kitLayerNameClean}”`;
+        // set `annotationText` on the layer settings as the kit layer name
+        setAnnotationTextSettings(textToSet, 'style', this.layer);
+
+        // log the official name alongside the original layer name and set as success
+        result.status = 'success';
+        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
+        return result;
+      }
+    }
+
+    // could not find a matching layer in the Lingo Kit
+    result.status = 'error';
+    result.messages.log = `${id} was not found in a connected Lingo Kit`;
+    result.messages.toast = '😢 This layer could not be found in a connected Lingo Kit.';
     return result;
   }
 
   /**
-   * @description Checks the layer’s settings object for the existence of `annotationText`.
+   * @description Checks the layer’s settings object for the existence of `annotationText` and
+   * and that `annotationType` is 'custom' (Component and Style annotations can be easily updated
+   * and need to be rechecked each time, whereas Custom annotations do not.
    *
    * @kind function
-   * @name hasName
+   * @name hasCustomText
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  hasName() {
+  hasCustomText() {
     const result = {
       status: null,
       messages: {
@@ -167,12 +237,16 @@ export default class Identifier {
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
 
     // check for existing `annotationText`
-    if (layerSettings && layerSettings.annotationText) {
+    if (
+      layerSettings
+      && layerSettings.annotationText
+      && (layerSettings.annotationType === 'custom')
+    ) {
       result.status = 'success';
-      result.messages.log = `Name set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
+      result.messages.log = `Custom text set for “${this.layer.name()}” is “${layerSettings.annotationText}”`;
     } else {
       result.status = 'error';
-      result.messages.log = `No name is set for “${this.layer.name()}”`;
+      result.messages.log = `No custom text is set for “${this.layer.name()}”`;
     }
 
     return result;
@@ -183,10 +257,10 @@ export default class Identifier {
    * annotation text and adds the text to the layer’s settings object.
    *
    * @kind function
-   * @name setName
+   * @name setText
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  setName() {
+  setText() {
     const result = {
       status: null,
       messages: {
@@ -195,7 +269,7 @@ export default class Identifier {
       },
     };
     const layerSettings = Settings.layerSettingForKey(this.layer, PLUGIN_IDENTIFIER);
-    let initialValue = this.layer.name();
+    let initialValue = cleanName(this.layer.name());
 
     if (layerSettings && layerSettings.annotationText) {
       initialValue = layerSettings.annotationText;
@@ -215,17 +289,17 @@ export default class Identifier {
     if (customInput.error) {
       // most likely the user canceled the input
       result.status = 'error';
-      result.messages.log = 'Set name was canceled by user';
+      result.messages.log = 'Set text was canceled by user';
       return result;
     }
 
-    const customName = customInput.value;
-    // set `annotationText` on the layer settings as the custom name
-    setAnnotationTextSettings(customName, this.layer);
+    const customText = customInput.value;
+    // set `annotationText` on the layer settings as the custom text
+    setAnnotationTextSettings(customText, 'custom', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';
-    result.messages.log = `Custom Name set for “${this.layer.name()}” is “${customName}”`;
+    result.messages.log = `Custom Text set for “${this.layer.name()}” is “${customText}”`;
     return result;
   }
 }

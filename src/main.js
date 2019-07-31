@@ -53,12 +53,14 @@ const annotateLayer = (context = null) => {
 
   // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
-    return messenger.toast('A layer must be selected');
+    return messenger.alert('A layer must be selected');
   }
 
   // iterate through each layer in a selection
-  const layers = new Crawler({ for: selection });
-  layers.all().forEach((layer) => {
+  const layers = new Crawler({ for: selection }).all();
+  const multipleLayers = (layers.length > 1);
+
+  layers.forEach((layer) => {
     // set up Identifier instance for the layer
     const layerToAnnotate = new Identifier({
       for: layer,
@@ -69,31 +71,33 @@ const annotateLayer = (context = null) => {
     const painter = new Painter({ for: layer, in: document });
 
     // determine the annotation text
-    let hasName = false;
-    const hasNameResult = layerToAnnotate.hasName();
+    let hasText = false;
+    const hasCustomTextResult = layerToAnnotate.hasCustomText();
 
-    if (hasNameResult.status === 'error') {
-      let setNameResult = null;
+    if (hasCustomTextResult.status === 'error') {
+      let setTextResult = null;
       const getLingoNameResult = layerToAnnotate.getLingoName();
       if (getLingoNameResult.status === 'error') {
         messenger.handleResult(getLingoNameResult);
 
-        setNameResult = layerToAnnotate.setName();
-        messenger.handleResult(setNameResult);
+        if (!multipleLayers) {
+          setTextResult = layerToAnnotate.setText();
+          messenger.handleResult(setTextResult);
 
-        if (setNameResult.status === 'success') {
-          hasName = true;
+          if (setTextResult.status === 'success') {
+            hasText = true;
+          }
         }
       } else {
-        hasName = true;
+        hasText = true;
       }
     } else {
-      hasName = true;
+      hasText = true;
     }
 
     // draw the annotation (if the text exists)
     let paintResult = null;
-    if (hasName) {
+    if (hasText) {
       paintResult = painter.addAnnotation();
     }
 
@@ -127,12 +131,12 @@ const annotateLayerCustom = (context = null) => {
 
   // need a selected layer to annotate it
   if (selection === null || selection.count() === 0) {
-    return messenger.toast('A layer must be selected');
+    return messenger.alert('A layer must be selected');
   }
 
   // need a selected layer to annotate it
   if (selection.count() > 1) {
-    return messenger.toast('Only one layer must be selected');
+    return messenger.alert('Only one layer may be selected');
   }
 
   // grab the layer form the selection
@@ -148,10 +152,10 @@ const annotateLayerCustom = (context = null) => {
   const painter = new Painter({ for: layer, in: document });
 
   // determine the annotation text
-  const setNameResult = layerToAnnotate.setName();
-  messenger.handleResult(setNameResult);
+  const setTextResult = layerToAnnotate.setText();
+  messenger.handleResult(setTextResult);
 
-  if (setNameResult.status === 'success') {
+  if (setTextResult.status === 'success') {
     // draw the annotation (if the text exists)
     let paintResult = null;
     paintResult = painter.addAnnotation();
@@ -161,6 +165,92 @@ const annotateLayerCustom = (context = null) => {
       return messenger.handleResult(paintResult);
     }
   }
+
+  return null;
+};
+
+/**
+ * @description Annotates a selection of layers in a Sketch file with the
+ * spacing number (“IS-X”) based on the gap between the two layers.
+ *
+ * @kind function
+ * @name annotateMeasurement
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected or
+ * if more than two layers are selected.
+ */
+const annotateMeasurement = (context = null) => {
+  const {
+    document,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() > 2) {
+    return messenger.alert('One or two layers must be selected');
+  }
+
+  // grab the gap frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+
+  // set up Painter instance for the reference layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // draw the spacing annotation (if gap frame exists)
+  let paintResult = null;
+  if (selection.count() === 2) {
+    const gapFrame = crawler.gapFrame();
+    paintResult = painter.addGapMeasurement(gapFrame);
+  }
+
+  if (selection.count() === 1) {
+    paintResult = painter.addDimMeasurement();
+  }
+
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
+
+  return null;
+};
+
+/**
+ * @description Draws a semi-transparent “Bounding Box” around any selected elements.
+ *
+ * @kind function
+ * @name drawBoundingBox
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected.
+ */
+const drawBoundingBox = (context = null) => {
+  const {
+    document,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() === 0) {
+    return messenger.alert('At least one layer must be selected');
+  }
+
+  // grab the frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+  const frame = crawler.frame();
+
+  // set up Painter instance for the layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // draw the bounding box (if frame exists)
+  let paintResult = null;
+  if (frame) {
+    paintResult = painter.addBoundingBox(frame);
+  }
+
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
 
   return null;
 };
@@ -192,26 +282,11 @@ const onOpenDocument = (context) => {
   }
 };
 
-/**
- * @description Writes to the log whenever the selection changes and displays a Toast indicator.
- *
- * @kind function
- * @name onSelectionChange
- * @param {Object} context The current context (event) received from Sketch.
- */
-const onSelectionChange = (context) => {
-  if (String(context.action) === 'SelectionChanged.finish') {
-    const { document, messenger } = assemble(context);
-
-    messenger.log(`Selection Changed in Doc “${document.id}”`);
-  }
-  return null;
-};
-
 // export each used in manifest
 export {
   annotateLayer,
   annotateLayerCustom,
+  annotateMeasurement,
+  drawBoundingBox,
   onOpenDocument,
-  onSelectionChange,
 };

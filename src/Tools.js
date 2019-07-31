@@ -114,9 +114,39 @@ const updateArray = (key, item, array, action = 'add') => {
   return updatedArray;
 };
 
+/**
+ * @description Takes a Sketch layer object and returns a `frame` object with
+ * `x` and `y` coordinates, relative to the artboard the frame is on.
+ *
+ * @kind function
+ * @name getPositionOnArtboard
+ * @param {Object} layer The Sketch layer object.
+ * @returns {Object} A `frame` object with `x` and `y` coordinates.
+ */
+const getPositionOnArtboard = (layer) => {
+  // original layer frame position
+  const coordinates = {
+    x: layer.frame().x(),
+    y: layer.frame().y(),
+  };
+  // look for an immediate parent
+  let { parent } = fromNative(layer);
+
+  // loop through each parent and adjust the coordinates
+  if (parent) {
+    while (parent.name && parent.type !== 'Artboard') {
+      coordinates.x += parent.frame.x;
+      coordinates.y += parent.frame.y;
+      parent = parent.parent; // eslint-disable-line prefer-destructuring
+    }
+  }
+  return coordinates;
+};
+
 export {
   findLayerById,
   getDocument,
+  getPositionOnArtboard,
   getSelection,
   setArray,
   updateArray,

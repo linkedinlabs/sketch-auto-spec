@@ -106,11 +106,16 @@ svg {
   width: 28px; /* 22px icon */
 }
 
-.actions li.action-measure a {
+.actions li.action-bind a {
   display: block;
   margin-right: 13px;
+  width: 28px; /* 22px icon */
+}
+
+.actions li.action-measure a {
+  display: block;
+  margin-left: 3px;
   width: 25px; /* 19px icon */
-  opacity: 0.5; /* temporarily disable measure */
 }
 
 /* buttons */
@@ -131,12 +136,20 @@ svg {
   width: 100%;
 }
 
+.actions a .icon svg.icons-bind rect {
+  fill: rgba(255, 102, 85, 0.3);
+}
+
 svg path,
 svg polygon {
   fill: rgba(0, 0, 0, 0.6);
 }
 
 @media (prefers-color-scheme: dark) {
+  .actions a .icon svg.icons-bind rect {
+    fill: rgba(255, 102, 85, 0.2);
+  }
+
   svg path,
   svg polygon {
     fill: rgba(255, 255, 255, 0.7);
@@ -148,25 +161,12 @@ svg polygon {
   a:hover svg polygon {
     fill: rgba(0, 0, 0, 0.9);
   }
-
-  /* temporarily disable measure */
-  .actions li.action-measure a:hover {
-    cursor: default;
-  }
-
-  .actions li.action-measure a:hover svg polygon {
-    fill: rgba(0, 0, 0, 0.6);
-  }
 }
 
 @media (prefers-color-scheme: dark) and (hover: hover) {
   a:hover svg path,
   a:hover svg polygon {
     fill: rgba(255, 255, 255, 0.9);
-  }
-
-  .actions li.action-measure a:hover svg polygon {
-    fill: rgba(255, 255, 255, 0.6);
   }
 }
 
