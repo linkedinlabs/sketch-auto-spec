@@ -79,6 +79,7 @@ export default class Messenger {
   handleResult(result) {
     if (result.messages) {
       // set up toast and log messages
+      const alertMessage = result.messages.alert;
       const toastMessage = result.messages.toast;
       const logMessage = result.messages.log;
       const isError = (result.status === 'error');
@@ -91,6 +92,11 @@ export default class Messenger {
       // toast a message or error
       if (toastMessage) {
         this.toast(toastMessage);
+      }
+
+      // alert a message or error
+      if (alertMessage) {
+        this.alert(alertMessage);
       }
     }
   }
