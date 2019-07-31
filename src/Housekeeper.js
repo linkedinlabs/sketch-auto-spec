@@ -1,6 +1,6 @@
-import { Settings } from 'sketch';
+import { fromNative, Settings } from 'sketch';
 import { updateArray } from './Tools';
-import { PLUGIN_IDENTIFIER } from './constants';
+import { COLORS, PLUGIN_IDENTIFIER } from './constants';
 
 /**
  * @description A list of the unique keys that match to a migration function.
@@ -11,6 +11,7 @@ import { PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
+  1563951600000,
   1561504830674,
   1561503084281,
 ];
@@ -219,6 +220,126 @@ export default class Housekeeper {
     });
 
     return null;
+  }
+
+  /**
+   * @description Migrates any spec layers using the old color palette to the new
+   * set of colors. This migration does not distinguish custom/component annotations.
+   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/31}
+   *
+   * @kind function
+   * @name migration1563951600000
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
+  migration1563951600000() {
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+    const migrationKey = 1563951600000;
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    // this app does not have any plugin settings; no further work needed
+    if (!documentSettings || !documentSettings.containerGroups) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    // default the changes flag to false
+    let colorsUpdated = false;
+
+    // helper function to update the color of any layer fills
+    const updateColor = (layer, newColor, opacity = 'ff') => {
+      if (layer.style && layer.style.fills) {
+        layer.style.fills.forEach((fill) => {
+          if (fill.color) {
+            const currentColor = fill.color.match(/.{1,7}/g)[0];
+            if (currentColor !== newColor) {
+              fill.color = `${newColor}${opacity}`; // eslint-disable-line no-param-reassign
+              colorsUpdated = true;
+            }
+          }
+          return null;
+        });
+      }
+    };
+
+    // helper function to iterate through all children of a group layer (even sub-groups)
+    // and call the appropriate instance of `updateColor`
+    const updateChildrenColors = (children, groupType) => {
+      const nativeLayers = children();
+      nativeLayers.forEach((nativeLayer) => {
+        const layer = fromNative(nativeLayer);
+
+        if (layer.type === 'ShapePath') {
+          switch (groupType) {
+            case 'component':
+            case 'custom':
+            case 'measure':
+            case 'style':
+              updateColor(layer, COLORS[groupType]);
+              break;
+            case 'bounding':
+              updateColor(layer, COLORS.style, '4d');
+              break;
+            default:
+              return null;
+          }
+        }
+        return null;
+      });
+    };
+
+    this.messenger.log('Run “update colors” migration…');
+
+    documentSettings.containerGroups.forEach((containerGroup) => {
+      const boundingBoxContainer = this.document.getLayerWithID(
+        containerGroup.boundingInnerGroupId,
+      );
+      const componentBoxContainer = this.document.getLayerWithID(
+        containerGroup.componentInnerGroupId,
+      );
+      const measurementContainer = this.document.getLayerWithID(
+        containerGroup.measurementInnerGroupId,
+      );
+      const styleContainer = this.document.getLayerWithID(
+        containerGroup.styleInnerGroupId,
+      );
+
+      // convert component boxes
+      if (componentBoxContainer && componentBoxContainer.sketchObject.children) {
+        updateChildrenColors(componentBoxContainer.sketchObject.children, 'component');
+      }
+
+      // convert bounding boxes
+      if (boundingBoxContainer && boundingBoxContainer.sketchObject.children) {
+        updateChildrenColors(boundingBoxContainer.sketchObject.children, 'bounding');
+      }
+
+      // convert measurement annotations
+      if (measurementContainer && measurementContainer.sketchObject.children) {
+        updateChildrenColors(measurementContainer.sketchObject.children, 'measure');
+      }
+
+      // convert style annotations
+      if (styleContainer && styleContainer.sketchObject.children) {
+        updateChildrenColors(styleContainer.sketchObject.children, 'style');
+      }
+    });
+
+    if (colorsUpdated) {
+      result.messages.log = `Migration: Ran ${migrationKey} (update colors) and colors were updated`;
+    } else {
+      result.messages.log = `Migration: Ran ${migrationKey} (update colors) and colors were not updated`;
+    }
+
+    result.status = 'success';
+    return result;
   }
 
   /**
