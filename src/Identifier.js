@@ -9,21 +9,29 @@ import { PLUGIN_IDENTIFIER } from './constants';
  * @kind function
  * @name setAnnotationTextSettings
  * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationSecondaryText Optional text to add to the layer’s settings.
  * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
  * @private
  */
-const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
+const setAnnotationTextSettings = (
+  annotationText,
+  annotationSecondaryText,
+  annotationType,
+  layer,
+) => {
   let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
 
   // set `annotationText` on the layer settings
   if (!layerSettings) {
     layerSettings = {
       annotationText,
+      annotationSecondaryText,
       annotationType,
     };
   } else {
     layerSettings.annotationText = annotationText;
+    layerSettings.annotationSecondaryText = annotationSecondaryText;
     layerSettings.annotationType = annotationType;
   }
 
@@ -75,6 +83,52 @@ const cleanName = (name) => {
   return cleanedName;
 };
 
+/**
+ * @description Looks through layer overrides and returns a text string based
+ * on the override(s) and context.
+ *
+ * @kind function
+ * @name parseOverrides
+ * @param {Object} layer The Sketch js layer object.
+ * @param {Object} document The Sketch document object that contains the layer.
+ * @returns {string} Text containing information about the override(s).
+ *
+ * @private
+ */
+const parseOverrides = (layer, document) => {
+  let overridesText = null;
+
+  // iterate available overrides
+  fromNative(layer).overrides.forEach((override) => {
+    // only worry about an editable override that has changed and is based on a symbol
+    if (
+      override.editable
+      && !override.isDefault
+      && override.id.includes('symbolID')
+    ) {
+      // current override type/category (always last portion of the path)
+      const overrideTypeId = override.path.split('/').pop();
+      const overrideType = document.getLayerWithID(overrideTypeId);
+      const overrideTypeName = overrideType.name;
+
+      // current override master symbol (ID is the override value)
+      const overrideSymbol = document.getSymbolMasterWithID(override.value);
+      const overrideName = overrideSymbol.name;
+
+      // look for Icon overrides
+      if (
+        overrideTypeName.toLowerCase().includes('icon')
+        && !overrideTypeName.toLowerCase().includes('color')
+      ) {
+        const iconName = overrideName.split('/').pop();
+        overridesText = `Override: ${iconName}`;
+      }
+    }
+  });
+
+  return overridesText;
+};
+
 // --- main Identifier class function
 /**
  * @description A class to handle identifying a Sketch layer as a valid part of the Design System.
@@ -91,10 +145,12 @@ const cleanName = (name) => {
 export default class Identifier {
   constructor({
     for: layer,
+    document,
     documentData,
     messenger,
   }) {
     this.layer = layer;
+    this.document = document;
     this.documentData = documentData;
     this.messenger = messenger;
   }
@@ -165,9 +221,11 @@ export default class Identifier {
       const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitSymbol.name);
+      const subtextToSet = parseOverrides(this.layer, this.document);
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(textToSet, symbolType, this.layer);
+      // set option `subtextToSet` on the layer settings based on existing overrides
+      setAnnotationTextSettings(textToSet, subtextToSet, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -184,7 +242,7 @@ export default class Identifier {
       const textToSet = cleanName(kitLayer.name);
 
       // set `annotationText` on the layer settings as the kit layer name
-      setAnnotationTextSettings(textToSet, symbolType, this.layer);
+      setAnnotationTextSettings(textToSet, null, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -201,7 +259,7 @@ export default class Identifier {
         const textToSet = cleanName(kitStyle.name);
 
         // set `annotationText` on the layer settings as the kit layer name
-        setAnnotationTextSettings(textToSet, 'style', this.layer);
+        setAnnotationTextSettings(textToSet, null, 'style', this.layer);
 
         // log the official name alongside the original layer name and set as success
         result.status = 'success';
@@ -295,7 +353,7 @@ export default class Identifier {
 
     const customText = customInput.value;
     // set `annotationText` on the layer settings as the custom text
-    setAnnotationTextSettings(customText, 'custom', this.layer);
+    setAnnotationTextSettings(customText, null, 'custom', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';

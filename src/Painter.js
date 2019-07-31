@@ -160,13 +160,19 @@ const buildMeasureIcon = (parent, colorHex, orientation = 'horizonal') => {
  * @kind function
  * @name buildAnnotation
  * @param {Object} annotationText The text for the annotation.
+ * @param {Object} annotationSecondaryText Optional secondary text for the annotation.
  * @param {string} annotationType A string representing the type of annotation
  * (component or foundation).
  * @param {Object} artboard The artboard to draw within.
  * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
  * @private
  */
-const buildAnnotation = (annotationText, annotationType = 'component', artboard) => {
+const buildAnnotation = (
+  annotationText,
+  annotationSecondaryText,
+  annotationType = 'component',
+  artboard,
+) => {
   // set the dominant color
   let colorHex = null;
   switch (annotationType) {
@@ -208,15 +214,25 @@ const buildAnnotation = (annotationText, annotationType = 'component', artboard)
     textFrame.y = -1;
   }
 
+  // adjustment for two-line annotations
+  let rectTextBuffer = 0;
+  if (annotationSecondaryText) {
+    rectTextBuffer = 22;
+  }
+
+  let setText = annotationText;
+  if (annotationSecondaryText) {
+    setText = `${annotationText}\n${annotationSecondaryText}`;
+  }
   const text = new Text({
     frame: {
       x: textFrame.x,
-      y: textFrame.y,
+      y: (textFrame.y - rectTextBuffer),
     },
     parent: artboard,
-    text: annotationText,
+    text: setText,
     style: {
-      alignment: Text.Alignment.left,
+      alignment: Text.Alignment.center,
       borders: [{
         enabled: false,
       }],
@@ -232,9 +248,9 @@ const buildAnnotation = (annotationText, annotationType = 'component', artboard)
   text.adjustToFit();
 
   // build the rounded rectangle
-  const rectHeight = (annotationType === 'measurement' ? 22 : 30);
+  const rectHeight = (annotationType === 'measurement' ? 22 : 30) + rectTextBuffer;
   const rectangle = new ShapePath({
-    frame: new Rectangle(0, 0, 200, rectHeight),
+    frame: new Rectangle(0, -rectTextBuffer, 200, rectHeight),
     parent: artboard,
     style: {
       borders: [{
@@ -345,7 +361,7 @@ const buildBoundingBox = (frame, artboard) => {
  * @param {Object} annotation Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
  * for the layer receiving the annotation + the artboard width (`artboardWidth`).
- * @param {string} annotationType An optional string representing the type of annotation
+ * @param {string} annotationType An optional string representing the type of annotation.
  * @param {string} orientation An optional string representing the orientation of the
  * annotation (`top` or `left`).
  *
@@ -777,6 +793,7 @@ const createOuterGroup = (
  * @name setContainerGroups
  * @param {Object} artboard The artboard to draw within.
  * @param {Object} document The document to draw within.
+ * @param {string} elementType A string representing the type of annotation to draw.
  * @returns {Object} The container group layer.
  * @private
  */
@@ -938,7 +955,11 @@ export default class Painter {
     }
 
     // set up some information
-    const { annotationText, annotationType } = layerSettings;
+    const {
+      annotationText,
+      annotationSecondaryText,
+      annotationType,
+    } = layerSettings;
     const layerName = this.layer.name();
     const layerId = fromNative(this.layer).id;
     const groupName = `Annotation for ${layerName}`;
@@ -975,6 +996,7 @@ export default class Painter {
     // construct the base annotation elements
     const annotation = buildAnnotation(
       annotationText,
+      annotationSecondaryText,
       annotationType,
       this.artboard,
     );
@@ -1297,6 +1319,7 @@ export default class Painter {
     // construct the base annotation elements
     const annotation = buildAnnotation(
       annotationText,
+      null, // annotationSecondaryText
       annotationType,
       this.artboard,
     );
