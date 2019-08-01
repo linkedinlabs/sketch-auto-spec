@@ -136,7 +136,11 @@ const parseOverrides = (layer, document) => {
         // ---------- set up formatting exceptions
         // parsing exception for Ghost Entity symbols
         if (overrideTypeName.toLowerCase().includes('ghost')) {
-          iconName = overrideName.split(/(?:[^w])(\/)/).reverse()[1]; // eslint-disable-line prefer-destructuring
+          // in some kits, Ghost naming scheme is fine
+          // but in the Web kit it is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
+          if (Number(iconName) === parseInt(iconName, 10)) {
+            iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+          }
         }
 
         // set final text
