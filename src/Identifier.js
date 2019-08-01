@@ -77,6 +77,7 @@ const checkNameForType = (name) => {
  */
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
+
   let cleanedName = name.split('/').pop();
   // otherwise, fall back to the kit layer name
   cleanedName = !cleanedName ? name : cleanedName;
@@ -117,8 +118,11 @@ const parseOverrides = (layer, document) => {
 
       // look for Icon overrides
       if (
-        (overrideTypeName.toLowerCase().includes('icon')
-          && !overrideTypeName.toLowerCase().includes('color'))
+        (
+          overrideTypeName.toLowerCase().includes('icon')
+          && !overrideTypeName.toLowerCase().includes('color')
+          && !overrideTypeName.toLowerCase().includes('🎨')
+        )
         || overrideTypeName.toLowerCase() === 'checkbox'
         || overrideTypeName.toLowerCase() === 'radio'
         || overrideTypeName.toLowerCase() === 'type'
