@@ -114,18 +114,21 @@ const parseOverrides = (layer, document) => {
 
       // current override master symbol (ID is the override value)
       const overrideSymbol = document.getSymbolMasterWithID(override.value);
-      const overrideName = overrideSymbol.name;
+      // grab name (sometimes it does not exist if “None” is a changed override)
+      const overrideName = overrideSymbol ? overrideSymbol.name : null;
 
       // look for Icon overrides
       if (
-        (
-          overrideTypeName.toLowerCase().includes('icon')
-          && !overrideTypeName.toLowerCase().includes('color')
-          && !overrideTypeName.toLowerCase().includes('🎨')
+        overrideName && (
+          (
+            overrideTypeName.toLowerCase().includes('icon')
+            && !overrideTypeName.toLowerCase().includes('color')
+            && !overrideTypeName.toLowerCase().includes('🎨')
+          )
+          || overrideTypeName.toLowerCase() === 'checkbox'
+          || overrideTypeName.toLowerCase() === 'radio'
+          || overrideTypeName.toLowerCase() === 'type'
         )
-        || overrideTypeName.toLowerCase() === 'checkbox'
-        || overrideTypeName.toLowerCase() === 'radio'
-        || overrideTypeName.toLowerCase() === 'type'
       ) {
         // default icon name (usually last element of the name, separated by “/”)
         let iconName = overrideName.split(/(?:[^w])(\/)/).pop();
