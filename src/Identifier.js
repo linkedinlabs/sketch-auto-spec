@@ -78,7 +78,7 @@ const checkNameForType = (name) => {
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
 
-  let cleanedName = name.split('/').pop();
+  let cleanedName = name.split(/(?:[^w])(\/)/).pop();
   // otherwise, fall back to the kit layer name
   cleanedName = !cleanedName ? name : cleanedName;
   return cleanedName;
@@ -127,13 +127,13 @@ const parseOverrides = (layer, document) => {
         || overrideTypeName.toLowerCase() === 'radio'
         || overrideTypeName.toLowerCase() === 'type'
       ) {
-        // default icon name (usually last element of the name)
-        let iconName = overrideName.split('/').pop();
+        // default icon name (usually last element of the name, separated by “/”)
+        let iconName = overrideName.split(/(?:[^w])(\/)/).pop();
 
         // ---------- set up formatting exceptions
         // parsing exception for Ghost Entity symbols
         if (overrideTypeName.toLowerCase().includes('ghost')) {
-          iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+          iconName = overrideName.split(/(?:[^w])(\/)/).reverse()[1]; // eslint-disable-line prefer-destructuring
         }
 
         // set final text
