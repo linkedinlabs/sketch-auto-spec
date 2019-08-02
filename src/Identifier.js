@@ -96,11 +96,12 @@ const cleanName = (name) => {
  * @name parseOverrides
  * @param {Object} layer The Sketch js layer object.
  * @param {Object} document The Sketch document object that contains the layer.
+ * @param {Object} workingName The top-level layer name.
  * @returns {string} Text containing information about the override(s).
  *
  * @private
  */
-const parseOverrides = (layer, document) => {
+const parseOverrides = (layer, document, workingName = null) => {
   const overridesText = [];
 
   // iterate available overrides
@@ -121,10 +122,17 @@ const parseOverrides = (layer, document) => {
       // grab name (sometimes it does not exist if “None” is a changed override)
       const overrideName = overrideSymbol ? overrideSymbol.name : null;
 
-      // look for Icon overrides - this is based on parsing the text of an
-      // `overrideTypeName` and making some comparisons and exceptions
-      if (
-        overrideName && (
+      if (overrideName) {
+        // look for top-level overrides
+        if (!override.path.includes('/')) {
+          let topLevelOverrideName = overrideName.split(/(?:[^w])(\/)/).pop();
+          topLevelOverrideName = topLevelOverrideName.replace(`${workingName}`, '');
+          // update `overridesText`
+          overridesText.push(topLevelOverrideName);
+        }
+        // look for Icon overrides - this is based on parsing the text of an
+        // `overrideTypeName` and making some comparisons and exceptions
+        if (
           (
             overrideTypeName.toLowerCase().includes('icon')
             && !overrideTypeName.toLowerCase().includes('color')
@@ -134,32 +142,35 @@ const parseOverrides = (layer, document) => {
           || overrideTypeName.toLowerCase() === 'radio'
           || overrideTypeName.toLowerCase() === 'type'
           || overrideTypeName.toLowerCase().includes('pebble')
-        )
-      ) {
-        // default icon name (usually last element of the name, separated by “/”)
-        let iconName = overrideName.split(/(?:[^w])(\/)/).pop();
+        ) {
+          // default icon name (usually last element of the name, separated by “/”)
+          let iconName = overrideName.split(/(?:[^w])(\/)/).pop();
 
-        // ---------- set up formatting exceptions
-        // parsing exception for Ghost Entity symbols
-        if (overrideTypeName.toLowerCase().includes('ghost')) {
-          // in some kits, Ghost naming scheme is fine
-          // but in the Web kit it is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
-          if (Number(iconName) === parseInt(iconName, 10)) {
-            iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+          // ---------- set up formatting exceptions
+          // parsing exception for Ghost Entity symbols
+          if (overrideTypeName.toLowerCase().includes('ghost')) {
+            // in some kits, Ghost naming scheme is fine
+            // but in the Web kit it is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
+            if (Number(iconName) === parseInt(iconName, 10)) {
+              iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+            }
           }
-        }
 
-        // update `overridesText`
-        overridesText.push(iconName);
+          // update `overridesText`
+          overridesText.push(iconName);
+        }
       }
     }
   });
 
-  let label = 'Override';
-  if (overridesText.length > 1) {
-    label = 'Overrides';
+  let setOverridesText = null;
+  if (overridesText.length > 0) {
+    let label = 'Override';
+    if (overridesText.length > 1) {
+      label = 'Overrides';
+    }
+    setOverridesText = `${label}: ${overridesText.join(', ')}`;
   }
-  const setOverridesText = `${label}: ${overridesText.join(',')}`;
 
   return setOverridesText;
 };
@@ -256,7 +267,7 @@ export default class Identifier {
       const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitSymbol.name);
-      const subtextToSet = parseOverrides(this.layer, this.document);
+      const subtextToSet = parseOverrides(this.layer, this.document, textToSet);
 
       // set `annotationText` on the layer settings as the kit symbol name
       // set option `subtextToSet` on the layer settings based on existing overrides
