@@ -54,7 +54,11 @@ const setAnnotationTextSettings = (
 const checkNameForType = (name) => {
   let annotationType = 'component';
   // grab the first segment of the name (before the first “/”) – top-level Kit name
-  const kitName = name.split('/')[0];
+  let kitName = name.split('/')[0];
+
+  // set up some known exceptions (remove the text that would trigger a type change)
+  kitName = kitName.replace('(Dual Icons)', '');
+
   // kit name substrings, exclusive to Foundations
   const foundations = ['Divider', 'Flood', 'Icons', 'Illustration', 'Logos'];
 
@@ -128,6 +132,7 @@ const parseOverrides = (layer, document) => {
           || overrideTypeName.toLowerCase() === 'checkbox'
           || overrideTypeName.toLowerCase() === 'radio'
           || overrideTypeName.toLowerCase() === 'type'
+          || overrideTypeName.toLowerCase().includes('pebble')
         )
       ) {
         // default icon name (usually last element of the name, separated by “/”)
