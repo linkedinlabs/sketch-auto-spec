@@ -101,7 +101,7 @@ const cleanName = (name) => {
  * @private
  */
 const parseOverrides = (layer, document) => {
-  let overridesText = null;
+  const overridesText = [];
 
   // iterate available overrides
   fromNative(layer).overrides.forEach((override) => {
@@ -121,7 +121,8 @@ const parseOverrides = (layer, document) => {
       // grab name (sometimes it does not exist if “None” is a changed override)
       const overrideName = overrideSymbol ? overrideSymbol.name : null;
 
-      // look for Icon overrides
+      // look for Icon overrides - this is based on parsing the text of an
+      // `overrideTypeName` and making some comparisons and exceptions
       if (
         overrideName && (
           (
@@ -148,13 +149,19 @@ const parseOverrides = (layer, document) => {
           }
         }
 
-        // set final text
-        overridesText = `Override: ${iconName}`;
+        // update `overridesText`
+        overridesText.push(iconName);
       }
     }
   });
 
-  return overridesText;
+  let label = 'Override';
+  if (overridesText.length > 1) {
+    label = 'Overrides';
+  }
+  const setOverridesText = `${label}: ${overridesText.join(',')}`;
+
+  return setOverridesText;
 };
 
 // --- main Identifier class function
