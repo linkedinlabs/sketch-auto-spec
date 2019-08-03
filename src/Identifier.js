@@ -123,41 +123,38 @@ const parseOverrides = (layer, document, workingName = null) => {
       const overrideName = overrideSymbol ? overrideSymbol.name : null;
 
       if (overrideName) {
-        // look for top-level overrides
-        if (!override.path.includes('/')) {
-          let topLevelOverrideName = overrideName.split(/(?:[^w])(\/)/).pop();
-          topLevelOverrideName = topLevelOverrideName.replace(`${workingName}`, '');
-          // update `overridesText`
-          overridesText.push(topLevelOverrideName);
-        }
-        // look for Icon overrides - this is based on parsing the text of an
-        // `overrideTypeName` and making some comparisons and exceptions
+        // look for top-level overrides and Icon overrides - based on
+        // parsing the text of an `overrideTypeName` and making some
+        // comparisons and exceptions
         if (
           (
             overrideTypeName.toLowerCase().includes('icon')
             && !overrideTypeName.toLowerCase().includes('color')
             && !overrideTypeName.toLowerCase().includes('🎨')
+            && !overrideTypeName.toLowerCase().includes('button')
           )
           || overrideTypeName.toLowerCase() === 'checkbox'
           || overrideTypeName.toLowerCase() === 'radio'
           || overrideTypeName.toLowerCase() === 'type'
           || overrideTypeName.toLowerCase().includes('pebble')
+          || !override.path.includes('/')
         ) {
           // default icon name (usually last element of the name, separated by “/”)
-          let iconName = overrideName.split(/(?:[^w])(\/)/).pop();
+          let overrideValueName = overrideName.split(/(?:[^w])(\/)/).pop();
+          overrideValueName = overrideValueName.replace(`${workingName}`, '');
 
           // ---------- set up formatting exceptions
           // parsing exception for Ghost Entity symbols
           if (overrideTypeName.toLowerCase().includes('ghost')) {
             // in some kits, Ghost naming scheme is fine
             // but in the Web kit it is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
-            if (Number(iconName) === parseInt(iconName, 10)) {
-              iconName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+            if (Number(overrideValueName) === parseInt(overrideValueName, 10)) {
+              overrideValueName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
             }
           }
 
           // update `overridesText`
-          overridesText.push(iconName);
+          overridesText.push(overrideValueName);
         }
       }
     }
