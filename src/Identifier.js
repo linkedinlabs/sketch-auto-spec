@@ -81,7 +81,7 @@ const checkNameForType = (name) => {
  */
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
-
+  // ignore segments that begin with a “w” as-in “…Something w/ Icon”
   let cleanedName = name.split(/(?:[^w])(\/)/).pop();
   // otherwise, fall back to the kit layer name
   cleanedName = !cleanedName ? name : cleanedName;
@@ -104,7 +104,8 @@ const cleanName = (name) => {
 const parseOverrides = (layer, document, workingName = null) => {
   const overridesText = [];
 
-  // iterate available overrides
+  // iterate available overrides - based on current Lingo naming schemes and may break
+  // as those change or are updated.
   fromNative(layer).overrides.forEach((override) => {
     // only worry about an editable override that has changed and is based on a symbol
     if (
@@ -137,7 +138,7 @@ const parseOverrides = (layer, document, workingName = null) => {
           || overrideTypeName.toLowerCase() === 'radio'
           || overrideTypeName.toLowerCase() === 'type'
           || overrideTypeName.toLowerCase().includes('pebble')
-          || !override.path.includes('/')
+          || !override.path.includes('/') // excluding “/” gives us top-level overrides
         ) {
           // default icon name (usually last element of the name, separated by “/”)
           let overrideValueName = overrideName.split(/(?:[^w])(\/)/).pop();
@@ -146,8 +147,8 @@ const parseOverrides = (layer, document, workingName = null) => {
           // ---------- set up formatting exceptions
           // parsing exception for Ghost Entity symbols
           if (overrideTypeName.toLowerCase().includes('ghost')) {
-            // in some kits, Ghost naming scheme is fine
-            // but in the Web kit it is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
+            // in some kits, Ghost naming scheme is fine but in the Web kit it
+            // is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
             if (Number(overrideValueName) === parseInt(overrideValueName, 10)) {
               overrideValueName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
             }
