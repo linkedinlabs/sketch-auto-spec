@@ -29,14 +29,31 @@ export default class Crawler {
   }
 
   /**
-   * @description Uses `setArray` to ensure the selection array is a javascript array.
+   * @description Uses `setArray` to ensure the selection array is a javascript array. Also
+   * looks into the selection for any groups and pulls out individual layers.
    *
    * @kind function
    * @name all
    * @returns {Object} All items in the array as a javascript array.
    */
   all() {
-    return setArray(this.array);
+    const initialSelection = setArray(this.array);
+    const flatSelection = [];
+    initialSelection.forEach((layer) => {
+      if (fromNative(layer).type === 'Group') {
+        const innerLayers = layer.children();
+        innerLayers.forEach((innerLayer) => {
+          // .children() includes the outer layer group, so we want to exclude it
+          // from our flattened selection
+          if (fromNative(innerLayer).type !== 'Group') {
+            flatSelection.push(innerLayer);
+          }
+        });
+      } else {
+        flatSelection.push(layer);
+      }
+    });
+    return flatSelection;
   }
 
   /**
