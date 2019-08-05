@@ -3,7 +3,7 @@
   "description": "Annotate and spec design system elements",
   "author": "LinkedIn Labs",
   "homepage": "https://github.com/linkedinlabs/sketch-auto-spec",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "appcast": "https://raw.githubusercontent.com/linkedinlabs/sketch-auto-spec/master/.appcast.xml",
   "compatibleVersion": "55.0",
