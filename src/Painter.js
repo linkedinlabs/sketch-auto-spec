@@ -1164,6 +1164,7 @@ export default class Painter {
     const groupNameWidth = `Dimension Width for layer ${layerName}`;
     const annotationWidth = buildAnnotation(
       annotationTextWidth,
+      null, // annotationSecondaryText
       annotationType,
       this.artboard,
     );
@@ -1199,6 +1200,7 @@ export default class Painter {
     const groupNameHeight = `Dimension Width for layer ${layerName}`;
     const annotationHeight = buildAnnotation(
       annotationTextHeight,
+      null, // annotationSecondaryText
       annotationType,
       this.artboard,
     );
