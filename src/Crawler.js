@@ -40,12 +40,18 @@ export default class Crawler {
     const initialSelection = setArray(this.array);
     const flatSelection = [];
     initialSelection.forEach((layer) => {
-      if (fromNative(layer).type === 'Group') {
+      if (
+        fromNative(layer).type === 'Group'
+        || fromNative(layer).type === 'Artboard'
+      ) {
         const innerLayers = layer.children();
         innerLayers.forEach((innerLayer) => {
           // .children() includes the outer layer group, so we want to exclude it
           // from our flattened selection
-          if (fromNative(innerLayer).type !== 'Group') {
+          if (
+            fromNative(innerLayer).type !== 'Group'
+            && fromNative(innerLayer).type !== 'Artboard'
+          ) {
             flatSelection.push(innerLayer);
           }
         });
