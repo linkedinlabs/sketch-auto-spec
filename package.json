@@ -29,7 +29,7 @@
   "skpm": {
     "name": "sketch-specter",
     "manifest": "src/manifest.json",
-    "main": "sketch-specter.sketchplugin",
+    "main": "Specter.sketchplugin",
     "assets": [
       "assets/**/*"
     ]
