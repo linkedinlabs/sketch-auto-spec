@@ -566,8 +566,11 @@ const setGroupName = (elementType) => {
     case 'custom':
       groupName = 'Component Annotations';
       break;
-    case 'measurement':
-      groupName = 'Measurement Annotations';
+    case 'dimension':
+      groupName = 'Dimension Annotations';
+      break;
+    case 'spacing':
+      groupName = 'Spacing Annotations';
       break;
     case 'style':
       groupName = 'Foundation Annotations';
@@ -588,7 +591,10 @@ const setGroupKey = (elementType) => {
     case 'custom':
       groupKey = 'componentInnerGroupId';
       break;
-    case 'measurement':
+    case 'dimension':
+      groupKey = 'dimensionInnerGroupId';
+      break;
+    case 'spacing':
       groupKey = 'measurementInnerGroupId';
       break;
     case 'style':
@@ -631,13 +637,15 @@ const orderContainerLayers = (outerGroupId, document) => {
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   let boundingGroupId = null;
   let componentGroupId = null;
-  let measurementGroupId = null;
+  let dimensionGroupId = null;
+  let spacingGroupId = null;
 
   // find the correct group set and inner groups based on the `outerGroupId`
   documentSettings.containerGroups.forEach((groupSet) => {
     if (groupSet.id === outerGroupId) {
       componentGroupId = groupSet.componentInnerGroupId;
-      measurementGroupId = groupSet.measurementInnerGroupId;
+      dimensionGroupId = groupSet.dimensionInnerGroupId;
+      spacingGroupId = groupSet.measurementInnerGroupId;
       boundingGroupId = groupSet.boundingInnerGroupId;
     }
     return null;
@@ -649,10 +657,18 @@ const orderContainerLayers = (outerGroupId, document) => {
     fromNative(componentGroup).moveToFront();
   }
 
-  // always move measurement annotations group to second from bottom of list
-  const measurementBoxGroup = document.getLayerWithID(measurementGroupId);
-  if (measurementBoxGroup) {
-    fromNative(measurementBoxGroup).moveToBack();
+  // foundations group remains second from top without moving
+
+  // always move spacing annotations group to third from bottom of list
+  const spacingBoxGroup = document.getLayerWithID(spacingGroupId);
+  if (spacingBoxGroup) {
+    fromNative(spacingBoxGroup).moveToBack();
+  }
+
+  // always move dimension annotations group to second from bottom of list
+  const dimensionBoxGroup = document.getLayerWithID(dimensionGroupId);
+  if (dimensionBoxGroup) {
+    fromNative(dimensionBoxGroup).moveToBack();
   }
 
   // always move bounding box group to bottom of list
@@ -1109,7 +1125,7 @@ export default class Painter {
   }
 
   /**
-   * @description Takes a layer and creates two measurement annotations with the layer’s
+   * @description Takes a layer and creates two dimension annotations with the layer’s
    * `height` and `width`.
    *
    * @kind function
