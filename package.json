@@ -4,7 +4,7 @@
   "version": "1.0.2",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/linkedinlabs/sketch-auto-spec.git"
+    "url": "git+https://github.com/linkedinlabs/specter-sketch.git"
   },
   "engines": {
     "sketch": ">=55.0"

@@ -225,7 +225,7 @@ export default class Housekeeper {
   /**
    * @description Migrates any spec layers using the old color palette to the new
    * set of colors. This migration does not distinguish custom/component annotations.
-   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/31}
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/31}
    *
    * @kind function
    * @name migration1563951600000
@@ -346,7 +346,7 @@ export default class Housekeeper {
    * @description Migrates any `labeledLayers` recorded in plugin settings into local document
    * settings as `annotatedLayeres`. It first checks to make sure the layer actually exists in
    * the document before “moving” the representation in settings.
-   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/9}
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/9}
    *
    * @kind function
    * @name migration1561504830674
@@ -417,7 +417,7 @@ export default class Housekeeper {
    * @description Migrates any `containerGroups` recorded in plugin settings into local document
    * settings. It first checks to make sure the layer actually exists in
    * the document before “moving” the representation in settings.
-   * [More info]{@link https://github.com/linkedinlabs/sketch-auto-spec/pull/9}
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/9}
    *
    * @kind function
    * @name migration1561504830674
