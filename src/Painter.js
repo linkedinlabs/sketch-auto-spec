@@ -1200,7 +1200,7 @@ export default class Painter {
     // ------------------------
     // construct the height annotation elements
     const annotationTextHeight = `${this.layer.frame().height()}dp`;
-    const groupNameHeight = `Dimension Width for layer ${layerName}`;
+    const groupNameHeight = `Dimension Height for layer ${layerName}`;
     const annotationHeight = buildAnnotation(
       annotationTextHeight,
       null, // annotationSecondaryText
