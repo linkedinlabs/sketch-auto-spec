@@ -9,21 +9,29 @@ import { PLUGIN_IDENTIFIER } from './constants';
  * @kind function
  * @name setAnnotationTextSettings
  * @param {string} annotationText The text to add to the layer’s settings.
+ * @param {string} annotationSecondaryText Optional text to add to the layer’s settings.
  * @param {string} annotationType The type of annotation (`custom`, `component`, `style`).
  * @param {Object} layer The Sketch layer object receiving the settings update.
  * @private
  */
-const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
+const setAnnotationTextSettings = (
+  annotationText,
+  annotationSecondaryText,
+  annotationType,
+  layer,
+) => {
   let layerSettings = Settings.layerSettingForKey(layer, PLUGIN_IDENTIFIER);
 
   // set `annotationText` on the layer settings
   if (!layerSettings) {
     layerSettings = {
       annotationText,
+      annotationSecondaryText,
       annotationType,
     };
   } else {
     layerSettings.annotationText = annotationText;
+    layerSettings.annotationSecondaryText = annotationSecondaryText;
     layerSettings.annotationType = annotationType;
   }
 
@@ -46,7 +54,11 @@ const setAnnotationTextSettings = (annotationText, annotationType, layer) => {
 const checkNameForType = (name) => {
   let annotationType = 'component';
   // grab the first segment of the name (before the first “/”) – top-level Kit name
-  const kitName = name.split('/')[0];
+  let kitName = name.split('/')[0];
+
+  // set up some known exceptions (remove the text that would trigger a type change)
+  kitName = kitName.replace('(Dual Icons)', '');
+
   // kit name substrings, exclusive to Foundations
   const foundations = ['Divider', 'Flood', 'Icons', 'Illustration', 'Logos'];
 
@@ -69,10 +81,96 @@ const checkNameForType = (name) => {
  */
 const cleanName = (name) => {
   // take only the last segment of the name (after a “/”, if available)
-  let cleanedName = name.split('/').pop();
+  // ignore segments that begin with a “w” as-in “…Something w/ Icon”
+  let cleanedName = name.split(/(?:[^w])(\/)/).pop();
   // otherwise, fall back to the kit layer name
   cleanedName = !cleanedName ? name : cleanedName;
   return cleanedName;
+};
+
+/**
+ * @description Looks through layer overrides and returns a text string based
+ * on the override(s) and context.
+ *
+ * @kind function
+ * @name parseOverrides
+ * @param {Object} layer The Sketch js layer object.
+ * @param {Object} document The Sketch document object that contains the layer.
+ * @param {Object} workingName The top-level layer name.
+ * @returns {string} Text containing information about the override(s).
+ *
+ * @private
+ */
+const parseOverrides = (layer, document, workingName = null) => {
+  const overridesText = [];
+
+  // iterate available overrides - based on current Lingo naming schemes and may break
+  // as those change or are updated.
+  fromNative(layer).overrides.forEach((override) => {
+    // only worry about an editable override that has changed and is based on a symbol
+    if (
+      override.editable
+      && !override.isDefault
+      && override.id.includes('symbolID')
+    ) {
+      // current override type/category (always last portion of the path)
+      const overrideTypeId = override.path.split('/').pop();
+      const overrideType = document.getLayerWithID(overrideTypeId);
+      const overrideTypeName = overrideType.name;
+
+      // current override master symbol (ID is the override value)
+      const overrideSymbol = document.getSymbolMasterWithID(override.value);
+      // grab name (sometimes it does not exist if “None” is a changed override)
+      const overrideName = overrideSymbol ? overrideSymbol.name : null;
+
+      if (overrideName) {
+        // look for top-level overrides and Icon overrides - based on
+        // parsing the text of an `overrideTypeName` and making some
+        // comparisons and exceptions
+        if (
+          (
+            overrideTypeName.toLowerCase().includes('icon')
+            && !overrideTypeName.toLowerCase().includes('color')
+            && !overrideTypeName.toLowerCase().includes('🎨')
+            && !overrideTypeName.toLowerCase().includes('button')
+          )
+          || overrideTypeName.toLowerCase() === 'checkbox'
+          || overrideTypeName.toLowerCase() === 'radio'
+          || overrideTypeName.toLowerCase() === 'type'
+          || overrideTypeName.toLowerCase().includes('pebble')
+          || !override.path.includes('/') // excluding “/” gives us top-level overrides
+        ) {
+          // default icon name (usually last element of the name, separated by “/”)
+          let overrideValueName = overrideName.split(/(?:[^w])(\/)/).pop();
+          overrideValueName = overrideValueName.replace(`${workingName}`, '');
+
+          // ---------- set up formatting exceptions
+          // parsing exception for Ghost Entity symbols
+          if (overrideTypeName.toLowerCase().includes('ghost')) {
+            // in some kits, Ghost naming scheme is fine but in the Web kit it
+            // is reversed: “…/Article Ghost/3” instead of “…/3/Article Ghost”
+            if (Number(overrideValueName) === parseInt(overrideValueName, 10)) {
+              overrideValueName = overrideName.split('/').reverse()[1]; // eslint-disable-line prefer-destructuring
+            }
+          }
+
+          // update `overridesText`
+          overridesText.push(overrideValueName);
+        }
+      }
+    }
+  });
+
+  let setOverridesText = null;
+  if (overridesText.length > 0) {
+    let label = 'Override';
+    if (overridesText.length > 1) {
+      label = 'Overrides';
+    }
+    setOverridesText = `${label}: ${overridesText.join(', ')}`;
+  }
+
+  return setOverridesText;
 };
 
 // --- main Identifier class function
@@ -91,10 +189,12 @@ const cleanName = (name) => {
 export default class Identifier {
   constructor({
     for: layer,
+    document,
     documentData,
     messenger,
   }) {
     this.layer = layer;
+    this.document = document;
     this.documentData = documentData;
     this.messenger = messenger;
   }
@@ -165,9 +265,11 @@ export default class Identifier {
       const symbolType = checkNameForType(kitSymbol.name);
       // take only the last segment of the name (after a “/”, if available)
       const textToSet = cleanName(kitSymbol.name);
+      const subtextToSet = parseOverrides(this.layer, this.document, textToSet);
 
       // set `annotationText` on the layer settings as the kit symbol name
-      setAnnotationTextSettings(textToSet, symbolType, this.layer);
+      // set option `subtextToSet` on the layer settings based on existing overrides
+      setAnnotationTextSettings(textToSet, subtextToSet, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -184,7 +286,7 @@ export default class Identifier {
       const textToSet = cleanName(kitLayer.name);
 
       // set `annotationText` on the layer settings as the kit layer name
-      setAnnotationTextSettings(textToSet, symbolType, this.layer);
+      setAnnotationTextSettings(textToSet, null, symbolType, this.layer);
 
       // log the official name alongside the original layer name and set as success
       result.status = 'success';
@@ -201,7 +303,7 @@ export default class Identifier {
         const textToSet = cleanName(kitStyle.name);
 
         // set `annotationText` on the layer settings as the kit layer name
-        setAnnotationTextSettings(textToSet, 'style', this.layer);
+        setAnnotationTextSettings(textToSet, null, 'style', this.layer);
 
         // log the official name alongside the original layer name and set as success
         result.status = 'success';
@@ -295,7 +397,7 @@ export default class Identifier {
 
     const customText = customInput.value;
     // set `annotationText` on the layer settings as the custom text
-    setAnnotationTextSettings(customText, 'custom', this.layer);
+    setAnnotationTextSettings(customText, null, 'custom', this.layer);
 
     // log the custom name alongside the original layer name and set as success
     result.status = 'success';

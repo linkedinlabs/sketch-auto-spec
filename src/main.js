@@ -64,6 +64,7 @@ const annotateLayer = (context = null) => {
     // set up Identifier instance for the layer
     const layerToAnnotate = new Identifier({
       for: layer,
+      document,
       documentData,
       messenger,
     });
