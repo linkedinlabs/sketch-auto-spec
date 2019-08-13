@@ -40,12 +40,18 @@ export default class Crawler {
     const initialSelection = setArray(this.array);
     const flatSelection = [];
     initialSelection.forEach((layer) => {
-      if (fromNative(layer).type === 'Group') {
+      if (
+        fromNative(layer).type === 'Group'
+        || fromNative(layer).type === 'Artboard'
+      ) {
         const innerLayers = layer.children();
         innerLayers.forEach((innerLayer) => {
           // .children() includes the outer layer group, so we want to exclude it
           // from our flattened selection
-          if (fromNative(innerLayer).type !== 'Group') {
+          if (
+            fromNative(innerLayer).type !== 'Group'
+            && fromNative(innerLayer).type !== 'Artboard'
+          ) {
             flatSelection.push(innerLayer);
           }
         });
@@ -150,17 +156,19 @@ export default class Crawler {
       layerBId: null,
     };
 
+    const selection = setArray(this.array);
+
     // set shorthand for `getPositionOnArtboard`
     const aPos = getPositionOnArtboard;
 
     // set the layers to a default for comparisons
-    let layerA = this.all()[0];
-    let layerB = this.all()[0];
+    let layerA = selection[0];
+    let layerB = selection[0];
     // assume the gap orientation is vertical
     let horizontalGap = false;
 
     // find left-most (`layerA`) and right-most (`layerB`) layers
-    this.all().forEach((layer) => {
+    selection.forEach((layer) => {
       if (aPos(layer).x < aPos(layerA).x) {
         layerA = layer;
       }
@@ -211,7 +219,7 @@ export default class Crawler {
     // the gap is horizontal (if overlap does not exist)
     if (horizontalGap) {
       // find top-most (`layerA`) and bottom-most (`layerB`) layers
-      this.all().forEach((layer) => {
+      selection.forEach((layer) => {
         if (aPos(layer).y < aPos(layerA).y) {
           layerA = layer;
         }
