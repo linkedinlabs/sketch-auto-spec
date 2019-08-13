@@ -662,6 +662,7 @@ const drawContainerGroup = (groupSettings) => {
     height,
     parent,
     keystone,
+    locked,
   } = groupSettings;
 
   const containerGroup = new Group({
@@ -671,7 +672,7 @@ const drawContainerGroup = (groupSettings) => {
       width,
       height,
     },
-    locked: true,
+    locked,
     name,
     parent,
   });
@@ -718,6 +719,7 @@ const createInnerGroup = (
     width: outerGroupLayer.frame.width,
     height: outerGroupLayer.frame.height,
     keystone: true,
+    locked: false,
   });
 
   // update the `containerSet` object
@@ -756,6 +758,7 @@ const createOuterGroup = (
     width: artboard.frame().width(),
     height: artboard.frame().height(),
     keystone: false,
+    locked: true,
   });
 
   // new object with IDs to add to settings
