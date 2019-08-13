@@ -534,7 +534,8 @@ const positionAnnotation = (
     icon.remove();
 
     // redraw icon in vertical orientation
-    const iconNew = buildMeasureIcon(group, COLORS.dimension, 'vertical');
+    const measureIconColor = (annotationType === 'spacing' ? COLORS.spacing : COLORS.dimension);
+    const iconNew = buildMeasureIcon(group, measureIconColor, 'vertical');
 
     // resize icon based on gap/layer height
     iconNew.frame.height = layerHeight;
