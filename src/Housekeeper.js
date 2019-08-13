@@ -280,7 +280,8 @@ export default class Housekeeper {
           switch (groupType) {
             case 'component':
             case 'custom':
-            case 'measure':
+            case 'dimension':
+            case 'spacing':
             case 'style':
               updateColor(layer, COLORS[groupType]);
               break;
