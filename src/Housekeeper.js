@@ -11,6 +11,7 @@ import { COLORS, PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
+  1565809536057,
   1563951600000,
   1561504830674,
   1561503084281,
@@ -222,6 +223,94 @@ export default class Housekeeper {
     return null;
   }
 
+  /** WIP
+   * @description Migrates any spec layers using the old color palette to the new
+   * set of colors. This migration does not distinguish custom/component annotations.
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/31}
+   *
+   * @kind function
+   * @name migration1565809536057
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
+  migration1565809536057() {
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+    const migrationKey = 1565809536057;
+    const migrationName = 'separate measurement types';
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    // this app does not have any document settings; no further work needed
+    if (!documentSettings || !documentSettings.containerGroups) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    this.messenger.log(`Run “${migrationName}” migration…`);
+
+    // default the changes flag to false
+    let measurementsTransitioned = false;
+    let newDocumentSettings = documentSettings;
+
+    documentSettings.containerGroups.forEach((containerGroup) => {
+      const measurementContainer = this.document.getLayerWithID(
+        containerGroup.measurementInnerGroupId,
+      );
+
+      if (measurementContainer) {
+        const outerGroupId = containerGroup.id;
+        const { measurementInnerGroupId } = containerGroup;
+        const newContainerGroup = containerGroup;
+
+        // move measurementInnerGroupId to spacingInnerGroupId
+        newContainerGroup.spacingInnerGroupId = measurementInnerGroupId;
+        delete newContainerGroup.measurementInnerGroupId;
+
+        // update the documentSettings -----
+        // remove the old `containerGroup` set
+        newDocumentSettings = updateArray(
+          'containerGroups',
+          { id: outerGroupId },
+          newDocumentSettings,
+          'remove',
+        );
+
+        // add the new `containerGroup` set
+        newDocumentSettings = updateArray(
+          'containerGroups',
+          newContainerGroup,
+          newDocumentSettings,
+          'add',
+        );
+
+        // note the change
+        measurementsTransitioned = true;
+      }
+    });
+
+    if (measurementsTransitioned) {
+      // commit the `Settings` update
+      Settings.setDocumentSettingForKey(
+        this.document,
+        PLUGIN_IDENTIFIER,
+        newDocumentSettings,
+      );
+
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and containers were updated`;
+    } else {
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and containers were not updated`;
+    }
+
+    result.status = 'success';
+    return result;
+  }
+
   /**
    * @description Migrates any spec layers using the old color palette to the new
    * set of colors. This migration does not distinguish custom/component annotations.
@@ -243,7 +332,7 @@ export default class Housekeeper {
     const migrationKey = 1563951600000;
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
-    // this app does not have any plugin settings; no further work needed
+    // this app does not have any document settings; no further work needed
     if (!documentSettings || !documentSettings.containerGroups) {
       result.status = 'success';
       result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;

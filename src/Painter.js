@@ -596,7 +596,7 @@ const setGroupKey = (elementType) => {
       groupKey = 'dimensionInnerGroupId';
       break;
     case 'spacing':
-      groupKey = 'measurementInnerGroupId';
+      groupKey = 'spacingInnerGroupId';
       break;
     case 'style':
       groupKey = 'styleInnerGroupId';
@@ -646,7 +646,7 @@ const orderContainerLayers = (outerGroupId, document) => {
     if (groupSet.id === outerGroupId) {
       componentGroupId = groupSet.componentInnerGroupId;
       dimensionGroupId = groupSet.dimensionInnerGroupId;
-      spacingGroupId = groupSet.measurementInnerGroupId;
+      spacingGroupId = groupSet.spacingInnerGroupId;
       boundingGroupId = groupSet.boundingInnerGroupId;
     }
     return null;
