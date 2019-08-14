@@ -935,7 +935,7 @@ const setContainerGroups = (artboard, document, elementType) => {
  *
  * @property layer The layer in the Sketch file that we want to annotate or modify.
  */
-export default class Painter {
+class Painter {
   constructor({ for: layer, in: document }) {
     this.layer = layer;
     this.document = document;
@@ -1414,3 +1414,8 @@ export default class Painter {
     return result;
   }
 }
+
+export {
+  createInnerGroup,
+  Painter,
+};

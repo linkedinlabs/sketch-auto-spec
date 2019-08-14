@@ -1,5 +1,6 @@
 import { fromNative, Settings } from 'sketch';
 import { updateArray } from './Tools';
+import { createInnerGroup } from './Painter';
 import { COLORS, PLUGIN_IDENTIFIER } from './constants';
 
 /**
@@ -11,7 +12,8 @@ import { COLORS, PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
-  1565809536057,
+  1565814709912,
+  1565809536066,
   1563951600000,
   1561504830674,
   1561503084281,
@@ -25,7 +27,7 @@ const migrationKeys = [
  * @kind function
  * @name documentCreationTimestamp
  *
- * @param {Object} document The Sketch document to erxtract the creation date from.
+ * @param {Object} document The Sketch document to extract the creation date from.
  * @returns {string} Returns a string with the creation date/time as a timestamp.
  * @private
  */
@@ -52,6 +54,40 @@ const documentCreationTimestamp = (document) => {
   }
 
   return creationTimestamp;
+};
+
+/**
+ * @description A helper function to extract the file creation date from a Sketch
+ * file. If no creation date can be found, it assumes a new temp (un-saved) file
+ * and assigns the creation date to the current date/time.
+ *
+ * @kind function
+ * @name updateColor
+ *
+ * @param {Object} layer The Sketch layer to modify.
+ * @param {string} document Hex value for the new color.
+ * @param {string} opacity Optional hex value for opacity.
+ *
+ * @returns {boolean} Returns a boolean to indicate whether or not the color was updated.
+ * @private
+ */
+// helper function to update the color of any layer fills
+const updateColor = (layer, newColor, opacity = 'ff') => {
+  let colorUpdated = false;
+  if (layer.style && layer.style.fills) {
+    layer.style.fills.forEach((fill) => {
+      if (fill.color) {
+        const currentColor = fill.color.match(/.{1,7}/g)[0];
+        if (currentColor !== newColor) {
+          fill.color = `${newColor}${opacity}`; // eslint-disable-line no-param-reassign
+          colorUpdated = true;
+        }
+      }
+      return null;
+    });
+  }
+
+  return colorUpdated;
 };
 
 /**
@@ -202,12 +238,17 @@ export default class Housekeeper {
 
         // only mark the migration as run if successful
         if (migrationResult.status === 'success') {
-          documentSettings.migrations.push(migrationKey);
+          // some migrations will likely update document settings, so do a fresh lookup
+          const latestDocumentSettings = Settings.documentSettingForKey(
+            this.document, PLUGIN_IDENTIFIER,
+          );
+
+          latestDocumentSettings.migrations.push(migrationKey);
 
           Settings.setDocumentSettingForKey(
             this.document,
             PLUGIN_IDENTIFIER,
-            documentSettings,
+            latestDocumentSettings,
           );
         }
 
@@ -223,17 +264,18 @@ export default class Housekeeper {
     return null;
   }
 
-  /** WIP
-   * @description Migrates any spec layers using the old color palette to the new
-   * set of colors. This migration does not distinguish custom/component annotations.
-   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/31}
+  /**
+   * @description Migrates dimension annotations currently existing in spacing container
+   * groups to the proper dimension container group. The migration also applies the updated
+   * color to the dimension annotations.
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
    *
    * @kind function
-   * @name migration1565809536057
+   * @name migration1565814709912
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1565809536057() {
+  migration1565814709912() {
     const result = {
       status: null,
       messages: {
@@ -241,7 +283,153 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1565809536057;
+    const migrationKey = 1565814709912;
+    const migrationName = 'separate dimensions from spacing';
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    // this app does not have any document settings; no further work needed
+    if (!documentSettings || !documentSettings.containerGroups) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    this.messenger.log(`Run “${migrationName}” migration…`);
+
+    // default the changes flag to false
+    let dimensionsTransitioned = false;
+    let newDocumentSettings = documentSettings;
+
+    documentSettings.containerGroups.forEach((containerGroup) => {
+      const spacingContainer = this.document.getLayerWithID(
+        containerGroup.spacingInnerGroupId,
+      );
+
+      if (spacingContainer) {
+        // grab layers first
+        const dimensionLayers = [];
+        spacingContainer.layers.forEach((layer) => {
+          if (layer.name.includes('Dimension')) {
+            dimensionLayers.push(layer);
+          }
+        });
+
+        if (dimensionLayers.length > 1) {
+          let dimensionContainer = null;
+          if (containerGroup.dimensionInnerGroupId) {
+            dimensionContainer = this.document.getLayerWithID(
+              containerGroup.dimensionInnerGroupId,
+            );
+          }
+
+          // create the Dimension container if it does not exist already
+          if (!dimensionContainer) {
+            const outerGroupLayer = this.document.getLayerWithID(
+              containerGroup.id,
+            );
+
+            const cigResult = createInnerGroup(
+              outerGroupLayer,
+              containerGroup,
+              'dimension',
+            );
+
+            dimensionContainer = cigResult.newInnerGroup;
+
+            // update the `newDocumentSettings` array
+            newDocumentSettings = updateArray(
+              'containerGroups',
+              cigResult.updatedContainerSet,
+              newDocumentSettings,
+              'add',
+            );
+          }
+
+          // move the existing dimension layers into the container
+          // and update the layer colors
+          dimensionLayers.forEach((dimensionLayer) => {
+            // set new parent to move the layer
+            dimensionLayer.parent = dimensionContainer; // eslint-disable-line no-param-reassign
+
+            // find all children inside group and update their colors
+            const nativeChildLayers = dimensionLayer.sketchObject.children();
+            nativeChildLayers.forEach((nativeLayer) => {
+              const jsLayer = fromNative(nativeLayer);
+
+              if (jsLayer.type === 'ShapePath') {
+                updateColor(jsLayer, COLORS.dimension);
+              }
+            });
+          });
+
+          // set the feedback flag
+          dimensionsTransitioned = true;
+
+          // check if we need to delete the remaining container
+          const updatedSpacingContainer = this.document.getLayerWithID(
+            containerGroup.spacingInnerGroupId,
+          );
+
+          // if it exists and less than 2 layers are present
+          if (updatedSpacingContainer && updatedSpacingContainer.layers.length <= 1) {
+            let removeLayer = false;
+            if (updatedSpacingContainer.layers.length < 1) {
+              // if one layer is present, check to see if it’s the keystone layer
+              if (updatedSpacingContainer.layers[0].name.includes('keystone')) {
+                removeLayer = true;
+              }
+            } else {
+              removeLayer = true;
+            }
+
+            // remove the layer
+            if (removeLayer) {
+              updatedSpacingContainer.remove();
+            }
+          }
+
+          // reset the group layer boundary
+          dimensionContainer.adjustToFit();
+        }
+      }
+    });
+
+    if (dimensionsTransitioned) {
+      // commit the `Settings` update
+      Settings.setDocumentSettingForKey(
+        this.document,
+        PLUGIN_IDENTIFIER,
+        newDocumentSettings,
+      );
+
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and annotations were updated`;
+    } else {
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and annotations were not updated`;
+    }
+
+    result.status = 'success';
+    return result;
+  }
+
+  /**
+   * @description Migrates the use of the deprecated container layer `measurementInnerGroupId`
+   * to the new `spacingInnerGroupId`.
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
+   *
+   * @kind function
+   * @name migration1565809536066
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
+  migration1565809536066() {
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+    const migrationKey = 1565809536066;
     const migrationName = 'separate measurement types';
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
@@ -342,28 +530,13 @@ export default class Housekeeper {
     // default the changes flag to false
     let colorsUpdated = false;
 
-    // helper function to update the color of any layer fills
-    const updateColor = (layer, newColor, opacity = 'ff') => {
-      if (layer.style && layer.style.fills) {
-        layer.style.fills.forEach((fill) => {
-          if (fill.color) {
-            const currentColor = fill.color.match(/.{1,7}/g)[0];
-            if (currentColor !== newColor) {
-              fill.color = `${newColor}${opacity}`; // eslint-disable-line no-param-reassign
-              colorsUpdated = true;
-            }
-          }
-          return null;
-        });
-      }
-    };
-
     // helper function to iterate through all children of a group layer (even sub-groups)
     // and call the appropriate instance of `updateColor`
     const updateChildrenColors = (children, groupType) => {
       const nativeLayers = children();
       nativeLayers.forEach((nativeLayer) => {
         const layer = fromNative(nativeLayer);
+        let colorDidUpdate = false;
 
         if (layer.type === 'ShapePath') {
           switch (groupType) {
@@ -372,14 +545,18 @@ export default class Housekeeper {
             case 'dimension':
             case 'spacing':
             case 'style':
-              updateColor(layer, COLORS[groupType]);
+              colorDidUpdate = updateColor(layer, COLORS[groupType]);
               break;
             case 'bounding':
-              updateColor(layer, COLORS.style, '4d');
+              colorDidUpdate = updateColor(layer, COLORS.style, '4d');
               break;
             default:
               return null;
           }
+        }
+
+        if (colorDidUpdate) {
+          colorsUpdated = true;
         }
         return null;
       });
