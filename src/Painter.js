@@ -335,19 +335,26 @@ const buildAnnotation = (
  * @kind function
  * @name buildBoundingBox
  * @param {Object} frame The frame coordinates (`x`, `y`, `width`, and `height`) for the box.
- * @param {Object} artboard The artboard to draw within.
+ * @param {Object} containerGroup The container group to draw within.
  * @returns {Object} The Sketch ShapePath object for the box.
  * @private
  */
-const buildBoundingBox = (frame, artboard) => {
+const buildBoundingBox = (frame, containerGroup) => {
   const colorHex = COLORS.style;
   const colorOpactiy = '4d'; // 30% opacity
 
+  // find container frame, relative to artboard
+  const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
+
+  // set x, y relative to container group and artboard
+  const placementX = frame.x - relativeGroupFrame.x;
+  const placementY = frame.y - relativeGroupFrame.y;
+
   // build the rounded rectangle
   const boundingBox = new ShapePath({
-    frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
+    frame: new Rectangle(placementX, placementY, frame.width, frame.height),
     name: 'Bounding Box',
-    parent: artboard,
+    parent: containerGroup,
     style: {
       borders: [{
         enabled: false,
