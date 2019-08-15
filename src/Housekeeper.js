@@ -12,8 +12,9 @@ import { COLORS, PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
-  1566025200010,
-  1566025200000,
+  1566025200026,
+  1566025200012,
+  1566025200002,
   1563951600000,
   1561504830674,
   1561503084281,
@@ -265,17 +266,17 @@ export default class Housekeeper {
   }
 
   /**
-   * @description Migrates dimension annotations currently existing in spacing container
-   * groups to the proper dimension container group. The migration also applies the updated
-   * color to the dimension annotations.
-   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
+   * @description Removes legacy “keystone” layers from any existing container
+   * groups and then resizes the frame boundaries for each group. Inner groups
+   * that are currently locked are also unlocked.
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/45}
    *
    * @kind function
-   * @name migration1566025200010
+   * @name migration1566025200026
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1566025200010() {
+  migration1566025200026() {
     const result = {
       status: null,
       messages: {
@@ -283,7 +284,114 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1566025200010;
+    const migrationKey = 1566025200026;
+    const migrationName = 'remove keystone layers';
+    const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
+
+    // this app does not have any document settings; no further work needed
+    if (!documentSettings || !documentSettings.containerGroups) {
+      result.status = 'success';
+      result.messages.log = `Migration: Running ${migrationKey} was unnecessary`;
+      return result;
+    }
+
+    this.messenger.log(`Run “${migrationName}” migration…`);
+
+    // default the changes flag to false
+    let keystonesRemoved = false;
+
+    documentSettings.containerGroups.forEach((containerGroup) => {
+      const containerGroupLayer = this.document.getLayerWithID(containerGroup.id);
+      if (containerGroupLayer) {
+        // fine/remove the keystone layers
+        const innerLayers = containerGroupLayer.sketchObject.children();
+        innerLayers.forEach((layer) => {
+          if (layer.name().includes('--- keystone')) {
+            // remove the keystone layer
+            fromNative(layer).remove();
+
+            // set flag
+            keystonesRemoved = true;
+          }
+        });
+
+        // re-adjust group frame boundaries across all container groups
+        // unlocked container layers
+        const boundingBoxGroup = this.document.getLayerWithID(
+          containerGroup.boundingInnerGroupId,
+        );
+        if (boundingBoxGroup) {
+          fromNative(boundingBoxGroup).adjustToFit();
+          fromNative(boundingBoxGroup).locked = false;
+        }
+
+        const componentGroup = this.document.getLayerWithID(
+          containerGroup.componentInnerGroupId,
+        );
+        if (componentGroup) {
+          fromNative(componentGroup).adjustToFit();
+          fromNative(componentGroup).locked = false;
+        }
+
+        const dimensionBoxGroup = this.document.getLayerWithID(
+          containerGroup.dimensionInnerGroupId,
+        );
+        if (dimensionBoxGroup) {
+          fromNative(dimensionBoxGroup).adjustToFit();
+          fromNative(dimensionBoxGroup).locked = false;
+        }
+
+        const spacingBoxGroup = this.document.getLayerWithID(
+          containerGroup.spacingInnerGroupId,
+        );
+        if (spacingBoxGroup) {
+          fromNative(spacingBoxGroup).adjustToFit();
+          fromNative(spacingBoxGroup).locked = false;
+        }
+
+        const styleGroup = this.document.getLayerWithID(
+          containerGroup.styleInnerGroupId,
+        );
+        if (styleGroup) {
+          fromNative(styleGroup).adjustToFit();
+          fromNative(styleGroup).locked = false;
+        }
+
+        fromNative(containerGroupLayer).adjustToFit();
+      }
+    });
+
+
+    if (keystonesRemoved) {
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and layers were removed`;
+    } else {
+      result.messages.log = `Migration: Ran ${migrationKey} (${migrationName}) and layers were not removed`;
+    }
+
+    result.status = 'success';
+    return result;
+  }
+
+  /**
+   * @description Migrates dimension annotations currently existing in spacing container
+   * groups to the proper dimension container group. The migration also applies the updated
+   * color to the dimension annotations.
+   * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
+   *
+   * @kind function
+   * @name migration1566025200012
+   *
+   * @returns {Object} A result object containing success/error status and log/toast messages.
+   */
+  migration1566025200012() {
+    const result = {
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+    const migrationKey = 1566025200012;
     const migrationName = 'separate dimensions from spacing';
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
@@ -420,11 +528,11 @@ export default class Housekeeper {
    * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
    *
    * @kind function
-   * @name migration1566025200000
+   * @name migration1566025200002
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1566025200000() {
+  migration1566025200002() {
     const result = {
       status: null,
       messages: {
@@ -432,7 +540,7 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1566025200000;
+    const migrationKey = 1566025200002;
     const migrationName = 'separate measurement types';
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
