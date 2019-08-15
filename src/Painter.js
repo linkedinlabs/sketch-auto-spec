@@ -426,7 +426,7 @@ const positionAnnotation = (
     icon.parent = group;
   }
 
-  // position the group within the artboard, above the layer receiving the annotation
+  // ------- position the group within the artboard, above the layer receiving the annotation
   let diamondAdjustment = null;
 
   // initial placement based on layer to annotate
@@ -479,9 +479,12 @@ const positionAnnotation = (
     placementY = 5;
   }
 
-  // set annotation group placement
-  group.frame.x = placementX;
-  group.frame.y = placementY;
+  // find container frame, relative to artboard
+  const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
+
+  // set annotation group placement, relative to container group
+  group.frame.x = placementX - relativeGroupFrame.x;
+  group.frame.y = placementY - relativeGroupFrame.y;
 
   // adjust diamond on horizonal placement, if necessary
   if (diamondAdjustment) {
@@ -554,6 +557,7 @@ const positionAnnotation = (
 
   group.adjustToFit();
   containerGroup.adjustToFit();
+  containerGroup.parent.adjustToFit();
   return group;
 };
 
