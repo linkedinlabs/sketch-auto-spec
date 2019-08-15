@@ -12,8 +12,8 @@ import { COLORS, PLUGIN_IDENTIFIER } from './constants';
  * @type {Array}
  */
 const migrationKeys = [
-  1565814709913,
-  1565809536066,
+  1566025200010,
+  1566025200000,
   1563951600000,
   1561504830674,
   1561503084281,
@@ -271,11 +271,11 @@ export default class Housekeeper {
    * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
    *
    * @kind function
-   * @name migration1565814709913
+   * @name migration1566025200010
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1565814709913() {
+  migration1566025200010() {
     const result = {
       status: null,
       messages: {
@@ -283,7 +283,7 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1565814709913;
+    const migrationKey = 1566025200010;
     const migrationName = 'separate dimensions from spacing';
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
@@ -420,11 +420,11 @@ export default class Housekeeper {
    * [More info]{@link https://github.com/linkedinlabs/specter-sketch/pull/44}
    *
    * @kind function
-   * @name migration1565809536066
+   * @name migration1566025200000
    *
    * @returns {Object} A result object containing success/error status and log/toast messages.
    */
-  migration1565809536066() {
+  migration1566025200000() {
     const result = {
       status: null,
       messages: {
@@ -432,7 +432,7 @@ export default class Housekeeper {
         log: null,
       },
     };
-    const migrationKey = 1565809536066;
+    const migrationKey = 1566025200000;
     const migrationName = 'separate measurement types';
     const documentSettings = Settings.documentSettingForKey(this.document, PLUGIN_IDENTIFIER);
 
