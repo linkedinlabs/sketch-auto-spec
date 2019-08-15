@@ -686,8 +686,8 @@ const orderContainerLayers = (outerGroupId, document) => {
  *
  * @kind function
  * @name drawContainerGroup
- * @param {Object} groupSettings Object containing the `name`, `width`, `height`, `parent` layer,
- * and a `bool` named `keystone` indicating whether or not a keystone layer should be inserted.
+ * @param {Object} groupSettings Object containing the `name`, `width`,
+ * `height`, and `parent` layer.
  * @returns {Object} The container group layer object.
  * @private
  */
@@ -697,7 +697,6 @@ const drawContainerGroup = (groupSettings) => {
     width,
     height,
     parent,
-    keystone,
     locked,
   } = groupSettings;
 
@@ -712,16 +711,6 @@ const drawContainerGroup = (groupSettings) => {
     name,
     parent,
   });
-
-  if (keystone) {
-    // add placeholder rectangle to keep everything relative to 0, 0 on the artboard
-    new ShapePath({ // eslint-disable-line no-new
-      frame: new Rectangle(0, 0, 1, 1),
-      locked: true,
-      name: '--- keystone - please DO NOT delete me 🤗',
-      parent: containerGroup,
-    });
-  }
 
   return containerGroup;
 };
@@ -754,7 +743,6 @@ export const createInnerGroup = (
     parent: outerGroupLayer,
     width: outerGroupLayer.frame.width,
     height: outerGroupLayer.frame.height,
-    keystone: true,
     locked: false,
   });
 
@@ -793,7 +781,6 @@ const createOuterGroup = (
     parent: artboard,
     width: artboard.frame().width(),
     height: artboard.frame().height(),
-    keystone: false,
     locked: true,
   });
 
