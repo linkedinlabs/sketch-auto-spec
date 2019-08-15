@@ -740,7 +740,7 @@ const drawContainerGroup = (groupSettings) => {
  * updated parent container group settings object.
  * @private
  */
-const createInnerGroup = (
+export const createInnerGroup = (
   outerGroupLayer,
   containerSet,
   elementType,
@@ -935,7 +935,7 @@ const setContainerGroups = (artboard, document, elementType) => {
  *
  * @property layer The layer in the Sketch file that we want to annotate or modify.
  */
-class Painter {
+export default class Painter {
   constructor({ for: layer, in: document }) {
     this.layer = layer;
     this.document = document;
@@ -1414,8 +1414,3 @@ class Painter {
     return result;
   }
 }
-
-export {
-  createInnerGroup,
-  Painter,
-};
