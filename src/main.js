@@ -199,11 +199,23 @@ const annotateMeasurement = (context = null) => {
   // set up Painter instance for the reference layer
   const painter = new Painter({ for: layer, in: document });
 
-  // draw the spacing annotation (if gap frame exists)
+  // draw the spacing annotation
+  // (if gap frame exists or layers are overlapped)
   let paintResult = null;
   if (selection.count() === 2) {
     const gapFrame = crawler.gapFrame();
-    paintResult = painter.addGapMeasurement(gapFrame);
+    let overlapFrames = null;
+    if (gapFrame) {
+      paintResult = painter.addGapMeasurement(gapFrame);
+    } else {
+      overlapFrames = crawler.overlapFrames();
+    }
+
+    if (overlapFrames) {
+      log('placeholder: paint padding dimensions here');
+    } else {
+      log('handle error here');
+    }
   }
 
   if (selection.count() === 1) {

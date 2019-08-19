@@ -272,4 +272,99 @@ export default class Crawler {
 
     return theFrame;
   }
+
+  /** WIP
+   * @description Simulates Sketch’s frame() object, but for the space between two
+   * selected layers. It keeps the coordinates relative to the artboard, ignoring
+   * if some of the items are grouped inside other layers. It also adds an orientation
+   * `horizontal` or `vertical` based on the gap orientation. Assumes only 2 layers
+   * are selected.
+   *
+   * @kind function
+   * @name overlapFrames
+   * @returns {Object} The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap frame.
+   */
+  overlapFrames() {
+    const theFrames = {
+      top: {
+        x: null,
+        y: null,
+        width: 0,
+        height: 0,
+        orientation: 'vertical',
+      },
+      bottom: {
+        x: null,
+        y: null,
+        width: 0,
+        height: 0,
+        orientation: 'vertical',
+      },
+      right: {
+        x: null,
+        y: null,
+        width: 0,
+        height: 0,
+        orientation: 'vertical',
+      },
+      left: {
+        x: null,
+        y: null,
+        width: 0,
+        height: 0,
+        orientation: 'vertical',
+      },
+      layerAId: null,
+      layerBId: null,
+    };
+
+    // use `gapFrame` to first ensure that the itemse do actually overlap
+    const gapFrame = this.gapFrame();
+
+    if (gapFrame) {
+      return null;
+    }
+
+    // set the selection
+    const selection = setArray(this.array);
+
+    // set shorthand for `getPositionOnArtboard`
+    const aPos = getPositionOnArtboard;
+
+    // set the layers to a default for comparisons
+    let layerA = selection[0];
+    let layerB = selection[0];
+
+    // find biggest (`layerA`) and smallest (`layerB`) layers
+    let layerAArea = (layerA.frame().width() * layerA.frame().height());
+    let layerBArea = (layerB.frame().width() * layerB.frame().height());
+
+    // set the largest layer to `layerA` and the smallest to `layerB`
+    // if `layerB` is currently the largest, we have to flip them
+    selection.forEach((layer) => {
+      const layerArea = (layer.frame().width() * layer.frame().height());
+      if (layerArea > layerAArea) {
+        layerA = layer;
+        layerAArea = layerArea;
+      }
+
+      if (layerArea < layerAArea) {
+        layerB = layer;
+        layerBArea = layerArea;
+      }
+    });
+
+    // we need a dominant layer to orient positioning;
+    // if both layers are exactly the same size, we cannot assume dominance
+    if (layerAArea === layerBArea) {
+      return null;
+    }
+
+    // set frames
+
+    // deliver the result
+    return theFrames;
+  }
 }
