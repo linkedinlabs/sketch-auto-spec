@@ -287,39 +287,6 @@ export default class Crawler {
    * for the two layers used to calculated the gap frame.
    */
   overlapFrames() {
-    const theFrames = {
-      top: {
-        x: null,
-        y: null,
-        width: 0,
-        height: 0,
-        orientation: 'vertical',
-      },
-      bottom: {
-        x: null,
-        y: null,
-        width: 0,
-        height: 0,
-        orientation: 'vertical',
-      },
-      right: {
-        x: null,
-        y: null,
-        width: 0,
-        height: 0,
-        orientation: 'vertical',
-      },
-      left: {
-        x: null,
-        y: null,
-        width: 0,
-        height: 0,
-        orientation: 'vertical',
-      },
-      layerAId: null,
-      layerBId: null,
-    };
-
     // use `gapFrame` to first ensure that the itemse do actually overlap
     const gapFrame = this.gapFrame();
 
@@ -362,7 +329,62 @@ export default class Crawler {
       return null;
     }
 
-    // set frames
+    // -------- set frames - essentially defining rectangles in the overapped spaces
+    // between the too layers
+    // top
+    const topWidth = layerB.frame().width();
+    const topHeight = aPos(layerB).y - aPos(layerA).y;
+    const topX = aPos(layerB).x;
+    const topY = layerA.frame().y();
+    // bottom
+    const bottomWidth = layerB.frame().width();
+    const bottomHeight = layerA.frame().height() - topHeight - layerB.frame().height();
+    const bottomX = aPos(layerB).x;
+    const bottomY = aPos(layerA).y + topHeight + layerB.frame().height();
+    // left
+    const leftWidth = aPos(layerB).x - aPos(layerA).x;
+    const leftHeight = layerB.frame().height();
+    const leftX = aPos(layerA).x;
+    const leftY = aPos(layerB).y;
+    // right
+    const rightWidth = layerA.frame().width() - layerB.frame().width() - leftWidth;
+    const rightHeight = layerB.frame().height();
+    const rightX = aPos(layerB).x + layerB.frame().width();
+    const rightY = aPos(layerB).y;
+
+    // set the frames
+    const theFrames = {
+      top: {
+        x: topX,
+        y: topY,
+        width: topWidth,
+        height: topHeight,
+        orientation: 'horizontal',
+      },
+      bottom: {
+        x: bottomX,
+        y: bottomY,
+        width: bottomWidth,
+        height: bottomHeight,
+        orientation: 'horizontal',
+      },
+      right: {
+        x: rightX,
+        y: rightY,
+        width: rightWidth,
+        height: rightHeight,
+        orientation: 'vertical',
+      },
+      left: {
+        x: leftX,
+        y: leftY,
+        width: leftWidth,
+        height: leftHeight,
+        orientation: 'vertical',
+      },
+      layerAId: fromNative(layerA).id,
+      layerBId: fromNative(layerB).id,
+    };
 
     // deliver the result
     return theFrames;
