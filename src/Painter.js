@@ -1282,49 +1282,18 @@ export default class Painter {
     return result;
   }
 
-  /**
-   * @description Takes a `gapFrame` object from Crawler and creates a spacing measurement
-   * annotation with the correct spacing number (“IS-X”).
+  /** WIP
+   * @description asf
    *
    * @kind function
-   * @name addGapMeasurement
-   * @param {Object} gapFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
-   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
-   * for the two layers used to calculated the gap.
-   *
-   * @returns {Object} A result object container success/error status and log/toast messages.
-   */
-  addGapMeasurement(gapFrame) {
-    const result = {
-      status: null,
-      messages: {
-        alert: null,
-        toast: null,
-        log: null,
-      },
-    };
-
-    // return an error if the selection is not placed on an artboard
-    if (!this.artboard) {
-      result.status = 'error';
-      result.messages.log = 'Selection not on artboard';
-      result.messages.alert = 'Your selection needs to be on an artboard';
-      return result;
-    }
-
-    // return an error if the selection is not placed on an artboard
-    if (!gapFrame) {
-      result.status = 'error';
-      result.messages.log = 'gapFrame is missing';
-      result.messages.alert = 'Could not find a gap in your selection';
-      return result;
-    }
-
+   * @name addSpacingAnnotation
+  */
+  addSpacingAnnotation(spacingFrame) {
     // set up some information
-    const annotationText = gapFrame.orientation === 'vertical' ? setSpacingText(gapFrame.width) : setSpacingText(gapFrame.height);
+    const annotationText = spacingFrame.orientation === 'vertical' ? setSpacingText(spacingFrame.width) : setSpacingText(spacingFrame.height);
     const annotationType = 'spacing';
     const layerName = this.layer.name();
-    const groupName = `Spacing for ${layerName}`;
+    const groupName = `Spacing for ${layerName} (${spacingFrame.type})`;
 
     // create or locate the container group
     const { containerGroup, innerContainerGroup } = setContainerGroups(
@@ -1341,7 +1310,11 @@ export default class Painter {
     if (documentSettings && documentSettings.annotatedSpacings) {
       // remove the old ID pair(s) from the `newDocumentSettings` array
       documentSettings.annotatedSpacings.forEach((layerSet) => {
-        if (layerSet.layerAId === gapFrame.layerAId && layerSet.layerBId === gapFrame.layerBId) {
+        if (
+          layerSet.layerAId === spacingFrame.layerAId
+          && layerSet.layerBId === spacingFrame.layerBId
+          && layerSet.type === spacingFrame.type
+        ) {
           this.removeAnnotation(layerSet);
 
           // remove the layerSet from the `newDocumentSettings` array
@@ -1366,14 +1339,14 @@ export default class Painter {
     // group and position the base annotation elements
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
-      width: gapFrame.width,
-      height: gapFrame.height,
-      x: gapFrame.x,
-      y: gapFrame.y,
+      width: spacingFrame.width,
+      height: spacingFrame.height,
+      x: spacingFrame.x,
+      y: spacingFrame.y,
       index: fromNative(this.layer).index,
     };
 
-    const annotationOrientation = (gapFrame.orientation === 'vertical' ? 'top' : 'left');
+    const annotationOrientation = (spacingFrame.orientation === 'vertical' ? 'top' : 'left');
     const group = positionAnnotation(
       innerContainerGroup,
       groupName,
@@ -1387,8 +1360,9 @@ export default class Painter {
     const newAnnotatedSpacingSet = {
       containerGroupId: fromNative(containerGroup).id,
       id: group.id,
-      layerAId: gapFrame.layerAId,
-      layerBId: gapFrame.layerBId,
+      layerAId: spacingFrame.layerAId,
+      layerBId: spacingFrame.layerBId,
+      direction: spacingFrame.direction,
     };
 
     // update the `newDocumentSettings` array
@@ -1405,6 +1379,119 @@ export default class Painter {
       PLUGIN_IDENTIFIER,
       newDocumentSettings,
     );
+  }
+
+  /**
+   * @description Takes a `spacingFrame` object from Crawler and creates a spacing measurement
+   * annotation with the correct spacing number (“IS-X”).
+   *
+   * @kind function
+   * @name addGapMeasurement
+   * @param {Object} spacingFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap.
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  addGapMeasurement(spacingFrame) {
+    const result = {
+      status: null,
+      messages: {
+        alert: null,
+        toast: null,
+        log: null,
+      },
+    };
+
+    // return an error if the selection is not placed on an artboard
+    if (!this.artboard) {
+      result.status = 'error';
+      result.messages.log = 'Selection not on artboard';
+      result.messages.alert = 'Your selection needs to be on an artboard';
+      return result;
+    }
+
+    // return an error if the selection is not placed on an artboard
+    if (!spacingFrame) {
+      result.status = 'error';
+      result.messages.log = 'spacingFrame is missing';
+      result.messages.alert = 'Could not find a gap in your selection';
+      return result;
+    }
+
+    // set type
+    spacingFrame.type = 'gap'; // eslint-disable-line no-param-reassign
+
+    // add the annotation
+    this.addSpacingAnnotation(spacingFrame);
+
+    // return a successful result
+    result.status = 'success';
+    result.messages.log = `Spacing annotated for “${this.layer.name()}”`;
+    return result;
+  }
+
+  /** WIP
+   * @description Takes a `overlapFrames` object from Crawler and creates a spacing measurement
+   * annotation with the correct spacing number (“IS-X”).
+   *
+   * @kind function
+   * @name addOverlapMeasurements
+   * @param {Object} overlapFrames The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap.
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  addOverlapMeasurements(overlapFrames) {
+    const result = {
+      status: null,
+      messages: {
+        alert: null,
+        toast: null,
+        log: null,
+      },
+    };
+
+    // return an error if the selection is not placed on an artboard
+    if (!this.artboard) {
+      result.status = 'error';
+      result.messages.log = 'Selection not on artboard';
+      result.messages.alert = 'Your selection needs to be on an artboard';
+      return result;
+    }
+
+    // return an error if the selection is not placed on an artboard
+    if (!overlapFrames) {
+      result.status = 'error';
+      result.messages.log = 'overlapFrames is missing';
+      result.messages.alert = 'Could not find a overlapped layers in your selection';
+      return result;
+    }
+
+    const types = ['top', 'bottom', 'right', 'left'];
+
+    types.forEach((type) => {
+      let frameX = overlapFrames[type].x + (overlapFrames[type].width / 2);
+      let frameY = overlapFrames[type].y;
+      if ((type === 'left') || (type === 'right')) {
+        frameY = overlapFrames[type].y + (overlapFrames[type].height / 2);
+        frameX = overlapFrames[type].x;
+      }
+
+      const spacingFrame = {
+        x: frameX,
+        y: frameY,
+        width: overlapFrames[type].width,
+        height: overlapFrames[type].height,
+        orientation: overlapFrames[type].orientation,
+        layerAId: overlapFrames.layerAId,
+        layerBId: overlapFrames.layerBId,
+        type,
+      };
+
+      this.addSpacingAnnotation(spacingFrame);
+    });
 
     // return a successful result
     result.status = 'success';

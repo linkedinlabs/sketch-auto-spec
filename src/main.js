@@ -209,6 +209,7 @@ const annotateMeasurement = (context = null) => {
       paintResult = painter.addGapMeasurement(gapFrame);
     } else {
       overlapFrames = crawler.overlapFrames();
+      paintResult = painter.addOverlapMeasurements(overlapFrames);
     }
 
     if (overlapFrames) {
