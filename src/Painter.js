@@ -568,6 +568,17 @@ const positionAnnotation = (
   return group;
 };
 
+/**
+ * @description Takes a string representing the type of element getting painted and
+ * returns the name of the group used for that element.
+ *
+ * @kind function
+ * @name setGroupName
+ * @param {string} elementType A string representing the type of element getting painted.
+ *
+ * @returns {string} The name of the group getting painted.
+ * @private
+ */
 const setGroupName = (elementType) => {
   let groupName = null;
   switch (elementType) {
@@ -593,6 +604,17 @@ const setGroupName = (elementType) => {
   return groupName;
 };
 
+/**
+ * @description Takes a string representing the type of element getting painted and
+ * returns the key used in document settings to represent data linked to the element.
+ *
+ * @kind function
+ * @name setGroupKey
+ * @param {string} elementType A string representing the type of element getting painted.
+ *
+ * @returns {string} The key representing the type of element getting painted.
+ * @private
+ */
 const setGroupKey = (elementType) => {
   let groupKey = null;
   switch (elementType) {
