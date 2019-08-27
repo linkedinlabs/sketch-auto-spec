@@ -30,6 +30,21 @@ const webviewIdentifier = `${PLUGIN_IDENTIFIER}.webview`;
 const messenger = new Messenger({ for: { action: 'GUI' } });
 
 /**
+ * @description Closes the webview when the plugin is shutdown by Sketch
+ * (for example, when the user disables the plugin)
+ *
+ * @kind function
+ * @name onShutdown
+ */
+export const onShutdown = () => {
+  const existingWebview = getWebview(webviewIdentifier);
+  if (existingWebview) {
+    existingWebview.close();
+    messenger.log('GUI closed.');
+  }
+};
+
+/**
  * @description Called by the plugin manifest to open and operate the UI.
  *
  * @kind function
@@ -37,6 +52,13 @@ const messenger = new Messenger({ for: { action: 'GUI' } });
  * @returns {Object} An open webview in the Sketch UI.
  */
 const watchGui = () => {
+  // check to see if the webview is already open
+  // if so, close it
+  const existingWebview = getWebview(webviewIdentifier);
+  if (existingWebview) {
+    return onShutdown();
+  }
+
   /**
    * @description Options to set on BrowserWindow.
    *
@@ -98,7 +120,6 @@ const watchGui = () => {
 
   // close the webview window
   webContents.on('closeWindow', () => {
-    const existingWebview = getWebview(webviewIdentifier);
     if (existingWebview) {
       existingWebview.close();
       messenger.log('GUI closed.');
@@ -109,18 +130,3 @@ const watchGui = () => {
   return browserWindow.loadURL(theWebview);
 };
 export default watchGui;
-
-/**
- * @description Closes the webview when the plugin is shutdown by Sketch
- * (for example, when the user disables the plugin)
- *
- * @kind function
- * @name onShutdown
- */
-export const onShutdown = () => {
-  const existingWebview = getWebview(webviewIdentifier);
-  if (existingWebview) {
-    existingWebview.close();
-    messenger.log('GUI closed.');
-  }
-};

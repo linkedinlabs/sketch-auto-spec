@@ -39,8 +39,9 @@
       "handler": "drawBoundingBox"
     },
     {
-      "name": "Show Toolbar",
+      "name": "Show/Hide Toolbar",
       "identifier": "view-gui",
+      "shortcut": "ctrl shift p",
       "script": "./GUI.js",
       "handlers": {
         "run": "onRun",
@@ -65,8 +66,10 @@
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
+      "-",
       "annotate-measurement",
       "draw-bounding-box",
+      "-",
       "view-gui"
     ]
   }
