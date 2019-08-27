@@ -335,7 +335,7 @@ export default class Crawler {
     const topWidth = layerB.frame().width();
     const topHeight = aPos(layerB).y - aPos(layerA).y;
     const topX = aPos(layerB).x;
-    const topY = layerA.frame().y();
+    const topY = aPos(layerA).y;
     // bottom
     const bottomWidth = layerB.frame().width();
     const bottomHeight = layerA.frame().height() - topHeight - layerB.frame().height();
