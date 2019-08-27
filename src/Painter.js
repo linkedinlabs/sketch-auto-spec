@@ -434,7 +434,7 @@ const positionAnnotation = (
   }
 
   // ------- position the group within the artboard, above the layer receiving the annotation
-  let diamondAdjustment = null;
+  let horizontalAdjustment = null;
 
   // initial placement based on layer to annotate
 
@@ -453,6 +453,7 @@ const positionAnnotation = (
 
   let offsetX = null;
   let offsetY = null;
+  let iconOffsetX = 0;
   let iconOffsetY = 0;
 
   // adjustments based on orientation
@@ -473,13 +474,25 @@ const positionAnnotation = (
   // correct for left bleed
   if (placementX < 0) {
     placementX = 5;
-    diamondAdjustment = 'left';
+    horizontalAdjustment = 'left';
+
+    // dimension/spacing annotations get their own special correction
+    if (icon) {
+      placementX = 2;
+      iconOffsetX = placementX;
+    }
   }
 
   // correct for right bleed
   if ((placementX + group.frame.width) > artboardWidth) {
     placementX = artboardWidth - group.frame.width - 5;
-    diamondAdjustment = 'right';
+    horizontalAdjustment = 'right';
+
+    // dimension/spacing annotations get their own special correction
+    if (icon) {
+      placementX -= 3;
+      iconOffsetX = placementX;
+    }
   }
 
   // correct for top bleed
@@ -501,10 +514,10 @@ const positionAnnotation = (
   group.frame.y = placementY - relativeGroupFrame.y;
 
   // adjust diamond on horizonal placement, if necessary
-  if (diamondAdjustment) {
+  if (horizontalAdjustment) {
     // move the diamond to the mid-point of the layer to annotate
     let diamondLayerMidX = null;
-    switch (diamondAdjustment) {
+    switch (horizontalAdjustment) {
       case 'left':
         diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
         break;
@@ -541,7 +554,19 @@ const positionAnnotation = (
   // adjust the measure icon width for top-oriented annotations
   if (orientation === 'top' && icon) {
     icon.frame.width = layerWidth;
-    icon.frame.x = (rectangle.frame.width - layerWidth) / 2;
+
+    if (iconOffsetX > 0) {
+      if (horizontalAdjustment === 'left') {
+        icon.frame.x -= getPositionOnArtboard(icon.sketchObject).x;
+      } else {
+        icon.frame.x = (
+          artboardWidth - getPositionOnArtboard(group.sketchObject).x - icon.frame.width
+        );
+      }
+    } else {
+      icon.frame.x = (rectangle.frame.width - layerWidth) / 2;
+    }
+
     icon.adjustToFit();
   }
 
