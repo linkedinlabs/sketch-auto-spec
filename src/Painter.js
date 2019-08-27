@@ -453,6 +453,7 @@ const positionAnnotation = (
 
   let offsetX = null;
   let offsetY = null;
+  let iconOffsetY = 0;
 
   // adjustments based on orientation
   switch (orientation) {
@@ -484,6 +485,12 @@ const positionAnnotation = (
   // correct for top bleed
   if (placementY < 0) {
     placementY = 5;
+
+    // dimension/spacing annotations get their own special correction
+    if (icon) {
+      placementY = 2;
+      iconOffsetY = placementY;
+    }
   }
 
   // find container frame, relative to artboard
@@ -550,12 +557,18 @@ const positionAnnotation = (
     // resize icon based on gap/layer height
     iconNew.frame.height = layerHeight;
 
-    // position icon based on orientation
-    if (orientation === 'right') {
-      iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
-      iconNew.frame.x = rectangle.frame.x - 10;
+    // position icon on `y`
+    if (iconOffsetY > 0) {
+      // move the icon back to the top of the artboard
+      iconNew.frame.y -= getPositionOnArtboard(iconNew.sketchObject).y;
     } else {
       iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
+    }
+
+    // position icon on `x` based on orientation
+    if (orientation === 'right') {
+      iconNew.frame.x = rectangle.frame.x - 10;
+    } else {
       iconNew.frame.x = rectangle.frame.x + rectangle.frame.width + 4;
     }
 
