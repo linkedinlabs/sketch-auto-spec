@@ -212,9 +212,7 @@ const annotateMeasurement = (context = null) => {
       paintResult = painter.addOverlapMeasurements(overlapFrames);
     }
 
-    if (overlapFrames) {
-      log('placeholder: paint padding dimensions here');
-    } else {
+    if (!overlapFrames && !gapFrame) {
       log('handle error here');
     }
   }
