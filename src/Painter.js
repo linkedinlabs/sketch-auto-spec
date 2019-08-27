@@ -1494,8 +1494,16 @@ export default class Painter {
     const types = ['top', 'bottom', 'right', 'left'];
 
     types.forEach((type) => {
+      // do not annotate if the results are negative, or less than a single
+      // IS-X spacing unit
+      if (overlapFrames[type].width <= 2 || overlapFrames[type].height <= 2) {
+        return null;
+      }
+
+      // otherwise, set up the frame we can use for the annotation
       let frameX = overlapFrames[type].x + (overlapFrames[type].width / 2);
       let frameY = overlapFrames[type].y;
+
       if ((type === 'left') || (type === 'right')) {
         frameY = overlapFrames[type].y + (overlapFrames[type].height / 2);
         frameX = overlapFrames[type].x;
@@ -1512,7 +1520,7 @@ export default class Painter {
         type,
       };
 
-      this.addSpacingAnnotation(spacingFrame);
+      return this.addSpacingAnnotation(spacingFrame);
     });
 
     // return a successful result
