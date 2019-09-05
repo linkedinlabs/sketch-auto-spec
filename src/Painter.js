@@ -619,7 +619,7 @@ const setGroupKey = (elementType) => {
 };
 
 /**
- * @description Determines the spacing value (multiples of four) based on length and returns
+ * @description Determines the spacing value (`IS-X`) based on length and returns
  * the appropriate spacing annotation text.
  *
  * @kind function
@@ -629,7 +629,36 @@ const setGroupKey = (elementType) => {
  * @private
  */
 const setSpacingText = (length) => {
-  const itemSpacingValue = Math.round(length / 4);
+  let itemSpacingValue = 1;
+
+  // IS-X spacing is not an even scale
+  // set some breakpoints and “round” `length` to the nearest proper IS-X number
+  switch (true) {
+    case (length >= 128): // 160 – IS-10 (not actually specc'd in Art Deco)
+      itemSpacingValue = 10;
+      break;
+    case (length >= 80): // 96 – IS-9
+      itemSpacingValue = 9;
+      break;
+    case (length >= 56): // 64 – IS-8
+      itemSpacingValue = 8;
+      break;
+    case (length >= 40): // 48 – IS-7
+      itemSpacingValue = 7;
+      break;
+    case (length >= 28): // 32 – IS-6
+      itemSpacingValue = 6;
+      break;
+    case (length >= 20): // 24 – IS-5
+      itemSpacingValue = 5;
+      break;
+    case (length >= 16): // 16 – IS-4
+      itemSpacingValue = 4;
+      break;
+    default:
+      itemSpacingValue = Math.round(length / 4);
+  }
+
   const text = `IS-${itemSpacingValue}`;
   return text;
 };
