@@ -350,7 +350,7 @@ const buildBoundingBox = (frame, containerGroup) => {
   const placementX = frame.x - relativeGroupFrame.x;
   const placementY = frame.y - relativeGroupFrame.y;
 
-  // build the rounded rectangle
+  // build the semi-transparent rectangle
   const boundingBox = new ShapePath({
     frame: new Rectangle(placementX, placementY, frame.width, frame.height),
     name: 'Bounding Box',
