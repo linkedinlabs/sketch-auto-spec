@@ -287,6 +287,32 @@ export default class Crawler {
    * for the two layers used to calculated the gap frame.
    */
   overlapFrames() {
+    /**
+     * @description Compensates for a mix of `Artboard` and non-artboard layers when
+     * determining a layer index. Artboard layer indexes are converted to a negative
+     * number so they can be compared against non-artboard layers. This is necessary
+     * because artboards use a separate z-index, making it possible for an artboard
+     * and a layer on that artboard to have the same index value.
+     *
+     * @kind function
+     * @name relativeIndex
+     * @param {Object} layer The sketchObject layer.
+     * @returns {integer} The index.
+     * @private
+     */
+    const relativeIndex = (layer) => {
+      const layerType = fromNative(layer).type;
+      let layerIndex = fromNative(layer).index;
+
+      // artboards use their own z-index
+      // flip them to a negative for consistent comparison to items on artboards
+      if (layerType === 'Artboard') {
+        layerIndex = (0 - (layerIndex + 1));
+      }
+
+      return layerIndex;
+    };
+
     // use `gapFrame` to first ensure that the itemse do actually overlap
     const gapFrame = this.gapFrame();
 
@@ -302,30 +328,32 @@ export default class Crawler {
 
     // set the layers to a default for comparisons
     let layerA = selection[0];
-    let layerB = selection[0];
+    let layerB = selection[selection.length - 1];
 
-    // find biggest (`layerA`) and smallest (`layerB`) layers
-    let layerAArea = (layerA.frame().width() * layerA.frame().height());
-    let layerBArea = (layerB.frame().width() * layerB.frame().height());
+    // find bottom (`layerA`) and top (`layerB`) layers
+    let layerAIndex = relativeIndex(layerA);
+    let layerBIndex = relativeIndex(layerB);
 
-    // set the largest layer to `layerA` and the smallest to `layerB`
-    // if `layerB` is currently the largest, we have to flip them
+    // set the bottom layer to `layerA` and the top to `layerB`
+    // if `layerB` is currently the bottom, we have to flip them
     selection.forEach((layer) => {
-      const layerArea = (layer.frame().width() * layer.frame().height());
-      if (layerArea > layerAArea) {
-        layerA = layer;
-        layerAArea = layerArea;
+      const layerIndex = relativeIndex(layer);
+
+      if (layerIndex > layerBIndex) {
+        layerB = layer;
+        layerBIndex = layerIndex;
       }
 
-      if (layerArea < layerAArea) {
-        layerB = layer;
-        layerBArea = layerArea;
+      if (layerIndex < layerAIndex) {
+        layerA = layer;
+        layerAIndex = layerIndex;
       }
     });
 
     // we need a dominant layer to orient positioning;
-    // if both layers are exactly the same size, we cannot assume dominance
-    if (layerAArea === layerBArea) {
+    // if both layers are exactly the same index, we cannot assume dominance.
+    // this should not happen, but layers might be selected from multiple artboards.
+    if (layerAIndex === layerBIndex) {
       return null;
     }
 
