@@ -41,7 +41,7 @@
     {
       "name": "Show/Hide Toolbar",
       "identifier": "view-gui",
-      "shortcut": "ctrl shift p",
+      "shortcut": "ctrl shift s",
       "script": "./GUI.js",
       "handlers": {
         "run": "onRun",
