@@ -683,20 +683,20 @@ const setGroupKey = (elementType) => {
  * the appropriate spacing annotation text.
  *
  * @kind function
- * @name setSpacingText
+ * @name retrieveSpacingValue
  * @param {number} length A number representing length.
  * @returns {string} A text label based on the spacing value.
  * @private
  */
-const setSpacingText = (length) => {
-  let itemSpacingValue = 1;
+const retrieveSpacingValue = (length) => {
+  let itemSpacingValue = null;
 
   // IS-X spacing is not an even scale
   // set some breakpoints and “round” `length` to the nearest proper IS-X number
+  // ignore anything so large that it’s above `IS-9`
   switch (true) {
-    case (length >= 128): // 160 – IS-10 (not actually specc'd in Art Deco)
-      itemSpacingValue = 10;
-      break;
+    case (length >= 128): // based on 160 – IS-10 (not actually specc'd in Art Deco)
+      return itemSpacingValue;
     case (length >= 80): // 96 – IS-9
       itemSpacingValue = 9;
       break;
@@ -719,8 +719,7 @@ const setSpacingText = (length) => {
       itemSpacingValue = Math.round(length / 4);
   }
 
-  const text = `IS-${itemSpacingValue}`;
-  return text;
+  return itemSpacingValue;
 };
 
 /**
@@ -1379,7 +1378,16 @@ export default class Painter {
   */
   addSpacingAnnotation(spacingFrame) {
     // set up some information
-    const annotationText = spacingFrame.orientation === 'vertical' ? setSpacingText(spacingFrame.width) : setSpacingText(spacingFrame.height);
+    const measurementToUse = spacingFrame.orientation === 'vertical' ? spacingFrame.width : spacingFrame.height;
+    const spacingValue = retrieveSpacingValue(measurementToUse);
+
+    // if there is no `spacingValue`, the measurement is above an `IS-9` and
+    // isn’t considered valid
+    if (!spacingValue) {
+      return null;
+    }
+
+    const annotationText = `IS-${spacingValue}`;
     const annotationType = 'spacing';
     const layerName = this.layer.name();
     const groupName = `Spacing for ${layerName} (${spacingFrame.type})`;
@@ -1468,6 +1476,8 @@ export default class Painter {
       PLUGIN_IDENTIFIER,
       newDocumentSettings,
     );
+
+    return null;
   }
 
   /**
