@@ -119,12 +119,7 @@ const watchGui = () => {
   webContents.on('drawBoundingBox', () => drawBoundingBox());
 
   // close the webview window
-  webContents.on('closeWindow', () => {
-    if (existingWebview) {
-      existingWebview.close();
-      messenger.log('GUI closed.');
-    }
-  });
+  webContents.on('closeWindow', () => onShutdown());
 
   // load the webview window
   return browserWindow.loadURL(theWebview);
