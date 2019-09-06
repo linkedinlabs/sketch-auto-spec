@@ -435,7 +435,6 @@ const positionAnnotation = (
   }
 
   // ------- position the group within the artboard, above the layer receiving the annotation
-  let horizontalAdjustment = null;
   let artboardEdge = null;
 
   // initial placement based on layer to annotate
@@ -475,20 +474,19 @@ const positionAnnotation = (
 
   // correct for left bleed
   if (placementX < 0) {
+    artboardEdge = 'left';
     placementX = 5;
-    horizontalAdjustment = 'left';
 
     // dimension/spacing annotations get their own special correction
     if (icon) {
-      placementX = 2;
       iconOffsetX = placementX;
     }
   }
 
   // correct for right bleed
   if ((placementX + group.frame.width) > artboardWidth) {
-    placementX = artboardWidth - group.frame.width - 5;
-    horizontalAdjustment = 'right';
+    artboardEdge = 'right';
+    placementX = artboardWidth - group.frame.width - 3;
 
     // dimension/spacing annotations get their own special correction
     if (icon) {
@@ -528,10 +526,10 @@ const positionAnnotation = (
   group.frame.y = placementY - relativeGroupFrame.y;
 
   // adjust diamond on horizonal placement, if necessary
-  if (horizontalAdjustment) {
+  if (artboardEdge) {
     // move the diamond to the mid-point of the layer to annotate
     let diamondLayerMidX = null;
-    switch (horizontalAdjustment) {
+    switch (artboardEdge) {
       case 'left':
         diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
         break;
@@ -539,7 +537,7 @@ const positionAnnotation = (
         diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
         break;
       default:
-        diamondLayerMidX = 0;
+        diamondLayerMidX = diamond.frame.x;
     }
     diamond.frame.x = diamondLayerMidX;
   }
@@ -566,16 +564,22 @@ const positionAnnotation = (
   }
 
   // adjust diamond based on artboard edge, if necessary
-  if (artboardEdge) {
+  if (artboardEdge && isMeasurement) {
     switch (artboardEdge) {
       case 'bottom':
         diamond.frame.y = rectangle.frame.height - diamond.frame.height - offsetY;
+        break;
+      case 'left':
+        diamond.frame.x = diamond.frame.width / 2;
+        break;
+      case 'right':
+        diamond.frame.x = rectangle.frame.width - diamond.frame.width - offsetX - 2;
         break;
       case 'top':
         diamond.frame.y = diamond.frame.height / 2;
         break;
       default:
-        return null;
+        diamond.frame.y = diamond.frame.y;
     }
   }
 
@@ -584,7 +588,7 @@ const positionAnnotation = (
     icon.frame.width = layerWidth;
 
     if (iconOffsetX > 0) {
-      if (horizontalAdjustment === 'left') {
+      if (artboardEdge === 'left') {
         icon.frame.x -= getPositionOnArtboard(icon.sketchObject).x;
       } else {
         icon.frame.x = (
