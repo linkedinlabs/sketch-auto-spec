@@ -436,6 +436,7 @@ const positionAnnotation = (
 
   // ------- position the group within the artboard, above the layer receiving the annotation
   let horizontalAdjustment = null;
+  let artboardEdge = null;
 
   // initial placement based on layer to annotate
 
@@ -498,6 +499,7 @@ const positionAnnotation = (
 
   // correct for top bleed
   if (placementY < 0) {
+    artboardEdge = 'top';
     placementY = 5;
 
     // dimension/spacing annotations get their own special correction
@@ -509,6 +511,7 @@ const positionAnnotation = (
 
   // correct for bottom bleed
   if (placementY > (artboardHeight - group.frame.height)) {
+    artboardEdge = 'bottom';
     offsetY = icon ? 2 : 5;
     placementY = (artboardHeight - group.frame.height - offsetY);
 
@@ -560,6 +563,20 @@ const positionAnnotation = (
 
     // re-size the annotation group frame
     group.frame.y += 2;
+  }
+
+  // adjust diamond based on artboard edge, if necessary
+  if (artboardEdge) {
+    switch (artboardEdge) {
+      case 'bottom':
+        diamond.frame.y = rectangle.frame.height - diamond.frame.height - offsetY;
+        break;
+      case 'top':
+        diamond.frame.y = diamond.frame.height / 2;
+        break;
+      default:
+        return null;
+    }
   }
 
   // adjust the measure icon width for top-oriented annotations
