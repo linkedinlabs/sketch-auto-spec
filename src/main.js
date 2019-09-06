@@ -170,7 +170,7 @@ const annotateLayerCustom = (context = null) => {
   return null;
 };
 
-/**
+/** WIP
  * @description Annotates a selection of layers in a Sketch file with the
  * spacing number (“IS-X”) based on the gap between the two layers.
  *
@@ -211,10 +211,6 @@ const annotateMeasurement = (context = null) => {
       overlapFrames = crawler.overlapFrames();
       paintResult = painter.addOverlapMeasurements(overlapFrames);
     }
-
-    if (!overlapFrames && !gapFrame) {
-      log('handle error here');
-    }
   }
 
   if (selection.count() === 1) {
@@ -226,6 +222,60 @@ const annotateMeasurement = (context = null) => {
 
   return null;
 };
+
+/** WIP
+ * @description Annotates a selection of layers in a Sketch file with the
+ * spacing number (“IS-X”) based on the gap between the two layers.
+ *
+ * @kind function
+ * @name annotateSpacingOnly
+ * @param {Object} context The current context (event) received from Sketch.
+ * @returns {null} Shows a Toast in the UI if nothing is selected or
+ * if more than two layers are selected.
+ */
+const annotateSpacingOnly = (context = null, direction = 'right') => {
+  const {
+    document,
+    messenger,
+    selection,
+  } = assemble(context);
+
+  // need a selected layer to annotate it
+  if (selection === null || selection.count() !== 2) {
+    return messenger.alert('Two layers must be selected');
+  }
+
+  // grab the gap frame from the selection
+  const crawler = new Crawler({ for: selection });
+  const layer = crawler.first();
+
+  // set up Painter instance for the reference layer
+  const painter = new Painter({ for: layer, in: document });
+
+  // draw the spacing annotation
+  // (if gap frame exists or layers are overlapped)
+  let paintResult = null;
+  if (selection.count() === 2) {
+    const overlapFrames = crawler.overlapFrames();
+
+    if (overlapFrames) {
+      const directions = [direction];
+      paintResult = painter.addOverlapMeasurements(overlapFrames, directions);
+    } else {
+      return messenger.alert('The selected layers need to overlap');
+    }
+  }
+
+  // read the response from Painter; log and display message(s)
+  messenger.handleResult(paintResult);
+
+  return null;
+};
+// export some `annotateSpacingOnly` aliases for the manifest to use in the plugin menu
+const annotateSpacingTop = (context = null) => annotateSpacingOnly(context, 'top');
+const annotateSpacingBottom = (context = null) => annotateSpacingOnly(context, 'bottom');
+const annotateSpacingLeft = (context = null) => annotateSpacingOnly(context, 'left');
+const annotateSpacingRight = (context = null) => annotateSpacingOnly(context, 'right');
 
 /**
  * @description Draws a semi-transparent “Bounding Box” around any selected elements.
@@ -299,6 +349,10 @@ export {
   annotateLayer,
   annotateLayerCustom,
   annotateMeasurement,
+  annotateSpacingTop,
+  annotateSpacingBottom,
+  annotateSpacingLeft,
+  annotateSpacingRight,
   drawBoundingBox,
   onOpenDocument,
 };

@@ -1581,7 +1581,10 @@ export default class Painter {
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  addOverlapMeasurements(overlapFrames) {
+  addOverlapMeasurements(
+    overlapFrames,
+    directions = ['top', 'bottom', 'right', 'left'],
+  ) {
     const result = {
       status: null,
       messages: {
@@ -1606,8 +1609,6 @@ export default class Painter {
       result.messages.alert = 'Could not find a overlapped layers in your selection';
       return result;
     }
-
-    const directions = ['top', 'bottom', 'right', 'left'];
 
     directions.forEach((direction) => {
       // do not annotate if the results are negative, or less than a single
@@ -1641,7 +1642,7 @@ export default class Painter {
 
     // return a successful result
     result.status = 'success';
-    result.messages.log = `Spacing annotated for “${this.layer.name()}”`;
+    result.messages.log = `Spacing (${directions.join(', ')}) annotated for “${this.layer.name()}”`;
     return result;
   }
 }
