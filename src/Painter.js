@@ -1428,7 +1428,7 @@ export default class Painter {
     const annotationText = `IS-${spacingValue}`;
     const annotationType = 'spacing';
     const layerName = this.layer.name();
-    const groupName = `Spacing for ${layerName} (${spacingFrame.type})`;
+    const groupName = `Spacing for ${layerName} (${spacingFrame.direction})`;
 
     // create or locate the container group
     const { containerGroup, innerContainerGroup } = setContainerGroups(
@@ -1448,7 +1448,7 @@ export default class Painter {
         if (
           layerSet.layerAId === spacingFrame.layerAId
           && layerSet.layerBId === spacingFrame.layerBId
-          && layerSet.type === spacingFrame.type
+          && layerSet.direction === spacingFrame.direction
         ) {
           this.removeAnnotation(layerSet);
 
@@ -1557,8 +1557,8 @@ export default class Painter {
       return result;
     }
 
-    // set type
-    spacingFrame.type = 'gap'; // eslint-disable-line no-param-reassign
+    // set direction (type)
+    spacingFrame.direction = 'gap'; // eslint-disable-line no-param-reassign
 
     // add the annotation
     this.addSpacingAnnotation(spacingFrame);
@@ -1607,33 +1607,33 @@ export default class Painter {
       return result;
     }
 
-    const types = ['top', 'bottom', 'right', 'left'];
+    const directions = ['top', 'bottom', 'right', 'left'];
 
-    types.forEach((type) => {
+    directions.forEach((direction) => {
       // do not annotate if the results are negative, or less than a single
       // IS-X spacing unit
-      if (overlapFrames[type].width <= 2 || overlapFrames[type].height <= 2) {
+      if (overlapFrames[direction].width <= 2 || overlapFrames[direction].height <= 2) {
         return null;
       }
 
       // otherwise, set up the frame we can use for the annotation
-      let frameX = overlapFrames[type].x + (overlapFrames[type].width / 2);
-      let frameY = overlapFrames[type].y;
+      let frameX = overlapFrames[direction].x + (overlapFrames[direction].width / 2);
+      let frameY = overlapFrames[direction].y;
 
-      if ((type === 'left') || (type === 'right')) {
-        frameY = overlapFrames[type].y + (overlapFrames[type].height / 2);
-        frameX = overlapFrames[type].x;
+      if ((direction === 'left') || (direction === 'right')) {
+        frameY = overlapFrames[direction].y + (overlapFrames[direction].height / 2);
+        frameX = overlapFrames[direction].x;
       }
 
       const spacingFrame = {
         x: frameX,
         y: frameY,
-        width: overlapFrames[type].width,
-        height: overlapFrames[type].height,
-        orientation: overlapFrames[type].orientation,
+        width: overlapFrames[direction].width,
+        height: overlapFrames[direction].height,
+        orientation: overlapFrames[direction].orientation,
         layerAId: overlapFrames.layerAId,
         layerBId: overlapFrames.layerBId,
-        type,
+        direction,
       };
 
       return this.addSpacingAnnotation(spacingFrame);
