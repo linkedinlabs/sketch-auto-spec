@@ -378,7 +378,8 @@ const buildBoundingBox = (frame, containerGroup) => {
  * inside the `containerGroup`.
  * @param {Object} annotation Each annotation element (`diamond`, `rectangle`, `text`).
  * @param {Object} layerFrame The frame specifications (`width`, `height`, `x`, `y`, `index`)
- * for the layer receiving the annotation + the artboard width (`artboardWidth`).
+ * for the layer receiving the annotation + the artboard width/height (`artboardWidth` /
+ * `artboardHeight`).
  * @param {string} annotationType An optional string representing the type of annotation.
  * @param {string} orientation An optional string representing the orientation of the
  * annotation (`top` or `left`).
@@ -401,7 +402,7 @@ const positionAnnotation = (
     icon,
   } = annotation;
 
-  const { artboardWidth } = layerFrame;
+  const { artboardWidth, artboardHeight } = layerFrame;
   const layerWidth = layerFrame.width;
   const layerHeight = layerFrame.height;
   const layerX = layerFrame.x;
@@ -506,6 +507,16 @@ const positionAnnotation = (
     }
   }
 
+  // correct for bottom bleed
+  if (placementY > (artboardHeight - group.frame.height)) {
+    offsetY = icon ? 2 : 5;
+    placementY = (artboardHeight - group.frame.height - offsetY);
+
+    if (icon) {
+      iconOffsetY = null;
+    }
+  }
+
   // find container frame, relative to artboard
   const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
 
@@ -583,11 +594,15 @@ const positionAnnotation = (
     iconNew.frame.height = layerHeight;
 
     // position icon on `y`
-    if (iconOffsetY > 0) {
-      // move the icon back to the top of the artboard
-      iconNew.frame.y -= getPositionOnArtboard(iconNew.sketchObject).y;
+    if (iconOffsetY !== null) {
+      if (iconOffsetY > 0) {
+        // move the icon back to the top of the artboard
+        iconNew.frame.y -= getPositionOnArtboard(iconNew.sketchObject).y;
+      } else {
+        iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
+      }
     } else {
-      iconNew.frame.y = (rectangle.frame.height - layerHeight) / 2;
+      iconNew.frame.y = group.frame.height - iconNew.frame.height;
     }
 
     // position icon on `x` based on orientation
@@ -1130,6 +1145,7 @@ export default class Painter {
     const layerCoordinates = getPositionOnArtboard(this.layer);
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
+      artboardHeight: this.artboard.frame().height(),
       width: this.layer.frame().width(),
       height: this.layer.frame().height(),
       x: layerCoordinates.x,
@@ -1276,6 +1292,7 @@ export default class Painter {
     const layerCoordinates = getPositionOnArtboard(this.layer);
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
+      artboardHeight: this.artboard.frame().height(),
       width: this.layer.frame().width(),
       height: this.layer.frame().height(),
       x: layerCoordinates.x,
@@ -1436,6 +1453,7 @@ export default class Painter {
     // group and position the base annotation elements
     const layerFrame = {
       artboardWidth: this.artboard.frame().width(),
+      artboardHeight: this.artboard.frame().height(),
       width: spacingFrame.width,
       height: spacingFrame.height,
       x: spacingFrame.x,
