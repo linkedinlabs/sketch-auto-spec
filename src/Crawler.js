@@ -273,8 +273,8 @@ export default class Crawler {
     return theFrame;
   }
 
-  /** WIP
-   * @description Simulates Sketch’s frame() object, but for the space between two
+  /**
+   * @description Creates four separate frames for the spaces around two overlapping
    * selected layers. It keeps the coordinates relative to the artboard, ignoring
    * if some of the items are grouped inside other layers. It also adds an orientation
    * `horizontal` or `vertical` based on the gap orientation. Assumes only 2 layers
@@ -282,9 +282,10 @@ export default class Crawler {
    *
    * @kind function
    * @name overlapFrames
-   * @returns {Object} The `x`, `y` coordinates, `width`, `height`, and `orientation`
-   * of an entire selection. It also includes layer IDs (`layerAId` and `layerBId`)
-   * for the two layers used to calculated the gap frame.
+   * @returns {Object} The `top`, `bottom`, `right`, and `left` frames. Each frame
+   * contains `x`, `y` coordinates, `width`, `height`, and `orientation`.
+   * The object also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the overlapped areas.
    */
   overlapFrames() {
     /**
@@ -313,9 +314,10 @@ export default class Crawler {
       return layerIndex;
     };
 
-    // use `gapFrame` to first ensure that the itemse do actually overlap
+    // use `gapFrame` to first ensure that the items do actually overlap
     const gapFrame = this.gapFrame();
 
+    // if items do not overlap, cannot create an `overlapFrame`
     if (gapFrame) {
       return null;
     }

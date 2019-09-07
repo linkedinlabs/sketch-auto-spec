@@ -170,9 +170,12 @@ const annotateLayerCustom = (context = null) => {
   return null;
 };
 
-/** WIP
- * @description Annotates a selection of layers in a Sketch file with the
- * spacing number (“IS-X”) based on the gap between the two layers.
+/**
+ * @description If two layers are selected: annotates the selection with the
+ * spacing number (“IS-X”) based on either the gap between the two layers or, if they
+ * are overlapping, the 4 directions of overlap (top, bottom, right, and left). If
+ * one layer is selected: annotates the height and width of the selected layer
+ * in “dp” (digital points) units.
  *
  * @kind function
  * @name annotateMeasurement
@@ -223,13 +226,16 @@ const annotateMeasurement = (context = null) => {
   return null;
 };
 
-/** WIP
- * @description Annotates a selection of layers in a Sketch file with the
- * spacing number (“IS-X”) based on the gap between the two layers.
+/**
+ * @description Annotates the selection with the spacing number (“IS-X”) based on either
+ * the gap between the two layers or, if they are overlapping, the 4 directions of overlap
+ * (top, bottom, right, and left).
  *
  * @kind function
  * @name annotateSpacingOnly
  * @param {Object} context The current context (event) received from Sketch.
+ * @param {string} direction An optional string representing the annotation direction.
+ * Valid inputs are `top`, `bottom`, `right` (default), and `left`.
  * @returns {null} Shows a Toast in the UI if nothing is selected or
  * if more than two layers are selected.
  */
@@ -271,7 +277,7 @@ const annotateSpacingOnly = (context = null, direction = 'right') => {
 
   return null;
 };
-// export some `annotateSpacingOnly` aliases for the manifest to use in the plugin menu
+// export some pre-defined `annotateSpacingOnly` aliases for `manifest` to use in the plugin menu
 const annotateSpacingTop = (context = null) => annotateSpacingOnly(context, 'top');
 const annotateSpacingBottom = (context = null) => annotateSpacingOnly(context, 'bottom');
 const annotateSpacingLeft = (context = null) => annotateSpacingOnly(context, 'left');

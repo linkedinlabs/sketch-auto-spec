@@ -1408,12 +1408,19 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description asf
+  /**
+   * @description Takes a `spacingFrame` object and creates a spacing measurement annotation
+   * with the correct spacing number (“IS-X”). If the calculated spacing number is larger
+   * than “IS-9”, the annotation is not created.
    *
    * @kind function
    * @name addSpacingAnnotation
-  */
+   * @param {Object} spacingFrame The `x`, `y` coordinates, `width`, `height`, and `orientation`
+   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the gap.
+   *
+   * @returns null
+   */
   addSpacingAnnotation(spacingFrame) {
     // set up some information
     const measurementToUse = spacingFrame.orientation === 'vertical' ? spacingFrame.width : spacingFrame.height;
@@ -1569,15 +1576,19 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description Takes a `overlapFrames` object from Crawler and creates a spacing measurement
-   * annotation with the correct spacing number (“IS-X”).
+  /**
+   * @description Takes a `overlapFrames` object from Crawler and creates spacing measurement
+   * annotations with the correct spacing number (“IS-X”) in the selected directions (top, bottom,
+   * right, and left). The default is all four directions.
    *
    * @kind function
    * @name addOverlapMeasurements
-   * @param {Object} overlapFrames The `x`, `y` coordinates, `width`, `height`, and `orientation`
-   * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
-   * for the two layers used to calculated the gap.
+   * @param {Object} overlapFrames The `top`, `bottom`, `right`, and `left` frames. Each frame
+   * contains `x`, `y` coordinates, `width`, `height`, and `orientation`. The object also includes
+   * layer IDs (`layerAId` and `layerBId`) for the two layers used to calculated the
+   * overlapped areas.
+   * @param {array} directions An optional array containing 4 unique strings representating
+   * the annotation directions: `top`, `bottom`, `right`, `left`.
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
