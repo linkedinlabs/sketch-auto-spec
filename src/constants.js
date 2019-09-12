@@ -22,6 +22,13 @@ const PLUGIN_IDENTIFIER = 'com.linkedinlabs.sketch.auto-spec-plugin';
  */
 const PLUGIN_NAME = 'Specter';
 
+/**
+ * @description An object containing the set of colors in-use by the plugin.
+ *
+ * @kind constant
+ * @name COLORS
+ * @type {Object}
+ */
 const COLORS = {
   component: '#9966ff',
   custom: '#ff3399',
