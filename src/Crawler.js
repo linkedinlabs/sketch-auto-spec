@@ -190,18 +190,14 @@ export default class Crawler {
         leftEdgeX = aPos(layerA).x + layerA.frame().width(); // lowest x within gap
         rightEdgeX = aPos(layerB).x; // highest x within gap
 
-        // set Y
-        if (aPos(layerA).y < aPos(layerB).y) {
-          topEdgeY = aPos(layerA).y;
-        } else {
-          topEdgeY = aPos(layerB).y;
-        }
-
-        // set height
+        // set `height`; set `y` based on smallest `height`
+        // offset `y` by half to center annotation
         if (layerA.frame().height() < layerB.frame().height()) {
           frameHeight = layerA.frame().height();
+          topEdgeY = aPos(layerA).y + (frameHeight / 2);
         } else {
           frameHeight = layerB.frame().height();
+          topEdgeY = aPos(layerB).y + (frameHeight / 2);
         }
 
         // set the final frame params
@@ -240,18 +236,14 @@ export default class Crawler {
         topEdgeY = aPos(layerA).y + layerA.frame().height(); // lowest y within gap
         bottomEdgeY = aPos(layerB).y; // highest y within gap
 
-        // set X
-        if (aPos(layerA).x < aPos(layerB).x) {
-          leftEdgeX = aPos(layerA).x;
-        } else {
-          leftEdgeX = aPos(layerB).x;
-        }
-
-        // set width
+        // set `width`; set `x` based on smallest `width`
+        // offset `x` by half to center annotation
         if (layerA.frame().width() < layerB.frame().width()) {
           frameWidth = layerA.frame().width();
+          leftEdgeX = aPos(layerA).x + (frameWidth / 2);
         } else {
           frameWidth = layerB.frame().width();
+          leftEdgeX = aPos(layerB).x + (frameWidth / 2);
         }
 
         // set the final frame params
