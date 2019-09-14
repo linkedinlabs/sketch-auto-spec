@@ -182,6 +182,7 @@ export default class Crawler {
       let leftEdgeX = null; // lowest x within gap
       let rightEdgeX = null; // highest x within gap
       let topEdgeY = null;
+      let bottomEdgeY = null;
       let frameHeight = null;
 
       // make sure the layers are not overlapped (a gap exists)
@@ -190,19 +191,55 @@ export default class Crawler {
         leftEdgeX = aPos(layerA).x + layerA.frame().width(); // lowest x within gap
         rightEdgeX = aPos(layerB).x; // highest x within gap
 
-        // set `height`; set `y` based on smallest `height`
-        // offset `y` by half to center annotation
-        if (layerA.frame().height() < layerB.frame().height()) {
-          frameHeight = layerA.frame().height();
-          topEdgeY = aPos(layerA).y + (frameHeight / 2);
+        const layerATopY = aPos(layerA).y;
+        const layerABottomY = aPos(layerA).y + layerA.frame().height();
+        const layerBTopY = aPos(layerB).y;
+        const layerBBottomY = aPos(layerB).y + layerB.frame().height();
+
+        if (layerBTopY >= layerATopY) {
+          // top of A is higher than top of B
+          if (layerABottomY >= layerBTopY) {
+            // top of B is higher than bottom of A
+            if (layerBBottomY >= layerABottomY) {
+              // bottom of A is higher than bottom of B
+              // decision: top edge is top of B; bottom edge is bottom of A
+              topEdgeY = layerBTopY;
+              bottomEdgeY = layerABottomY;
+            } else {
+              // decision: top edge is top of B; bottom edge is bottom of B
+              topEdgeY = layerBTopY;
+              bottomEdgeY = layerBBottomY;
+            }
+          } else {
+            // decision: top edge is bottom of A; bottom edge is top of B
+            topEdgeY = layerABottomY;
+            bottomEdgeY = layerBTopY;
+          }
+        } else if (layerBBottomY >= layerATopY) {
+          // top of A is higher than bottom of B
+          if (layerABottomY >= layerBBottomY) {
+            // bottom of B is higher than bottom of A
+            // decision: top edge is top of A; bottom edge is bottom of B
+            topEdgeY = layerATopY;
+            bottomEdgeY = layerBBottomY;
+          } else {
+            // decision: top edge is top of A; bottom edge is bottom of A
+            topEdgeY = layerATopY;
+            bottomEdgeY = layerABottomY;
+          }
         } else {
-          frameHeight = layerB.frame().height();
-          topEdgeY = aPos(layerB).y + (frameHeight / 2);
+          // decision: top edge is bottom of B; bottom edge is top of A
+          topEdgeY = layerBBottomY;
+          bottomEdgeY = layerATopY;
         }
 
+        // set frame height
+        frameHeight = bottomEdgeY - topEdgeY;
+
         // set the final frame params
+        // cut final `y` in half by height to position annotation at mid-point
         theFrame.x = leftEdgeX;
-        theFrame.y = topEdgeY;
+        theFrame.y = topEdgeY + (frameHeight / 2);
         theFrame.width = rightEdgeX - leftEdgeX;
         theFrame.height = frameHeight;
         theFrame.layerAId = fromNative(layerA).id;
@@ -228,6 +265,7 @@ export default class Crawler {
       let topEdgeY = null; // lowest y within gap
       let bottomEdgeY = null; // highest y within gap
       let leftEdgeX = null;
+      let rightEdgeX = null;
       let frameWidth = null;
 
       // make sure the layers are not overlapped (a gap exists)
@@ -236,18 +274,55 @@ export default class Crawler {
         topEdgeY = aPos(layerA).y + layerA.frame().height(); // lowest y within gap
         bottomEdgeY = aPos(layerB).y; // highest y within gap
 
-        // set `width`; set `x` based on smallest `width`
-        // offset `x` by half to center annotation
-        if (layerA.frame().width() < layerB.frame().width()) {
-          frameWidth = layerA.frame().width();
-          leftEdgeX = aPos(layerA).x + (frameWidth / 2);
+        // set initial layer values for comparison
+        const layerALeftX = aPos(layerA).x;
+        const layerARightX = aPos(layerA).x + layerA.frame().width();
+        const layerBLeftX = aPos(layerB).x;
+        const layerBRightX = aPos(layerB).x + layerB.frame().width();
+
+        if (layerBLeftX >= layerALeftX) {
+          // left-most of A is to the left of left-most of B
+          if (layerARightX >= layerBLeftX) {
+            // left-most of B is to the left of right-most of A
+            if (layerBRightX >= layerARightX) {
+              // right-most of A is to the left of right-most of B
+              // decision: left-most edge is left-most of B; right-most edge is right-most of A
+              leftEdgeX = layerBLeftX;
+              rightEdgeX = layerARightX;
+            } else {
+              // decision: left-most edge is left-most of B; right-most edge is right-most of B
+              leftEdgeX = layerBLeftX;
+              rightEdgeX = layerBRightX;
+            }
+          } else {
+            // decision: left-most edge is right-most of A; right-most edge is left-most of B
+            leftEdgeX = layerARightX;
+            rightEdgeX = layerBLeftX;
+          }
+        } else if (layerBRightX >= layerALeftX) {
+          // left-most of A is to the left of right-most of B
+          if (layerARightX >= layerBRightX) {
+            // right-most of B is to the left of right-most of A
+            // decision: left-most edge is left-most of A; right-most edge is right-most of B
+            leftEdgeX = layerALeftX;
+            rightEdgeX = layerBRightX;
+          } else {
+            // decision: left-most edge is left-most of A; right-most edge is right-most of A
+            leftEdgeX = layerALeftX;
+            rightEdgeX = layerARightX;
+          }
         } else {
-          frameWidth = layerB.frame().width();
-          leftEdgeX = aPos(layerB).x + (frameWidth / 2);
+          // decision: left-most edge is right-most of B; right-most edge is left-most of A
+          leftEdgeX = layerBRightX;
+          rightEdgeX = layerALeftX;
         }
 
+        // set frame height
+        frameWidth = rightEdgeX - leftEdgeX;
+
         // set the final frame params
-        theFrame.x = leftEdgeX;
+        // cut final `x` in half by width to position annotation at mid-point
+        theFrame.x = leftEdgeX + (frameWidth / 2);
         theFrame.y = topEdgeY;
         theFrame.width = frameWidth;
         theFrame.height = bottomEdgeY - topEdgeY;
@@ -290,7 +365,7 @@ export default class Crawler {
      * @kind function
      * @name relativeIndex
      * @param {Object} layer The sketchObject layer.
-     * @returns {integer} The index.
+     * @returns {number} The index.
      * @private
      */
     const relativeIndex = (layer) => {
