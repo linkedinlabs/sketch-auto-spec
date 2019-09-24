@@ -78,9 +78,9 @@ const annotateLayer = (context = null) => {
     if (hasCustomTextResult.status === 'error') {
       let setTextResult = null;
       const getLingoNameResult = layerToAnnotate.getLingoName();
-      if (getLingoNameResult.status === 'error') {
-        messenger.handleResult(getLingoNameResult);
+      messenger.handleResult(getLingoNameResult);
 
+      if (getLingoNameResult.status === 'error') {
         if (!multipleLayers) {
           setTextResult = layerToAnnotate.setText();
           messenger.handleResult(setTextResult);
