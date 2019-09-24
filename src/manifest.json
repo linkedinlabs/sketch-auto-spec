@@ -3,7 +3,7 @@
   "description": "Annotate and spec design system elements",
   "author": "LinkedIn",
   "homepage": "https://github.com/linkedinlabs/specter-sketch",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "appcast": "https://raw.githubusercontent.com/linkedinlabs/specter-sketch/master/.appcast.xml",
   "compatibleVersion": "55.0",
@@ -25,11 +25,39 @@
       "handler": "annotateLayerCustom"
     },
     {
-      "name": "Set Measurement",
+      "name": "Set Spacing / Dimensions",
       "identifier": "annotate-measurement",
       "shortcut": "ctrl shift m",
       "script": "./main.js",
       "handler": "annotateMeasurement"
+    },
+    {
+      "name": "Set Spacing: Left",
+      "identifier": "annotate-spacing-left",
+      "shortcut": "ctrl shift option ←",
+      "script": "./main.js",
+      "handler": "annotateSpacingLeft"
+    },
+    {
+      "name": "Set Spacing: Right",
+      "identifier": "annotate-spacing-right",
+      "shortcut": "ctrl shift option →",
+      "script": "./main.js",
+      "handler": "annotateSpacingRight"
+    },
+    {
+      "name": "Set Spacing: Top",
+      "identifier": "annotate-spacing-top",
+      "shortcut": "ctrl shift option ↑",
+      "script": "./main.js",
+      "handler": "annotateSpacingTop"
+    },
+    {
+      "name": "Set Spacing: Bottom",
+      "identifier": "annotate-spacing-bottom",
+      "shortcut": "ctrl shift option ↓",
+      "script": "./main.js",
+      "handler": "annotateSpacingBottom"
     },
     {
       "name": "Draw Bounding Box",
@@ -39,8 +67,9 @@
       "handler": "drawBoundingBox"
     },
     {
-      "name": "Show Toolbar",
+      "name": "Show/Hide Toolbar",
       "identifier": "view-gui",
+      "shortcut": "ctrl shift s",
       "script": "./GUI.js",
       "handlers": {
         "run": "onRun",
@@ -65,8 +94,15 @@
     "items": [
       "annotate-layer",
       "annotate-layer-custom",
+      "-",
       "annotate-measurement",
       "draw-bounding-box",
+      "-",
+      "annotate-spacing-top",
+      "annotate-spacing-bottom",
+      "annotate-spacing-left",
+      "annotate-spacing-right",
+      "-",
       "view-gui"
     ]
   }

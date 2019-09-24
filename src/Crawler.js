@@ -272,4 +272,151 @@ export default class Crawler {
 
     return theFrame;
   }
+
+  /**
+   * @description Creates four separate frames for the spaces around two overlapping
+   * selected layers. It keeps the coordinates relative to the artboard, ignoring
+   * if some of the items are grouped inside other layers. It also adds an orientation
+   * `horizontal` or `vertical` based on the gap orientation. Assumes only 2 layers
+   * are selected.
+   *
+   * @kind function
+   * @name overlapFrames
+   * @returns {Object} The `top`, `bottom`, `right`, and `left` frames. Each frame
+   * contains `x`, `y` coordinates, `width`, `height`, and `orientation`.
+   * The object also includes layer IDs (`layerAId` and `layerBId`)
+   * for the two layers used to calculated the overlapped areas.
+   */
+  overlapFrames() {
+    /**
+     * @description Compensates for a mix of `Artboard` and non-artboard layers when
+     * determining a layer index. Artboard layer indexes are converted to a negative
+     * number so they can be compared against non-artboard layers. This is necessary
+     * because artboards use a separate z-index, making it possible for an artboard
+     * and a layer on that artboard to have the same index value.
+     *
+     * @kind function
+     * @name relativeIndex
+     * @param {Object} layer The sketchObject layer.
+     * @returns {integer} The index.
+     * @private
+     */
+    const relativeIndex = (layer) => {
+      const layerType = fromNative(layer).type;
+      let layerIndex = fromNative(layer).index;
+
+      // artboards use their own z-index
+      // flip them to a negative for consistent comparison to items on artboards
+      if (layerType === 'Artboard') {
+        layerIndex = (0 - (layerIndex + 1));
+      }
+
+      return layerIndex;
+    };
+
+    // use `gapFrame` to first ensure that the items do actually overlap
+    const gapFrame = this.gapFrame();
+
+    // if items do not overlap, cannot create an `overlapFrame`
+    if (gapFrame) {
+      return null;
+    }
+
+    // set the selection
+    const selection = setArray(this.array);
+
+    // set shorthand for `getPositionOnArtboard`
+    const aPos = getPositionOnArtboard;
+
+    // set the layers to a default for comparisons
+    let layerA = selection[0];
+    let layerB = selection[selection.length - 1];
+
+    // find bottom (`layerA`) and top (`layerB`) layers
+    let layerAIndex = relativeIndex(layerA);
+    let layerBIndex = relativeIndex(layerB);
+
+    // set the bottom layer to `layerA` and the top to `layerB`
+    // if `layerB` is currently the bottom, we have to flip them
+    selection.forEach((layer) => {
+      const layerIndex = relativeIndex(layer);
+
+      if (layerIndex > layerBIndex) {
+        layerB = layer;
+        layerBIndex = layerIndex;
+      }
+
+      if (layerIndex < layerAIndex) {
+        layerA = layer;
+        layerAIndex = layerIndex;
+      }
+    });
+
+    // we need a dominant layer to orient positioning;
+    // if both layers are exactly the same index, we cannot assume dominance.
+    // this should not happen, but layers might be selected from multiple artboards.
+    if (layerAIndex === layerBIndex) {
+      return null;
+    }
+
+    // -------- set frames - essentially defining rectangles in the overapped spaces
+    // between the too layers
+    // top
+    const topWidth = layerB.frame().width();
+    const topHeight = aPos(layerB).y - aPos(layerA).y;
+    const topX = aPos(layerB).x;
+    const topY = aPos(layerA).y;
+    // bottom
+    const bottomWidth = layerB.frame().width();
+    const bottomHeight = layerA.frame().height() - topHeight - layerB.frame().height();
+    const bottomX = aPos(layerB).x;
+    const bottomY = aPos(layerA).y + topHeight + layerB.frame().height();
+    // left
+    const leftWidth = aPos(layerB).x - aPos(layerA).x;
+    const leftHeight = layerB.frame().height();
+    const leftX = aPos(layerA).x;
+    const leftY = aPos(layerB).y;
+    // right
+    const rightWidth = layerA.frame().width() - layerB.frame().width() - leftWidth;
+    const rightHeight = layerB.frame().height();
+    const rightX = aPos(layerB).x + layerB.frame().width();
+    const rightY = aPos(layerB).y;
+
+    // set the frames
+    const theFrames = {
+      top: {
+        x: topX,
+        y: topY,
+        width: topWidth,
+        height: topHeight,
+        orientation: 'horizontal',
+      },
+      bottom: {
+        x: bottomX,
+        y: bottomY,
+        width: bottomWidth,
+        height: bottomHeight,
+        orientation: 'horizontal',
+      },
+      right: {
+        x: rightX,
+        y: rightY,
+        width: rightWidth,
+        height: rightHeight,
+        orientation: 'vertical',
+      },
+      left: {
+        x: leftX,
+        y: leftY,
+        width: leftWidth,
+        height: leftHeight,
+        orientation: 'vertical',
+      },
+      layerAId: fromNative(layerA).id,
+      layerBId: fromNative(layerB).id,
+    };
+
+    // deliver the result
+    return theFrames;
+  }
 }

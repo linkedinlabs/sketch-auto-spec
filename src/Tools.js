@@ -129,7 +129,17 @@ const getPositionOnArtboard = (layer) => {
     x: layer.frame().x(),
     y: layer.frame().y(),
   };
-  // look for an immediate parent
+
+  // check first if the layer is an artboard;
+  // artboards should simply return `x: 0, y: 0` by definition
+  // otherwise we get coordinates relative to the overall page
+  if (fromNative(layer).type === 'Artboard') {
+    coordinates.x = 0;
+    coordinates.y = 0;
+    return coordinates;
+  }
+
+  // otherwise, look for an immediate parent
   let { parent } = fromNative(layer);
 
   // loop through each parent and adjust the coordinates

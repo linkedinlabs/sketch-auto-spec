@@ -49,7 +49,7 @@ export default class Messenger {
     if (this.document && UI.message !== undefined) {
       UI.message(message, this.document);
     } else {
-      this.sendLog(`Could not display: “${message}”`, 'error');
+      this.log(`Could not display: “${message}”`, 'error');
     }
   }
 
@@ -65,7 +65,7 @@ export default class Messenger {
     if (this.document && UI.message !== undefined) {
       UI.alert(title, message);
     } else {
-      this.sendLog(`Could not display: “${message}”`, 'error');
+      this.log(`Could not display: “${message}”`, 'error');
     }
   }
 
