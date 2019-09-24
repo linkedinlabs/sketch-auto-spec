@@ -153,10 +153,56 @@ const getPositionOnArtboard = (layer) => {
   return coordinates;
 };
 
+/**
+ * @description Compensates for a mix of `Artboard` and non-artboard layers, and
+ * groups and non-groups when determining a layer index. Artboard layer indexes
+ * are converted to a negative number so they can be compared against non-artboard
+ * layers. This is necessary because artboards use a separate z-index, making it
+ * possible for an artboard and a layer on that artboard to have the same
+ * index value. Group layers are parsed to a decimal value that includes the final
+ * parent Group index.
+ *
+ * @kind function
+ * @name getRelativeIndex
+ * @param {Object} layer The sketchObject layer.
+ * @returns {number} The index.
+ * @private
+ */
+const getRelativeIndex = (layer) => {
+  const layerType = fromNative(layer).type;
+  let layerIndex = fromNative(layer).index;
+
+  // artboards use their own z-index
+  // flip them to a negative for consistent comparison to items on artboards
+  if (layerType === 'Artboard') {
+    layerIndex = (0 - (layerIndex + 1));
+  } else {
+    const innerLayerIndex = layerIndex;
+    let parentGroupIndex = null;
+
+    let { parent } = fromNative(layer);
+
+    // loop through each parent and adjust the coordinates
+    if (parent) {
+      while (parent.type === 'Group') {
+        parentGroupIndex = parent.index;
+        parent = parent.parent; // eslint-disable-line prefer-destructuring
+      }
+
+      if (parentGroupIndex !== null) {
+        layerIndex = parseFloat(`${parentGroupIndex}.${innerLayerIndex}`);
+      }
+    }
+  }
+
+  return layerIndex;
+};
+
 export {
   findLayerById,
   getDocument,
   getPositionOnArtboard,
+  getRelativeIndex,
   getSelection,
   setArray,
   updateArray,
