@@ -109,6 +109,7 @@ const watchGui = () => {
   return browserWindow.loadURL(theWebview);
 };
 export default watchGui;
+
 /**
  * @description Closes the webview when the plugin is shutdown by Sketch
  * (for example, when the user disables the plugin)

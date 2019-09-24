@@ -1,7 +1,7 @@
 {
   "name": "Specter",
   "description": "Annotate and spec design system elements",
-  "author": "LinkedIn Labs",
+  "author": "LinkedIn",
   "homepage": "https://github.com/linkedinlabs/specter-sketch",
   "version": "1.0.3",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",

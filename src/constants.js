@@ -25,7 +25,8 @@ const PLUGIN_NAME = 'Specter';
 const COLORS = {
   component: '#9966ff',
   custom: '#ff3399',
-  measure: '#00cc99',
+  dimension: '#99cc00',
+  spacing: '#00cc99',
   style: '#ff6655',
 };
 

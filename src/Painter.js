@@ -182,8 +182,11 @@ const buildAnnotation = (
     case 'custom':
       colorHex = COLORS.custom;
       break;
-    case 'measurement':
-      colorHex = COLORS.measure;
+    case 'dimension':
+      colorHex = COLORS.dimension;
+      break;
+    case 'spacing':
+      colorHex = COLORS.spacing;
       break;
     case 'style':
       colorHex = COLORS.style;
@@ -203,13 +206,21 @@ const buildAnnotation = (
     fontFamily = 'system';
   }
 
+  let isMeasurement = false;
+  if (
+    annotationType === 'spacing'
+    || annotationType === 'dimension'
+  ) {
+    isMeasurement = true;
+  }
+
   // build the text box
   const textFrame = {
     x: 16,
     y: 3,
   };
 
-  if (annotationType === 'measurement') {
+  if (isMeasurement) {
     textFrame.x = 4;
     textFrame.y = -1;
   }
@@ -248,7 +259,7 @@ const buildAnnotation = (
   text.adjustToFit();
 
   // build the rounded rectangle
-  const rectHeight = (annotationType === 'measurement' ? 22 : 30) + rectTextBuffer;
+  const rectHeight = (isMeasurement ? 22 : 30) + rectTextBuffer;
   const rectangle = new ShapePath({
     frame: new Rectangle(0, -rectTextBuffer, 200, rectHeight),
     parent: artboard,
@@ -269,7 +280,7 @@ const buildAnnotation = (
   });
 
   // build the dangling diamond
-  const diamondOffset = (annotationType === 'measurement' ? 19 : 27);
+  const diamondOffset = (isMeasurement ? 19 : 27);
   const diamond = new ShapePath({
     frame: new Rectangle(0, diamondOffset, 6, 6),
     name: 'Diamond',
@@ -288,7 +299,7 @@ const buildAnnotation = (
 
   // set rectangle width based on text width
   const textWidth = text.frame.width;
-  const textPadding = (annotationType === 'measurement' ? 6 : 32);
+  const textPadding = (isMeasurement ? 6 : 32);
   const rectangleWidth = textWidth + textPadding;
   rectangle.frame.width = rectangleWidth;
 
@@ -302,7 +313,7 @@ const buildAnnotation = (
   diamond.index = rectangle.index - 1;
 
   let icon = null;
-  if (annotationType === 'measurement') {
+  if (isMeasurement) {
     icon = buildMeasureIcon(artboard, colorHex);
     icon.moveToBack();
     icon.frame.x = diamondMidX - 2;
@@ -389,6 +400,14 @@ const positionAnnotation = (
   const layerX = layerFrame.x;
   const layerY = layerFrame.y;
 
+  let isMeasurement = false;
+  if (
+    annotationType === 'spacing'
+    || annotationType === 'dimension'
+  ) {
+    isMeasurement = true;
+  }
+
   // create the annotation group
   const group = new Group({
     name: groupName,
@@ -431,15 +450,15 @@ const positionAnnotation = (
   // adjustments based on orientation
   switch (orientation) {
     case 'left':
-      offsetX = (annotationType === 'measurement' ? 40 : 38);
+      offsetX = (isMeasurement ? 40 : 38);
       placementX = layerX - offsetX;
       break;
     case 'right':
-      offsetX = (annotationType === 'measurement' ? 12 : 5);
+      offsetX = (isMeasurement ? 12 : 5);
       placementX = layerX + layerWidth + offsetX;
       break;
     default: // top
-      offsetY = (annotationType === 'measurement' ? 33 : 38);
+      offsetY = (isMeasurement ? 33 : 38);
       placementY = layerY - offsetY;
   }
 
@@ -515,7 +534,8 @@ const positionAnnotation = (
     icon.remove();
 
     // redraw icon in vertical orientation
-    const iconNew = buildMeasureIcon(group, COLORS.measure, 'vertical');
+    const measureIconColor = (annotationType === 'spacing' ? COLORS.spacing : COLORS.dimension);
+    const iconNew = buildMeasureIcon(group, measureIconColor, 'vertical');
 
     // resize icon based on gap/layer height
     iconNew.frame.height = layerHeight;
@@ -547,8 +567,11 @@ const setGroupName = (elementType) => {
     case 'custom':
       groupName = 'Component Annotations';
       break;
-    case 'measurement':
-      groupName = 'Measurement Annotations';
+    case 'dimension':
+      groupName = 'Dimension Annotations';
+      break;
+    case 'spacing':
+      groupName = 'Spacing Annotations';
       break;
     case 'style':
       groupName = 'Foundation Annotations';
@@ -569,8 +592,11 @@ const setGroupKey = (elementType) => {
     case 'custom':
       groupKey = 'componentInnerGroupId';
       break;
-    case 'measurement':
-      groupKey = 'measurementInnerGroupId';
+    case 'dimension':
+      groupKey = 'dimensionInnerGroupId';
+      break;
+    case 'spacing':
+      groupKey = 'spacingInnerGroupId';
       break;
     case 'style':
       groupKey = 'styleInnerGroupId';
@@ -612,13 +638,15 @@ const orderContainerLayers = (outerGroupId, document) => {
   const documentSettings = Settings.documentSettingForKey(document, PLUGIN_IDENTIFIER);
   let boundingGroupId = null;
   let componentGroupId = null;
-  let measurementGroupId = null;
+  let dimensionGroupId = null;
+  let spacingGroupId = null;
 
   // find the correct group set and inner groups based on the `outerGroupId`
   documentSettings.containerGroups.forEach((groupSet) => {
     if (groupSet.id === outerGroupId) {
       componentGroupId = groupSet.componentInnerGroupId;
-      measurementGroupId = groupSet.measurementInnerGroupId;
+      dimensionGroupId = groupSet.dimensionInnerGroupId;
+      spacingGroupId = groupSet.spacingInnerGroupId;
       boundingGroupId = groupSet.boundingInnerGroupId;
     }
     return null;
@@ -630,10 +658,18 @@ const orderContainerLayers = (outerGroupId, document) => {
     fromNative(componentGroup).moveToFront();
   }
 
-  // always move measurement annotations group to second from bottom of list
-  const measurementBoxGroup = document.getLayerWithID(measurementGroupId);
-  if (measurementBoxGroup) {
-    fromNative(measurementBoxGroup).moveToBack();
+  // foundations group remains second from top without moving
+
+  // always move spacing annotations group to third from bottom of list
+  const spacingBoxGroup = document.getLayerWithID(spacingGroupId);
+  if (spacingBoxGroup) {
+    fromNative(spacingBoxGroup).moveToBack();
+  }
+
+  // always move dimension annotations group to second from bottom of list
+  const dimensionBoxGroup = document.getLayerWithID(dimensionGroupId);
+  if (dimensionBoxGroup) {
+    fromNative(dimensionBoxGroup).moveToBack();
   }
 
   // always move bounding box group to bottom of list
@@ -704,7 +740,7 @@ const drawContainerGroup = (groupSettings) => {
  * updated parent container group settings object.
  * @private
  */
-const createInnerGroup = (
+export const createInnerGroup = (
   outerGroupLayer,
   containerSet,
   elementType,
@@ -1090,7 +1126,7 @@ export default class Painter {
   }
 
   /**
-   * @description Takes a layer and creates two measurement annotations with the layer’s
+   * @description Takes a layer and creates two dimension annotations with the layer’s
    * `height` and `width`.
    *
    * @kind function
@@ -1117,7 +1153,7 @@ export default class Painter {
     }
 
     // set up some information
-    const annotationType = 'measurement';
+    const annotationType = 'dimension';
     const layerId = fromNative(this.layer).id;
     const layerName = this.layer.name();
 
@@ -1200,7 +1236,7 @@ export default class Painter {
     // ------------------------
     // construct the height annotation elements
     const annotationTextHeight = `${this.layer.frame().height()}dp`;
-    const groupNameHeight = `Dimension Width for layer ${layerName}`;
+    const groupNameHeight = `Dimension Height for layer ${layerName}`;
     const annotationHeight = buildAnnotation(
       annotationTextHeight,
       null, // annotationSecondaryText
@@ -1288,7 +1324,7 @@ export default class Painter {
 
     // set up some information
     const annotationText = gapFrame.orientation === 'vertical' ? setSpacingText(gapFrame.width) : setSpacingText(gapFrame.height);
-    const annotationType = 'measurement';
+    const annotationType = 'spacing';
     const layerName = this.layer.name();
     const groupName = `Spacing for ${layerName}`;
 
