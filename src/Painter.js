@@ -335,19 +335,26 @@ const buildAnnotation = (
  * @kind function
  * @name buildBoundingBox
  * @param {Object} frame The frame coordinates (`x`, `y`, `width`, and `height`) for the box.
- * @param {Object} artboard The artboard to draw within.
+ * @param {Object} containerGroup The container group to draw within.
  * @returns {Object} The Sketch ShapePath object for the box.
  * @private
  */
-const buildBoundingBox = (frame, artboard) => {
+const buildBoundingBox = (frame, containerGroup) => {
   const colorHex = COLORS.style;
   const colorOpactiy = '4d'; // 30% opacity
 
+  // find container frame, relative to artboard
+  const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
+
+  // set x, y relative to container group and artboard
+  const placementX = frame.x - relativeGroupFrame.x;
+  const placementY = frame.y - relativeGroupFrame.y;
+
   // build the rounded rectangle
   const boundingBox = new ShapePath({
-    frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
+    frame: new Rectangle(placementX, placementY, frame.width, frame.height),
     name: 'Bounding Box',
-    parent: artboard,
+    parent: containerGroup,
     style: {
       borders: [{
         enabled: false,
@@ -426,7 +433,7 @@ const positionAnnotation = (
     icon.parent = group;
   }
 
-  // position the group within the artboard, above the layer receiving the annotation
+  // ------- position the group within the artboard, above the layer receiving the annotation
   let diamondAdjustment = null;
 
   // initial placement based on layer to annotate
@@ -479,9 +486,12 @@ const positionAnnotation = (
     placementY = 5;
   }
 
-  // set annotation group placement
-  group.frame.x = placementX;
-  group.frame.y = placementY;
+  // find container frame, relative to artboard
+  const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
+
+  // set annotation group placement, relative to container group
+  group.frame.x = placementX - relativeGroupFrame.x;
+  group.frame.y = placementY - relativeGroupFrame.y;
 
   // adjust diamond on horizonal placement, if necessary
   if (diamondAdjustment) {
@@ -554,6 +564,7 @@ const positionAnnotation = (
 
   group.adjustToFit();
   containerGroup.adjustToFit();
+  containerGroup.parent.adjustToFit();
   return group;
 };
 
@@ -686,8 +697,8 @@ const orderContainerLayers = (outerGroupId, document) => {
  *
  * @kind function
  * @name drawContainerGroup
- * @param {Object} groupSettings Object containing the `name`, `width`, `height`, `parent` layer,
- * and a `bool` named `keystone` indicating whether or not a keystone layer should be inserted.
+ * @param {Object} groupSettings Object containing the `name`, `width`,
+ * `height`, and `parent` layer.
  * @returns {Object} The container group layer object.
  * @private
  */
@@ -697,7 +708,6 @@ const drawContainerGroup = (groupSettings) => {
     width,
     height,
     parent,
-    keystone,
     locked,
   } = groupSettings;
 
@@ -712,16 +722,6 @@ const drawContainerGroup = (groupSettings) => {
     name,
     parent,
   });
-
-  if (keystone) {
-    // add placeholder rectangle to keep everything relative to 0, 0 on the artboard
-    new ShapePath({ // eslint-disable-line no-new
-      frame: new Rectangle(0, 0, 1, 1),
-      locked: true,
-      name: '--- keystone - please DO NOT delete me 🤗',
-      parent: containerGroup,
-    });
-  }
 
   return containerGroup;
 };
@@ -754,7 +754,6 @@ export const createInnerGroup = (
     parent: outerGroupLayer,
     width: outerGroupLayer.frame.width,
     height: outerGroupLayer.frame.height,
-    keystone: true,
     locked: false,
   });
 
@@ -793,7 +792,6 @@ const createOuterGroup = (
     parent: artboard,
     width: artboard.frame().width(),
     height: artboard.frame().height(),
-    keystone: false,
     locked: true,
   });
 
