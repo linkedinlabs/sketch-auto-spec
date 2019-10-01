@@ -45,7 +45,7 @@ const checkInstalledFont = (fontFamily) => {
  * @returns {Object} Layer group containing the icon.
  * @private
  */
-const buildMeasureIcon = (parent, colorHex, orientation = 'horizonal') => {
+const buildMeasureIcon = (parent, colorHex, orientation = 'horizontal') => {
   // horizontal orientation lines
   let line1Params = {
     x: 0,
@@ -129,7 +129,7 @@ const buildMeasureIcon = (parent, colorHex, orientation = 'horizonal') => {
     parent,
   });
 
-  if (orientation === 'horizonal') {
+  if (orientation === 'horizontal') {
     line1.sketchObject.hasFixedLeft = 1;
     line1.sketchObject.hasFixedWidth = 1;
     line2.sketchObject.hasFixedRight = 1;
@@ -525,7 +525,7 @@ const positionAnnotation = (
   group.frame.x = placementX - relativeGroupFrame.x;
   group.frame.y = placementY - relativeGroupFrame.y;
 
-  // adjust diamond on horizonal placement, if necessary
+  // adjust diamond on horizontal placement, if necessary
   if (artboardEdge) {
     // move the diamond to the mid-point of the layer to annotate
     let diamondLayerMidX = null;
@@ -542,7 +542,7 @@ const positionAnnotation = (
     diamond.frame.x = diamondLayerMidX;
   }
 
-  // move diamand to left/right edge, if necessary
+  // move diamond to left/right edge, if necessary
   if (orientation === 'left' || orientation === 'right') {
     const diamondNewY = rectangle.frame.y + (rectangle.frame.height / 2) - 3;
     let diamondNewX = null;
@@ -1065,8 +1065,8 @@ export default class Painter {
   }
 
   /**
-   * @description Takes the data representing an existing annotation and removes that data
-   * (and cleans up the data).
+   * @description Takes the data representing an existing annotation, removes that annotation,
+   * and cleans up the data.
    *
    * @kind function
    * @name removeAnnotation

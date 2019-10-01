@@ -405,7 +405,7 @@ export default class Crawler {
     }
 
     // -------- set frames - essentially defining rectangles in the overapped spaces
-    // between the too layers
+    // between the two layers
     // top
     const topWidth = layerB.frame().width();
     const topHeight = aPos(layerB).y - aPos(layerA).y;
