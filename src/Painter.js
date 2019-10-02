@@ -159,12 +159,14 @@ const buildMeasureIcon = (parent, colorHex, orientation = 'horizontal') => {
  *
  * @kind function
  * @name buildAnnotation
+ *
  * @param {Object} annotationText The text for the annotation.
  * @param {Object} annotationSecondaryText Optional secondary text for the annotation.
  * @param {string} annotationType A string representing the type of annotation
  * (component or foundation).
  * @param {Object} artboard The artboard to draw within.
- * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`).
+ *
+ * @returns {Object} Each annotation element (`diamond`, `rectangle`, `text`, and `icon`).
  * @private
  */
 const buildAnnotation = (
@@ -1419,7 +1421,7 @@ export default class Painter {
    * of an entire selection. It should also includes layer IDs (`layerAId` and `layerBId`)
    * for the two layers used to calculated the gap.
    *
-   * @returns null
+   * @returns {null}
    */
   addSpacingAnnotation(spacingFrame) {
     // set up some information
