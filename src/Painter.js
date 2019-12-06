@@ -1230,7 +1230,7 @@ export default class Painter {
     };
 
     // create or locate the container group
-    const { innerContainerGroup } = setContainerGroups(
+    const { containerGroup, innerContainerGroup } = setContainerGroups(
       this.artboard,
       this.document,
       'boundingBox',
@@ -1246,6 +1246,9 @@ export default class Painter {
 
       return result;
     }
+
+    innerContainerGroup.adjustToFit();
+    containerGroup.adjustToFit();
 
     result.status = 'success';
     result.messages.log = `Bounding box drawn on “${this.artboard.name()}”`;
