@@ -526,8 +526,13 @@ const positionAnnotation = (
   const relativeGroupFrame = getPositionOnArtboard(containerGroup.sketchObject);
 
   // set annotation group placement, relative to container group
+  let relativeXOffset = 0;
   group.frame.x = placementX - relativeGroupFrame.x;
   group.frame.y = placementY - relativeGroupFrame.y;
+
+  if (relativeGroupFrame.x < 0) {
+    relativeXOffset = -relativeGroupFrame.x;
+  }
 
   // adjust diamond on horizontal placement, if necessary
   if (artboardEdge) {
@@ -535,10 +540,8 @@ const positionAnnotation = (
     let diamondLayerMidX = null;
     switch (artboardEdge) {
       case 'left':
-        diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
-        break;
       case 'right':
-        diamondLayerMidX = ((layerX - group.frame.x) + ((layerWidth - 6) / 2));
+        diamondLayerMidX = ((layerX - group.frame.x + relativeXOffset) + ((layerWidth - 6) / 2));
         break;
       default:
         diamondLayerMidX = diamond.frame.x;
@@ -576,10 +579,7 @@ const positionAnnotation = (
       case 'left':
         diamond.frame.x = diamond.frame.width / 2;
         break;
-      case 'right':
-        diamond.frame.x = rectangle.frame.width - diamond.frame.width - offsetX - 2;
-        break;
-      default: // top
+      default: // top, right
         diamond.frame.y = diamond.frame.y;
     }
   }
@@ -1591,7 +1591,7 @@ export default class Painter {
    * contains `x`, `y` coordinates, `width`, `height`, and `orientation`. The object also includes
    * layer IDs (`layerAId` and `layerBId`) for the two layers used to calculated the
    * overlapped areas.
-   * @param {array} directions An optional array containing 4 unique strings representating
+   * @param {Array} directions An optional array containing 4 unique strings representating
    * the annotation directions: `top`, `bottom`, `right`, `left`.
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
