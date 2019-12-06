@@ -241,8 +241,8 @@ const buildAnnotation = (
     frame: {
       x: textFrame.x,
       y: (textFrame.y - rectTextBuffer),
-      height: 22,
-      width: 200,
+      height: 22, // text frames need an explicit height to start
+      width: 200, // text frames need an explicit width to start
     },
     parent: artboard,
     text: setText,
