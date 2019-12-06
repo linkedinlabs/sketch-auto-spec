@@ -571,15 +571,18 @@ const positionAnnotation = (
   }
 
   // adjust measurement diamond based on artboard edge, if necessary
-  if (artboardEdge && isMeasurement) {
+  if (artboardEdge && (annotationType === 'spacing')) {
     switch (artboardEdge) {
       case 'bottom':
         diamond.frame.y = rectangle.frame.height - diamond.frame.height - offsetY;
         break;
-      case 'left':
-        diamond.frame.x = diamond.frame.width / 2;
+      case 'top':
+        diamond.frame.y = diamond.frame.height / 2;
         break;
-      default: // top, right
+      case 'right':
+        diamond.frame.x = rectangle.frame.width - diamond.frame.width - offsetX - 2;
+        break;
+      default: // left
         diamond.frame.y = diamond.frame.y;
     }
   }
