@@ -297,17 +297,25 @@ export default class Identifier {
     // locate a shared style in Lingo
     if (sharedStyleId) {
       const kitStyle = lingoData.layerStyles[sharedStyleId] || lingoData.textStyles[sharedStyleId];
+      let textToSet = null;
 
       if (kitStyle) {
         // take only the last segment of the name (after a “/”, if available)
-        const textToSet = cleanName(kitStyle.name);
+        textToSet = cleanName(kitStyle.name);
+        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
+      }
 
+      if (!textToSet && layerJSON.sharedStyle && layerJSON.sharedStyle.name) {
+        textToSet = cleanName(layerJSON.sharedStyle.name);
+        result.messages.log = `Style Name in Shared Styles for “${this.layer.name()}” is “${textToSet}”`;
+      }
+
+      if (textToSet) {
         // set `annotationText` on the layer settings as the kit layer name
         setAnnotationTextSettings(textToSet, null, 'style', this.layer);
 
         // log the official name alongside the original layer name and set as success
         result.status = 'success';
-        result.messages.log = `Style Name in Lingo Kit for “${this.layer.name()}” is “${textToSet}”`;
         return result;
       }
     }
