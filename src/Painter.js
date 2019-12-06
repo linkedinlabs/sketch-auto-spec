@@ -567,7 +567,7 @@ const positionAnnotation = (
     group.frame.y += 2;
   }
 
-  // adjust diamond based on artboard edge, if necessary
+  // adjust measurement diamond based on artboard edge, if necessary
   if (artboardEdge && isMeasurement) {
     switch (artboardEdge) {
       case 'bottom':
@@ -579,10 +579,7 @@ const positionAnnotation = (
       case 'right':
         diamond.frame.x = rectangle.frame.width - diamond.frame.width - offsetX - 2;
         break;
-      case 'top':
-        diamond.frame.y = diamond.frame.height / 2;
-        break;
-      default:
+      default: // top
         diamond.frame.y = diamond.frame.y;
     }
   }
