@@ -3,7 +3,7 @@
   "description": "Annotate and spec design system elements",
   "author": "LinkedIn",
   "homepage": "https://github.com/linkedinlabs/specter-sketch",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "identifier": "com.linkedinlabs.sketch.auto-spec-plugin",
   "appcast": "https://raw.githubusercontent.com/linkedinlabs/specter-sketch/master/.appcast.xml",
   "compatibleVersion": "55.0",
@@ -25,7 +25,7 @@
       "handler": "annotateLayerCustom"
     },
     {
-      "name": "Set Spacing / Dimensions",
+      "name": "Set Spacing or Dimensions",
       "identifier": "annotate-measurement",
       "shortcut": "ctrl shift m",
       "script": "./main.js",
@@ -67,7 +67,7 @@
       "handler": "drawBoundingBox"
     },
     {
-      "name": "Show/Hide Toolbar",
+      "name": "Show or Hide Toolbar",
       "identifier": "view-gui",
       "shortcut": "ctrl shift s",
       "script": "./GUI.js",
