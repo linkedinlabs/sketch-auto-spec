@@ -25,7 +25,7 @@
       "handler": "annotateLayerCustom"
     },
     {
-      "name": "Set Spacing or Dimensions",
+      "name": "Set Spacing / Dimensions",
       "identifier": "annotate-measurement",
       "shortcut": "ctrl shift m",
       "script": "./main.js",
@@ -67,7 +67,7 @@
       "handler": "drawBoundingBox"
     },
     {
-      "name": "Show or Hide Toolbar",
+      "name": "Show / Hide Toolbar",
       "identifier": "view-gui",
       "shortcut": "ctrl shift s",
       "script": "./GUI.js",
